@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Inscription entreprise{% endblock %}
+
+{% block body %}
+<div class="bg-slate-50 py-16 px-6">
+    <div data-aos="fade-up" class="max-w-lg mx-auto card p-10">
+        <h1 class="text-2xl text-center mb-1.5">Créer un compte entreprise</h1>
+        <p class="text-center text-sm text-slate-500 mb-7">Publiez vos offres en quelques minutes</p>
+
+        {{ form_start(registrationForm) }}
+            {{ form_row(registrationForm.email) }}
+            {{ form_row(registrationForm.plainPassword.first) }}
+            {{ form_row(registrationForm.plainPassword.second) }}
+            {{ form_row(registrationForm.nom) }}
+            {{ form_row(registrationForm.siret) }}
+            {{ form_row(registrationForm.description) }}
+
+            <button type="submit" class="btn-gradient w-full mt-6">Créer mon compte</button>
+        {{ form_end(registrationForm) }}
+
+        <p class="text-center text-sm text-slate-500 mt-6">
+            Déjà un compte ? <a href="{{ path('app_login') }}" class="text-brand-indigo font-semibold hover:underline">Connectez-vous →</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

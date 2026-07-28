@@ -1,0 +1,51 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ mode == 'creation' ? 'Nouvelle offre' : "Modifier l'offre" }}{% endblock %}
+
+{% block body %}
+<div class="bg-slate-50 py-12 px-6 pb-24">
+    <div data-aos="fade-up" class="max-w-2xl mx-auto card p-10 sm:p-11">
+        <h1 class="text-2xl mb-1.5">{{ mode == 'creation' ? 'Nouvelle offre' : "Modifier l'offre" }}</h1>
+        <p class="text-sm text-slate-500 mb-7">
+            {% if mode == 'creation' %}
+                Elle sera enregistrée en brouillon — vous pourrez la publier ensuite depuis votre tableau de bord.
+            {% else %}
+                Modifiez les informations puis enregistrez.
+            {% endif %}
+        </p>
+
+        {{ form_start(form) }}
+            {{ form_row(form.titre) }}
+            {{ form_row(form.description) }}
+
+            <div class="grid sm:grid-cols-2 gap-x-4">
+                {{ form_row(form.typeContrat) }}
+                {{ form_row(form.ville) }}
+            </div>
+
+            <div class="grid sm:grid-cols-2 gap-x-4">
+                {{ form_row(form.salaireMin) }}
+                {{ form_row(form.salaireMax) }}
+            </div>
+
+            <div class="grid sm:grid-cols-2 gap-x-4">
+                {{ form_row(form.nbAnneesExperience) }}
+                {{ form_row(form.niveauEtude) }}
+            </div>
+
+            {{ form_row(form.secteur) }}
+
+            <label class="field-label">{{ form.competences.vars.label }}</label>
+            <div class="flex flex-wrap gap-2.5 mt-1.5">
+                {{ form_widget(form.competences) }}
+            </div>
+            <p class="text-xs text-slate-500 mt-2">Vous ne trouvez pas la compétence recherchée ? La gestion des nouvelles compétences sera bientôt disponible directement ici.</p>
+
+            <div class="flex gap-3 mt-8">
+                <button type="submit" class="btn-orange">{{ mode == 'creation' ? 'Enregistrer en brouillon' : 'Enregistrer les modifications' }}</button>
+                <a href="{{ path('entreprise_offres_index') }}" class="btn-ghost">Annuler</a>
+            </div>
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}

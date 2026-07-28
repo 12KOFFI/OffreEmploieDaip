@@ -1,0 +1,72 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ offre.titre }}{% endblock %}
+
+{% block body %}
+<div class="bg-slate-50 py-10 px-6 pb-24">
+    <div class="max-w-5xl mx-auto">
+        <div data-aos="fade-up" class="text-sm text-slate-500 mb-6">
+            <a href="{{ path('app_home') }}" class="text-brand-indigo font-medium hover:underline">Accueil</a> /
+            <a href="{{ path('app_home') }}#offres" class="text-brand-indigo font-medium hover:underline">Registre des offres</a> /
+            {{ offre.titre }}
+        </div>
+
+        <div class="grid lg:grid-cols-[2fr_1fr] gap-7 items-start">
+            <div data-aos="fade-up" class="card p-9 sm:p-11">
+                <div class="flex justify-between items-center mb-4.5">
+                    <span class="text-xs text-slate-500 font-medium">RÉF. {{ 'DAIP-%s-%05d'|format(offre.datePublication|date('Y'), offre.id) }}</span>
+                    <span class="badge-{{ offre.statut.value }}">{{ offre.statut.label }}</span>
+                </div>
+
+                <h1 class="text-[28px] mb-2">{{ offre.titre }}</h1>
+                <div class="text-[15px] text-slate-500 mb-6">Chez <strong class="text-navy">{{ offre.entreprise.nom }}</strong> — {{ offre.ville }}</div>
+
+                <div class="flex flex-wrap gap-2 mb-7">
+                    <span class="tag-pill">{{ offre.typeContrat.label }}</span>
+                    <span class="tag-pill">{{ offre.nbAnneesExperience }} an{{ offre.nbAnneesExperience > 1 ? 's' : '' }} d'expérience</span>
+                    {% if offre.niveauEtude %}<span class="tag-pill">{{ offre.niveauEtude }}</span>{% endif %}
+                    {% if offre.secteur %}<span class="tag-pill">{{ offre.secteur.nom }}</span>{% endif %}
+                </div>
+
+                <h3 class="text-sm uppercase tracking-wide text-slate-500 font-semibold mb-3">Description du poste</h3>
+                <p class="text-[15px] leading-relaxed whitespace-pre-line">{{ offre.description }}</p>
+
+                {% if offre.competences|length > 0 %}
+                    <h3 class="text-sm uppercase tracking-wide text-slate-500 font-semibold mt-7 mb-3">Compétences requises</h3>
+                    <div class="flex flex-wrap gap-2">
+                        {% for competence in offre.competences %}
+                            <span class="text-xs font-medium px-3 py-1.5 rounded-full bg-slate-50 text-navy">{{ competence.nom }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div data-aos="fade-up" data-aos-delay="120" class="card p-7">
+                <h3 class="text-sm font-semibold mb-4">Informations clés</h3>
+
+                <div class="flex justify-between text-sm py-2.5">
+                    <span class="text-slate-500">Rémunération</span>
+                    <span class="font-medium text-navy text-right">
+                        {% if offre.salaireMin or offre.salaireMax %}
+                            {{ offre.salaireMin ? offre.salaireMin|number_format(0, ',', ' ') : '?' }} – {{ offre.salaireMax ? offre.salaireMax|number_format(0, ',', ' ') : '?' }} FCFA
+                        {% else %}Non communiquée{% endif %}
+                    </span>
+                </div>
+                <div class="flex justify-between text-sm py-2.5 border-t border-slate-100"><span class="text-slate-500">Ville</span><span class="font-medium text-navy">{{ offre.ville }}</span></div>
+                <div class="flex justify-between text-sm py-2.5 border-t border-slate-100"><span class="text-slate-500">Contrat</span><span class="font-medium text-navy">{{ offre.typeContrat.label }}</span></div>
+                <div class="flex justify-between text-sm py-2.5 border-t border-slate-100"><span class="text-slate-500">Expérience</span><span class="font-medium text-navy">{{ offre.nbAnneesExperience }} an{{ offre.nbAnneesExperience > 1 ? 's' : '' }}</span></div>
+                {% if offre.datePublication %}
+                    <div class="flex justify-between text-sm py-2.5 border-t border-slate-100"><span class="text-slate-500">Publiée le</span><span class="font-medium text-navy">{{ offre.datePublication|date('d/m/Y') }}</span></div>
+                {% endif %}
+                {% if offre.entreprise.siteWeb %}
+                    <div class="flex justify-between text-sm py-2.5 border-t border-slate-100"><span class="text-slate-500">Site web</span><a href="{{ offre.entreprise.siteWeb }}" target="_blank" rel="noopener" class="font-medium text-brand-indigo">Visiter →</a></div>
+                {% endif %}
+
+                <div class="mt-5 bg-slate-50 rounded-xl p-4 text-xs text-slate-500">
+                    Cette offre est publiée directement par l'entreprise et supervisée par la DAIP. Aucune candidature en ligne n'est disponible sur cette plateforme pour le moment.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -52,10 +52,6 @@ class Offre
     #[ORM\Column(length: 20, enumType: StatutOffre::class)]
     private StatutOffre $statut = StatutOffre::BROUILLON;
 
-    // Motif renseigne par la DAIP quand elle rejette une offre
-    #[ORM\Column(type: 'text', nullable: true)]
-    private ?string $motifRejet = null;
-
     #[ORM\Column]
     private ?\DateTimeImmutable $datePublication = null;
 
@@ -198,17 +194,6 @@ class Offre
     public function setStatut(StatutOffre $statut): static
     {
         $this->statut = $statut;
-        return $this;
-    }
-
-    public function getMotifRejet(): ?string
-    {
-        return $this->motifRejet;
-    }
-
-    public function setMotifRejet(?string $motifRejet): static
-    {
-        $this->motifRejet = $motifRejet;
         return $this;
     }
 

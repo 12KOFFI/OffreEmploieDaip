@@ -1,3 +1,44 @@
-body {
-    background-color: skyblue;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    body { @apply font-body text-slate-800 bg-white; }
+    h1, h2, h3 { @apply font-display font-semibold text-navy; }
+}
+
+@layer components {
+    .btn { @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-body font-semibold text-sm transition-all duration-200 hover:-translate-y-0.5; }
+    .btn-orange { @apply btn bg-brand-orange text-white hover:bg-brand-orangedark; }
+    .btn-gradient { @apply btn bg-brand-gradient text-white hover:opacity-90; }
+    .btn-ghost { @apply btn bg-transparent border border-slate-200 text-navy hover:border-navy; }
+    .btn-ghost-light { @apply btn bg-white/10 border border-white/40 text-white hover:bg-white/20; }
+    .btn-sm { @apply px-4 py-2 text-xs; }
+    .btn-danger-ghost { @apply btn bg-transparent border border-red-200 text-red-600 hover:bg-red-50; }
+
+    .card { @apply bg-white border border-slate-100 rounded-2xl shadow-sm shadow-slate-100; }
+    .tag-pill { @apply text-xs font-medium px-3 py-1.5 rounded-full bg-indigo-50 text-brand-indigo; }
+
+    .badge { @apply text-xs font-semibold px-3 py-1 rounded-full; }
+    .badge-brouillon { @apply badge bg-slate-100 text-slate-600; }
+    .badge-publiee { @apply badge bg-green-50 text-brand-green; }
+    .badge-retiree { @apply badge bg-red-50 text-red-600; }
+    .badge-expiree { @apply badge bg-slate-100 text-slate-600; }
+
+    .field-label { @apply block text-sm font-medium text-navy mt-4 mb-1.5; }
+    .field-input { @apply w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-purple/25 focus:border-brand-purple; }
+    .field-input.has-icon { @apply pl-10; }
+    .field-input.has-toggle { @apply pr-10; }
+
+    .password-wrapper { @apply relative; }
+    .password-toggle { @apply absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 transition-colors cursor-pointer; }
+
+    .strength-meter { @apply mt-2; }
+    .strength-bars { @apply flex gap-1 mb-1; }
+    .strength-bar { @apply h-1.5 flex-1 rounded-full bg-slate-200 transition-colors duration-300; }
+    .strength-bar.weak { @apply bg-red-500; }
+    .strength-bar.fair { @apply bg-yellow-500; }
+    .strength-bar.good { @apply bg-blue-500; }
+    .strength-bar.strong { @apply bg-green-500; }
+    .strength-text { @apply text-xs text-slate-500; }
 }

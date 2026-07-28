@@ -1,0 +1,59 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes offres{% endblock %}
+
+{% block body %}
+<div class="py-12 px-6 pb-24">
+    <div class="max-w-5xl mx-auto">
+        <div data-aos="fade-up" class="flex items-center justify-between flex-wrap gap-4 mb-8">
+            <div>
+                <h1 class="text-[26px]">Mes offres</h1>
+                <p class="text-sm text-slate-500 mt-1">Gérez le cycle de vie de vos offres : brouillon, publication, retrait.</p>
+            </div>
+            <a href="{{ path('entreprise_offres_new') }}" class="btn-orange">+ Nouvelle offre</a>
+        </div>
+
+        {% if offres|length == 0 %}
+            <div data-aos="fade-up" class="text-center py-16 px-6 bg-slate-50 rounded-2xl text-slate-500">
+                <h3 class="text-navy font-semibold mb-2">Aucune offre pour l'instant</h3>
+                <p>Créez votre première offre pour commencer à recruter.</p>
+            </div>
+        {% else %}
+            <div class="flex flex-col gap-3.5">
+                {% for offre in offres %}
+                    <div data-aos="fade-up" data-aos-delay="{{ loop.index0 * 60 }}" class="card p-5 px-6 flex items-center justify-between gap-5 flex-wrap">
+                        <div>
+                            <h3 class="text-[17px] font-semibold mb-1">{{ offre.titre }}</h3>
+                            <div class="text-sm text-slate-500">
+                                {{ offre.ville }} · {{ offre.typeContrat.label }}
+                                {% if offre.secteur %} · {{ offre.secteur.nom }}{% endif %}
+                            </div>
+                        </div>
+                        <span class="badge-{{ offre.statut.value }}">{{ offre.statut.label }}</span>
+                        <div class="flex gap-2 flex-wrap">
+                            <a href="{{ path('entreprise_offres_edit', {id: offre.id}) }}" class="btn-ghost btn-sm">Modifier</a>
+
+                            {% if offre.statut.value in ['brouillon', 'retiree'] %}
+                                <form method="post" action="{{ path('entreprise_offres_publier', {id: offre.id}) }}">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('changer-statut-' ~ offre.id) }}">
+                                    <button type="submit" class="btn-orange btn-sm">Publier</button>
+                                </form>
+                            {% elseif offre.statut.value == 'publiee' %}
+                                <form method="post" action="{{ path('entreprise_offres_retirer', {id: offre.id}) }}">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('changer-statut-' ~ offre.id) }}">
+                                    <button type="submit" class="btn-ghost btn-sm">Retirer</button>
+                                </form>
+                            {% endif %}
+
+                            <form method="post" action="{{ path('entreprise_offres_delete', {id: offre.id}) }}" onsubmit="return confirm('Supprimer définitivement cette offre ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('supprimer-offre-' ~ offre.id) }}">
+                                <button type="submit" class="btn-danger-ghost btn-sm">Supprimer</button>
+                            </form>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

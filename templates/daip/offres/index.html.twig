@@ -1,0 +1,55 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Registre DAIP — Toutes les offres{% endblock %}
+
+{% block body %}
+<div class="py-12 px-6 pb-24">
+    <div class="max-w-5xl mx-auto">
+        <div data-aos="fade-up">
+            <h1 class="text-[26px]">Registre des offres</h1>
+            <p class="text-sm text-slate-500 mt-1">Vue de supervision sur l'ensemble des entreprises inscrites.</p>
+
+            <div class="inline-block bg-indigo-50 text-brand-indigo text-sm font-medium px-4 py-2.5 rounded-xl my-5">
+                👁 Lecture seule — la DAIP consulte, sans pouvoir modifier ni publier d'offre.
+            </div>
+        </div>
+
+        <div data-aos="fade-up" class="flex gap-2 flex-wrap mb-6">
+            {% set filtres_nav = [{k: null, l: 'Toutes'}, {k: 'brouillon', l: 'Brouillons'}, {k: 'publiee', l: 'Publiées'}, {k: 'retiree', l: 'Retirées'}] %}
+            {% for f in filtres_nav %}
+                <a href="{{ f.k ? path('daip_offres_index', {statut: f.k}) : path('daip_offres_index') }}"
+                   class="text-sm font-medium px-4 py-1.5 rounded-full border {{ statutFiltre == f.k ? 'bg-navy border-navy text-white' : 'border-slate-200 text-slate-500' }}">
+                    {{ f.l }}
+                </a>
+            {% endfor %}
+        </div>
+
+        <div data-aos="fade-up" class="card overflow-hidden">
+            <table class="w-full border-collapse">
+                <thead>
+                    <tr class="bg-slate-50">
+                        <th class="text-left text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3">Offre</th>
+                        <th class="text-left text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3">Entreprise</th>
+                        <th class="text-left text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3">Ville</th>
+                        <th class="text-left text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3">Statut</th>
+                        <th class="text-left text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3">Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for offre in offres %}
+                        <tr class="border-t border-slate-100">
+                            <td class="px-5 py-4 text-sm">{{ offre.titre }}</td>
+                            <td class="px-5 py-4 text-sm">{{ offre.entreprise.nom }}</td>
+                            <td class="px-5 py-4 text-sm">{{ offre.ville }}</td>
+                            <td class="px-5 py-4"><span class="badge-{{ offre.statut.value }}">{{ offre.statut.label }}</span></td>
+                            <td class="px-5 py-4 text-sm">{{ offre.datePublication ? offre.datePublication|date('d/m/Y') : '—' }}</td>
+                        </tr>
+                    {% else %}
+                        <tr><td colspan="5" class="text-center text-slate-500 py-10">Aucune offre pour ce filtre.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,131 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Accueil — DAIP Emploi{% endblock %}
+
+{% block body %}
+<section class="bg-brand-gradient text-center py-20 px-8">
+    <div class="max-w-6xl mx-auto">
+        <div data-aos="fade-down" class="inline-flex items-center gap-2 bg-white text-brand-indigo text-sm font-semibold px-5 py-2 rounded-full mb-7">
+            <span class="w-1.5 h-1.5 rounded-full bg-brand-green"></span> OFFRES D'EMPLOI
+        </div>
+
+        <h1 data-aos="fade-up" data-aos-delay="80" class="text-white text-3xl sm:text-5xl leading-tight max-w-3xl mx-auto mb-6">
+            Chaque offre publiée par une <span class="text-brand-orange">entreprise</span>, dans un registre ouvert à tous
+        </h1>
+
+        <p data-aos="fade-up" data-aos-delay="160" class="text-white/85 text-base sm:text-lg max-w-xl mx-auto mb-9">
+            DAIP Emploi centralise les offres publiées directement par les entreprises partenaires
+            et les rend consultables librement.
+        </p>
+
+        <div data-aos="fade-up" data-aos-delay="220" class="flex justify-center gap-3.5 flex-wrap mb-14">
+            <a href="{{ path('app_login') }}" class="btn-orange">Publier une offre</a>
+            <a href="#offres" class="btn-ghost-light">Consulter le registre</a>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
+            {% for stat in [{n:'128', l:'Entreprises'}, {n:'540', l:'Offres publiées'}, {n:'12', l:'Secteurs'}, {n:'100%', l:'Supervisé DAIP'}] %}
+                <div data-aos="zoom-in" data-aos-delay="{{ loop.index0 * 90 }}" class="bg-white/15 border border-white/20 rounded-2xl py-5 px-2">
+                    <span class="block text-white font-display font-bold text-2xl sm:text-[28px]">{{ stat.n }}</span>
+                    <span class="text-white/80 text-xs">{{ stat.l }}</span>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="py-20 px-8" id="comment-ca-marche">
+    <div class="max-w-6xl mx-auto">
+        <div data-aos="fade-up" class="max-w-xl mx-auto text-center mb-12">
+            <h2 class="text-2xl sm:text-3xl mb-3">Comment ça marche</h2>
+            <p class="text-slate-500 text-[15px]">Le parcours d'une offre, de sa rédaction à sa consultation par le public.</p>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-6">
+            {% set etapes = [
+                {t: "L'entreprise s'inscrit", d: 'Création d\'un compte entreprise seulement en quelques minutes.'},
+                {t: 'Elle rédige et publie', d: 'Titre, compétences requises, expérience, rémunération — l\'entreprise garde la main sur ses offres.'},
+                {t: 'Le registre s\'ouvre au public', d: "L'offre devient consultable librement, et visible en continu."},
+            ] %}
+            {% for etape in etapes %}
+                <div data-aos="fade-up" data-aos-delay="{{ loop.index0 * 120 }}" class="card p-7 text-center">
+                    <div class="w-9 h-9 rounded-full bg-brand-gradient text-white font-display font-bold text-sm flex items-center justify-center mx-auto mb-4">{{ loop.index }}</div>
+                    <h3 class="text-[17px] font-semibold mb-2">{{ etape.t }}</h3>
+                    <p class="text-sm text-slate-500">{{ etape.d }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="py-20 px-8 bg-slate-50" id="offres">
+    <div class="max-w-6xl mx-auto">
+        <div data-aos="fade-up" class="max-w-xl mx-auto text-center mb-10">
+            <h2 class="text-2xl sm:text-3xl mb-3">Dans le registre en ce moment</h2>
+            <p class="text-slate-500 text-[15px]">Consultez et filtrez les offres publiées par les entreprises.</p>
+        </div>
+
+        <form data-aos="fade-up" method="get" action="{{ path('app_home') }}#offres" class="card grid md:grid-cols-[1.4fr_1fr_1fr_1fr_auto] gap-3 p-4.5 mb-8">
+            <input type="text" name="q" value="{{ filtres.q }}" placeholder="Poste ou entreprise" class="field-input">
+            <input type="text" name="ville" value="{{ filtres.ville }}" placeholder="Ville" class="field-input">
+            <select name="secteur" class="field-input">
+                <option value="">Tous les secteurs</option>
+                {% for secteur in secteurs %}
+                    <option value="{{ secteur.id }}" {{ filtres.secteur == secteur.id ? 'selected' : '' }}>{{ secteur.nom }}</option>
+                {% endfor %}
+            </select>
+            <select name="typeContrat" class="field-input">
+                <option value="">Tous les contrats</option>
+                {% for type in typesContrat %}
+                    <option value="{{ type.value }}" {{ filtres.typeContrat == type.value ? 'selected' : '' }}>{{ type.label }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn-orange">Filtrer</button>
+        </form>
+
+        {% if filtresActifs %}
+            <div class="text-center -mt-4 mb-8">
+                <a href="{{ path('app_home') }}#offres" class="text-sm font-medium text-brand-indigo hover:underline">✕ Réinitialiser les filtres</a>
+            </div>
+        {% endif %}
+
+        {% if offres|length == 0 %}
+            <div data-aos="fade-up" class="card text-center py-14 px-6 text-slate-500">
+                <h3 class="text-navy font-semibold text-[17px] mb-2">Aucune offre ne correspond à ces critères</h3>
+                <p>Essayez d'élargir votre recherche ou revenez plus tard.</p>
+            </div>
+        {% else %}
+            <div class="grid md:grid-cols-3 gap-5">
+                {% for offre in offres %}
+                    <div data-aos="fade-up" data-aos-delay="{{ loop.index0 * 80 }}" class="card p-6 flex flex-col">
+                        <div class="flex justify-between items-center mb-3.5">
+                            <span class="text-[11.5px] text-slate-500 font-medium">RÉF. {{ 'DAIP-%s-%05d'|format(offre.datePublication|date('Y'), offre.id) }}</span>
+                            <span class="badge-publiee">Publiée</span>
+                        </div>
+                        <h4 class="text-lg font-semibold mb-1">{{ offre.titre }}</h4>
+                        <div class="text-sm text-slate-500 mb-4">{{ offre.entreprise.nom }} — {{ offre.ville }}</div>
+                        <div class="flex flex-wrap gap-1.5 mb-5">
+                            <span class="tag-pill">{{ offre.typeContrat.label }}</span>
+                            <span class="tag-pill">{{ offre.nbAnneesExperience }} an{{ offre.nbAnneesExperience > 1 ? 's' : '' }} exp.</span>
+                            {% if offre.secteur %}<span class="tag-pill">{{ offre.secteur.nom }}</span>{% endif %}
+                        </div>
+                        <a href="{{ path('app_offre_show', {id: offre.id}) }}" class="mt-auto text-sm font-semibold text-brand-indigo border-t border-slate-100 pt-3.5">Voir le dossier complet →</a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<section class="py-20 px-8">
+    <div class="max-w-6xl mx-auto">
+        <div data-aos="zoom-in" class="bg-brand-gradient rounded-[1.75rem] p-10 sm:p-14 flex flex-col sm:flex-row items-center justify-between gap-8">
+            <div>
+                <h2 class="text-white text-2xl sm:text-[27px] mb-1.5">Vous recrutez ?</h2>
+                <p class="text-white/80 text-sm">Créez votre compte entreprise et publiez votre première offre aujourd'hui.</p>
+            </div>
+            <a href="{{ path('app_login') }}" class="btn-orange whitespace-nowrap">Publier une offre</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Connexion{% endblock %}
+
+{% block body %}
+<div class="bg-slate-50 py-16 px-6">
+    <div data-aos="fade-up" class="max-w-md mx-auto card p-10">
+        <h1 class="text-2xl text-center mb-1.5">Connexion</h1>
+        <p class="text-center text-sm text-slate-500 mb-7">Accédez à votre espace personnel</p>
+
+        {% if error %}
+            <div class="text-sm rounded-xl px-4 py-3 bg-red-50 border border-red-200 text-red-700 mb-5">
+                {{ error.messageKey|trans(error.messageData, 'security') }}
+            </div>
+        {% endif %}
+
+        <form method="post">
+            <label for="inputEmail" class="field-label">Email</label>
+            <input type="email" value="{{ last_username }}" name="_username" id="inputEmail" required autofocus class="field-input">
+
+            <label for="inputPassword" class="field-label">Mot de passe</label>
+            <input type="password" name="_password" id="inputPassword" required class="field-input">
+
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+            <button type="submit" class="btn-gradient w-full mt-6">Se connecter</button>
+        </form>
+
+        <p class="text-center text-sm text-slate-500 mt-6">
+            Pas encore de compte entreprise ? <a href="{{ path('app_register') }}" class="text-brand-indigo font-semibold hover:underline">Inscrivez-vous →</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

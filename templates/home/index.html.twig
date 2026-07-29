@@ -24,7 +24,7 @@
         </div>
 
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
-            {% for stat in [{n:'128', l:'Entreprises'}, {n:'540', l:'Offres publiées'}, {n:'12', l:'Secteurs'}, {n:'100%', l:'Supervisé DAIP'}] %}
+            {% for stat in [{n: stats.entreprises, l:'Entreprises'}, {n: stats.offresPubliees, l:'Offres publiées'}, {n: stats.secteurs, l:'Secteurs'}, {n:'100%', l:'Supervisé DAIP'}] %}
                 <div data-aos="zoom-in" data-aos-delay="{{ loop.index0 * 90 }}" class="bg-white/15 border border-white/20 rounded-2xl py-5 px-2">
                     <span class="block text-white font-display font-bold text-2xl sm:text-[28px]">{{ stat.n }}</span>
                     <span class="text-white/80 text-xs">{{ stat.l }}</span>

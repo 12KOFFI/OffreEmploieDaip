@@ -1,0 +1,94 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouveau compte DAIP{% endblock %}
+
+{% block body %}
+<div class="bg-slate-50 py-16 px-6">
+    <div data-aos="fade-up" class="max-w-md mx-auto card p-10">
+        <h1 class="text-2xl text-center mb-1.5">Nouveau compte DAIP</h1>
+        <p class="text-center text-sm text-slate-500 mb-7">Réservé aux agents de supervision autorisés</p>
+
+        {{ form_start(form) }}
+            <label for="{{ form.email.vars.id }}" class="field-label">Email du compte DAIP</label>
+            <div class="relative">
+                <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></svg>
+                </span>
+                {{ form_widget(form.email, {attr: {class: 'field-input pl-10', placeholder: 'agent@daip.ci'}}) }}
+            </div>
+            {{ form_errors(form.email) }}
+
+            <label for="{{ form.plainPassword.first.vars.id }}" class="field-label">Mot de passe</label>
+            <div class="relative">
+                <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </span>
+                {{ form_widget(form.plainPassword.first, {attr: {class: 'field-input pl-10', placeholder: '••••••••'}}) }}
+            </div>
+            {{ form_errors(form.plainPassword.first) }}
+
+            <div class="mt-2.5">
+                <div class="flex gap-1.5" id="strength-bars">
+                    <span class="h-1.5 flex-1 rounded-full bg-slate-200 transition-colors duration-200" data-bar></span>
+                    <span class="h-1.5 flex-1 rounded-full bg-slate-200 transition-colors duration-200" data-bar></span>
+                    <span class="h-1.5 flex-1 rounded-full bg-slate-200 transition-colors duration-200" data-bar></span>
+                    <span class="h-1.5 flex-1 rounded-full bg-slate-200 transition-colors duration-200" data-bar></span>
+                </div>
+                <p id="strength-label" class="text-xs text-slate-400 mt-1.5">Au moins 8 caractères, avec lettre et chiffre.</p>
+            </div>
+
+            {{ form_row(form.plainPassword.second) }}
+
+            <div class="flex gap-3 mt-6">
+                <button type="submit" class="btn-gradient">Créer le compte</button>
+                <a href="{{ path('daip_comptes_index') }}" class="btn-ghost">Annuler</a>
+            </div>
+        {{ form_end(form) }}
+    </div>
+</div>
+
+<script>
+    (function () {
+        var passwordField = document.getElementById('{{ form.plainPassword.first.vars.id }}');
+        if (!passwordField) return;
+
+        var bars = document.querySelectorAll('#strength-bars [data-bar]');
+        var label = document.getElementById('strength-label');
+        var levels = [
+            { color: 'bg-red-400', text: 'Faible — ajoutez majuscules, chiffres et symboles.' },
+            { color: 'bg-orange-400', text: 'Moyen — encore un peu court ou trop simple.' },
+            { color: 'bg-yellow-400', text: 'Bon — presque parfait.' },
+            { color: 'bg-brand-green', text: 'Excellent — mot de passe solide.' },
+        ];
+
+        function scorePassword(value) {
+            var score = 0;
+            if (value.length >= 8) score++;
+            if (value.length >= 12) score++;
+            if (/[A-Z]/.test(value) && /[a-z]/.test(value)) score++;
+            if (/[0-9]/.test(value)) score++;
+            if (/[^A-Za-z0-9]/.test(value)) score++;
+            return Math.min(score, 4);
+        }
+
+        passwordField.addEventListener('input', function () {
+            var value = passwordField.value;
+            bars.forEach(function (bar) { bar.className = 'h-1.5 flex-1 rounded-full bg-slate-200 transition-colors duration-200'; });
+
+            if (value.length === 0) {
+                label.textContent = 'Au moins 8 caractères, avec lettre et chiffre.';
+                label.className = 'text-xs text-slate-400 mt-1.5';
+                return;
+            }
+
+            var score = scorePassword(value);
+            var level = levels[Math.max(score - 1, 0)];
+            for (var i = 0; i < score; i++) {
+                bars[i].className = 'h-1.5 flex-1 rounded-full transition-colors duration-200 ' + level.color;
+            }
+            label.textContent = level.text;
+            label.className = 'text-xs mt-1.5 font-medium ' + level.color.replace('bg-', 'text-');
+        });
+    })();
+</script>
+{% endblock %}

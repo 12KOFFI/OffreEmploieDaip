@@ -25,6 +25,12 @@
                 <a href="{{ path('app_home') }}#comment-ca-marche" class="hidden sm:inline text-sm font-medium text-slate-500 hover:text-navy transition-colors">Comment ça marche</a>
                 {% if app.user %}
                     <a href="{{ path('app_dashboard_redirect') }}" class="hidden sm:inline text-sm font-medium text-slate-500 hover:text-navy transition-colors">Mon espace</a>
+                    {% if is_granted('ROLE_ENTREPRISE') %}
+                        <a href="{{ path('entreprise_profil_edit') }}" class="hidden sm:inline text-sm font-medium text-slate-500 hover:text-navy transition-colors">Mon profil</a>
+                    {% endif %}
+                    {% if is_granted('ROLE_DAIP') %}
+                        <a href="{{ path('daip_comptes_index') }}" class="hidden sm:inline text-sm font-medium text-slate-500 hover:text-navy transition-colors">Comptes DAIP</a>
+                    {% endif %}
                     <a href="{{ path('app_logout') }}" class="btn-ghost btn-sm">Déconnexion</a>
                 {% else %}
                     <a href="{{ path('app_login') }}" class="hidden sm:inline text-sm font-medium text-slate-500 hover:text-navy transition-colors">Connexion</a>

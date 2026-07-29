@@ -366,6 +366,73 @@ Chaque section importante a un attribut `data-aos="fade-up"` (ou
 listes (offres, étapes) pour un effet de cascade au scroll. AOS
 s'initialise une seule fois dans `base.html.twig`.
 
+## Étape 15 — Formulaires améliorés + 3 nouvelles fonctionnalités
+
+### Connexion / Inscription avec icônes, afficher/masquer, jauge de force
+
+```
+templates/security/login.html.twig          → icônes email/cadenas + bouton œil
+templates/registration/register.html.twig   → idem + jauge de force du mot de passe (JS)
+src/Form/EntrepriseRegistrationType.php      → ajout d'une contrainte Regex (lettre + chiffre obligatoires)
+```
+
+La jauge de force est **visuelle uniquement** (JS, feedback immédiat) —
+la vraie validation qui bloque un mot de passe trop faible se fait
+**côté serveur** via la contrainte `Regex` ajoutée au champ
+`plainPassword` : au minimum 8 caractères + au moins une lettre et un
+chiffre. Le champ affiché seul (`password-field`) sert d'ancre pour le
+script JS de la jauge.
+
+### Comptes DAIP : formulaire au lieu de la commande console uniquement
+
+```
+src/Form/CreateDaipType.php
+src/Controller/Daip/CompteController.php    → /daip/comptes (liste) + /daip/comptes/nouveau (création)
+templates/daip/comptes/index.html.twig
+templates/daip/comptes/new.html.twig
+```
+
+Toujours protégé par `#[IsGranted('ROLE_DAIP')]` — comme convenu, seul
+un compte DAIP déjà connecté peut en créer un nouveau. La commande
+`app:create-daip` reste nécessaire pour le tout premier compte.
+
+### Profil entreprise
+
+```
+src/Form/EntrepriseProfilType.php
+src/Controller/Entreprise/ProfilController.php   → /entreprise/profil
+templates/entreprise/profil/edit.html.twig
+```
+
+Permet de modifier nom, SIRET, site web, logo (URL pour l'instant, pas
+d'upload de fichier) et description après l'inscription.
+
+### Vraies statistiques sur la page d'accueil
+
+`HomeController` calcule maintenant `entreprises` (nombre de comptes),
+`offresPubliees` (uniquement statut `publiee`) et `secteurs` via
+`$repository->count([...])`. Seul le "100% Supervisé DAIP" reste un
+texte fixe (ce n'est pas un compteur, juste une affirmation).
+
+### Liens de navigation
+
+`base.html.twig` affiche désormais "Mon profil" pour une entreprise
+connectée et "Comptes DAIP" pour un compte DAIP connecté, en plus de
+"Mon espace" commun aux deux.
+
+### Tester
+
+```bash
+php bin/console tailwind:build
+symfony console doctrine:schema:validate
+symfony server:start
+```
+
+1. Inscrivez-vous → observez la jauge de force qui réagit en tapant
+2. Connectez-vous en DAIP → `/daip/comptes` → créez un second compte DAIP
+3. Connectez-vous en entreprise → `/entreprise/profil` → modifiez la description
+4. Retournez sur `/` → les chiffres reflètent maintenant vos vraies données
+
 ## Structure des entités livrées
 
 - `User` — authentification (email, password, roles : ROLE_ENTREPRISE ou ROLE_DAIP)

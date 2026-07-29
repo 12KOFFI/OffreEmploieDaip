@@ -15,15 +15,35 @@
         {% endif %}
 
         <form method="post">
-            <label for="inputEmail" class="field-label">Email</label>
-            <input type="email" value="{{ last_username }}" name="_username" id="inputEmail" required autofocus class="field-input">
+            <label for="inputEmail" class="field-label">Adresse email</label>
+            <div class="relative">
+                <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></svg>
+                </span>
+                <input type="email" value="{{ last_username }}" name="_username" id="inputEmail" required autofocus
+                       placeholder="votre@email.com" class="field-input pl-10">
+            </div>
 
             <label for="inputPassword" class="field-label">Mot de passe</label>
-            <input type="password" name="_password" id="inputPassword" required class="field-input">
+            <div class="relative">
+                <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </span>
+                <input type="password" name="_password" id="inputPassword" required
+                       placeholder="••••••••" class="field-input pl-10 pr-10">
+                <button type="button" data-toggle-password="inputPassword"
+                        class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                    <svg data-eye-open xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg>
+                    <svg data-eye-closed class="hidden" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 1 12s4 8 11 8a9.26 9.26 0 0 0 5.39-1.61"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                </button>
+            </div>
 
             <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
 
-            <button type="submit" class="btn-gradient w-full mt-6">Se connecter</button>
+            <button type="submit" class="btn-gradient w-full mt-6">
+                <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                Se connecter
+            </button>
         </form>
 
         <p class="text-center text-sm text-slate-500 mt-6">
@@ -31,4 +51,16 @@
         </p>
     </div>
 </div>
+
+<script>
+    document.querySelectorAll('[data-toggle-password]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var input = document.getElementById(btn.getAttribute('data-toggle-password'));
+            var isHidden = input.type === 'password';
+            input.type = isHidden ? 'text' : 'password';
+            btn.querySelector('[data-eye-open]').classList.toggle('hidden', isHidden);
+            btn.querySelector('[data-eye-closed]').classList.toggle('hidden', !isHidden);
+        });
+    });
+</script>
 {% endblock %}

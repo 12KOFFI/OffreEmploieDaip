@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Comptes DAIP{% endblock %}
+
+{% block body %}
+<div class="py-12 px-6 pb-24">
+    <div class="max-w-3xl mx-auto">
+        <div data-aos="fade-up" class="flex items-center justify-between flex-wrap gap-4 mb-8">
+            <div>
+                <h1 class="text-[26px]">Comptes DAIP</h1>
+                <p class="text-sm text-slate-500 mt-1">Gérez les accès des agents de supervision.</p>
+            </div>
+            <a href="{{ path('daip_comptes_new') }}" class="btn-orange">+ Nouveau compte</a>
+        </div>
+
+        <div data-aos="fade-up" class="card overflow-hidden">
+            <table class="w-full border-collapse">
+                <thead>
+                    <tr class="bg-slate-50">
+                        <th class="text-left text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3">Email</th>
+                        <th class="text-left text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3">Créé le</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for compte in comptes %}
+                        <tr class="border-t border-slate-100">
+                            <td class="px-5 py-4 text-sm">
+                                {{ compte.email }}
+                                {% if compte == app.user %}<span class="tag-pill ml-2">Vous</span>{% endif %}
+                            </td>
+                            <td class="px-5 py-4 text-sm text-slate-500">{{ compte.createdAt|date('d/m/Y') }}</td>
+                        </tr>
+                    {% else %}
+                        <tr><td colspan="2" class="text-center text-slate-500 py-10">Aucun compte DAIP trouvé.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

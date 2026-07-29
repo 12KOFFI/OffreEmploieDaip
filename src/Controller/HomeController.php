@@ -2,7 +2,9 @@
 
 namespace App\Controller;
 
+use App\Enum\StatutOffre;
 use App\Enum\TypeContrat;
+use App\Repository\EntrepriseRepository;
 use App\Repository\OffreRepository;
 use App\Repository\SecteurRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -17,6 +19,7 @@ class HomeController extends AbstractController
         Request $request,
         OffreRepository $offreRepository,
         SecteurRepository $secteurRepository,
+        EntrepriseRepository $entrepriseRepository,
     ): Response {
         $filtres = [
             'q' => $request->query->get('q', ''),
@@ -25,10 +28,15 @@ class HomeController extends AbstractController
             'typeContrat' => $request->query->get('typeContrat', ''),
         ];
 
-        // Un filtre est "actif" des qu'un des champs ci-dessus est renseigne
         $filtresActifs = array_filter($filtres) !== [];
 
         $offres = $offreRepository->rechercherOffresPubliees($filtres);
+
+        $stats = [
+            'entreprises' => $entrepriseRepository->count([]),
+            'offresPubliees' => $offreRepository->count(['statut' => StatutOffre::PUBLIEE]),
+            'secteurs' => $secteurRepository->count([]),
+        ];
 
         return $this->render('home/index.html.twig', [
             'offres' => $offres,
@@ -36,6 +44,7 @@ class HomeController extends AbstractController
             'filtresActifs' => $filtresActifs,
             'secteurs' => $secteurRepository->findBy([], ['nom' => 'ASC']),
             'typesContrat' => TypeContrat::cases(),
+            'stats' => $stats,
         ]);
     }
 }

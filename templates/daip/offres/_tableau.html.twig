@@ -1,0 +1,90 @@
+{# Tableau + pagination du registre DAIP #}
+{# Attend : offres, filtres, secteurs, page, totalPages, total #}
+<form method="get" action="{{ path('daip_offres_index') }}" class="card grid sm:grid-cols-2 md:grid-cols-5 gap-3 p-4 mb-6" data-filter-form>
+    <select name="statut" class="field-input" data-filter-statut>
+        <option value="">Tous les statuts</option>
+        {% set filtres_nav = [{k: '', l: 'Toutes'}, {k: 'brouillon', l: 'Brouillons'}, {k: 'publiee', l: 'Publiées'}, {k: 'retiree', l: 'Retirées'}] %}
+        {% for f in filtres_nav %}
+            <option value="{{ f.k|default('') }}" {{ filtres.statut == f.k|default('') ? 'selected' : '' }}>{{ f.l }}</option>
+        {% endfor %}
+    </select>
+    <select name="secteur" class="field-input" data-filter-secteur>
+        <option value="">Tous les secteurs</option>
+        {% for secteur in secteurs %}
+            <option value="{{ secteur.id }}" {{ filtres.secteur == secteur.id ? 'selected' : '' }}>{{ secteur.nom }}</option>
+        {% endfor %}
+    </select>
+    <input type="text" name="ville" value="{{ filtres.ville|default('') }}" placeholder="Ville" class="field-input" data-filter-ville>
+    <input type="date" name="dateDebut" value="{{ filtres.dateDebut|default('') }}" placeholder="Date début" class="field-input" data-filter-date-debut>
+    <input type="date" name="dateFin" value="{{ filtres.dateFin|default('') }}" placeholder="Date fin" class="field-input" data-filter-date-fin>
+    <div class="sm:col-span-full md:col-span-5 flex justify-center">
+        <button type="submit" class="btn-orange">Filtrer</button>
+    </div>
+</form>
+
+<div data-aos="fade-up" class="card card-zoom overflow-hidden" id="daip-table-container">
+    <table class="w-full border-collapse">
+        <thead>
+            <tr class="bg-slate-50">
+                <th class="text-left text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3">Offre</th>
+                <th class="text-left text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3">Entreprise</th>
+                <th class="text-left text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3">Ville</th>
+                <th class="text-left text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3">Statut</th>
+                <th class="text-left text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3">Date publication</th>
+                <th class="text-left text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3">Date expiration</th>
+                <th class="text-left text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3">Action</th>
+            </tr>
+        </thead>
+        <tbody id="daip-table-body">
+            {% for offre in offres %}
+                <tr class="border-t border-slate-100 hover:bg-slate-75 transition-colors cursor-pointer" onclick="window.location='{{ path('app_offre_show', {id: offre.id}) }}'">
+                    <td class="px-5 py-4 text-sm font-medium text-navy">{{ offre.titre }}</td>
+                    <td class="px-5 py-4 text-sm">{{ offre.entreprise.nom }}</td>
+                    <td class="px-5 py-4 text-sm">{{ offre.ville }}</td>
+                    <td class="px-5 py-4"><span class="badge-{{ offre.statut.value }} inline-flex items-center">{{ offre.statut.label }}</span></td>
+                    <td class="px-5 py-4 text-sm">{{ offre.datePublication ? offre.datePublication|date('d/m/Y') : '—' }}</td>
+                    <td class="px-5 py-4 text-sm">{{ offre.dateExpiration ? offre.dateExpiration|date('d/m/Y') : '—' }}</td>
+                    <td class="px-5 py-4">
+                        <a href="{{ path('app_offre_show', {id: offre.id}) }}" class="text-sm font-semibold text-brand-indigo hover:underline">Consulter</a>
+                    </td>
+                </tr>
+            {% else %}
+                <tr><td colspan="7" class="text-center text-slate-500 py-10">Aucune offre pour ce filtre.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if totalPages > 1 %}
+    <div data-aos="fade-up" class="flex justify-center items-center gap-2 mt-6" id="daip-pagination">
+        {% if page > 1 %}
+            <a href="{{ path('daip_offres_index', filtres|merge({page: 1})) }}" class="btn-ghost btn-sm" data-page="1" aria-label="Première page">«</a>
+            <a href="{{ path('daip_offres_index', filtres|merge({page: page - 1})) }}" class="btn-ghost btn-sm" data-page="{{ page - 1 }}">← Précédent</a>
+        {% endif %}
+
+        {% set pagesAround = 2 %}
+        {% set startPage = max(1, page - pagesAround) %}
+        {% set endPage = min(totalPages, page + pagesAround) %}
+
+        {% if startPage > 1 %}
+            <span class="text-sm text-slate-400">…</span>
+        {% endif %}
+
+        {% for p in startPage..endPage %}
+            {% if p == page %}
+                <span class="text-sm font-semibold text-white bg-brand-indigo rounded-full w-9 h-9 flex items-center justify-center">{{ p }}</span>
+            {% else %}
+                <a href="{{ path('daip_offres_index', filtres|merge({page: p})) }}" class="text-sm font-medium text-slate-500 hover:text-navy w-9 h-9 flex items-center justify-center rounded-full hover:bg-slate-100 transition-colors" data-page="{{ p }}">{{ p }}</a>
+            {% endif %}
+        {% endfor %}
+
+        {% if endPage < totalPages %}
+            <span class="text-sm text-slate-400">…</span>
+        {% endif %}
+
+        {% if page < totalPages %}
+            <a href="{{ path('daip_offres_index', filtres|merge({page: page + 1})) }}" class="btn-ghost btn-sm" data-page="{{ page + 1 }}">Suivant →</a>
+            <a href="{{ path('daip_offres_index', filtres|merge({page: totalPages})) }}" class="btn-ghost btn-sm" data-page="{{ totalPages }}" aria-label="Dernière page">»</a>
+        {% endif %}
+    </div>
+{% endif %}

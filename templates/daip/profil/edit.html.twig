@@ -1,0 +1,35 @@
+{% extends 'dashboard_base.html.twig' %}
+
+{% block title %}Mon profil DAIP{% endblock %}
+
+{% block breadcrumb %}
+    <a href="{{ path('daip_dashboard') }}" class="hover:text-navy">Tableau de bord</a>
+    <span class="mx-1.5">/</span>
+    <span class="text-navy font-semibold">Mon profil</span>
+{% endblock %}
+
+{% block body %}
+<div class="py-12 px-6 pb-24">
+    <div class="max-w-2xl mx-auto">
+        <div data-aos="fade-up" class="mb-8">
+            <h1 class="text-[26px]">Mon profil</h1>
+            <p class="text-sm text-slate-500 mt-1">Consultez et modifiez vos informations de compte.</p>
+        </div>
+
+        <div data-aos="fade-up" class="card p-10">
+            {{ form_start(form) }}
+                <div>
+                    {{ form_label(form.email, 'Email', {'label_attr': {'class': 'field-label'}}) }}
+                    {{ form_widget(form.email, {'attr': {'class': 'field-input'}}) }}
+                    {{ form_errors(form.email) }}
+                </div>
+
+                <div class="flex gap-3 mt-8">
+                    <button type="submit" class="btn-orange">Enregistrer</button>
+                    <a href="{{ path('daip_dashboard') }}" class="btn-ghost">Annuler</a>
+                </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends 'dashboard_base.html.twig' %}
+
+{% block title %}Tableau de bord — {{ entreprise.nom }}{% endblock %}
+
+{% block breadcrumb %}
+    <span class="text-navy font-semibold">Tableau de bord</span> — {{ entreprise.nom }}
+{% endblock %}
+
+{% block body %}
+<div class="max-w-5xl mx-auto">
+    <div data-aos="fade-up" class="flex items-center justify-between flex-wrap gap-4 mb-8">
+        <div>
+            <h1 class="text-[26px]">Bienvenue, {{ entreprise.nom }}</h1>
+            <p class="text-sm text-slate-500 mt-1">Gérez vos offres d'emploi depuis votre tableau de bord.</p>
+        </div>
+        <a href="{{ path('entreprise_offres_new') }}" class="btn-orange">+ Nouvelle offre</a>
+    </div>
+
+    {# ── KPI Cards ────────────────────────────────────────────── #}
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+        {% set kpis = [
+            { label: 'Total offres',  value: totalOffres,                               color: 'bg-brand-gradient text-white' },
+            { label: 'Publiées',      value: compteurs.publiee   | default(0),           color: 'bg-green-50 text-brand-green' },
+            { label: 'Brouillons',    value: compteurs.brouillon | default(0),           color: 'bg-slate-50 text-slate-600' },
+            { label: 'Retirées',      value: compteurs.retiree   | default(0),           color: 'bg-red-50 text-red-600' },
+        ] %}
+        {% for kpi in kpis %}
+            <div data-aos="zoom-in" data-aos-delay="{{ loop.index0 * 70 }}" class="card-zoom rounded-2xl p-5 {{ kpi.color }} {{ loop.first ? '' : 'border border-4 border-slate-100' }}">
+                <span class="block font-display font-bold text-2xl">{{ kpi.value }}</span>
+                <span class="text-xs {{ loop.first ? 'text-white/80' : 'opacity-70' }}">{{ kpi.label }}</span>
+            </div>
+        {% endfor %}
+    </div>
+
+    {# ── Dernières offres ─────────────────────────────────────── #}
+    <div data-aos="fade-up">
+        <h2 class="text-lg mb-4">Vos dernières offres</h2>
+
+        {% if dernieresOffres|length == 0 %}
+            <div class="text-center py-14 px-6 bg-white rounded-2xl border border-slate-100 text-slate-500">
+                <h3 class="text-navy font-semibold mb-2">Aucune offre pour l'instant</h3>
+                <p class="mb-4">Créez votre première offre pour commencer à recruter.</p>
+                <a href="{{ path('entreprise_offres_new') }}" class="btn-orange">+ Créer une offre</a>
+            </div>
+        {% else %}
+            <div class="flex flex-col gap-3.5">
+                {% for offre in dernieresOffres %}
+                    <div data-aos="fade-up" data-aos-delay="{{ loop.index0 * 60 }}" class="card card-zoom p-5 px-6 flex items-center justify-between gap-5 flex-wrap">
+                        <div class="flex-1 min-w-[200px]">
+                            <h3 class="text-[17px] font-semibold mb-1">{{ offre.titre }}</h3>
+                            <div class="text-sm text-slate-500">
+                                {{ offre.ville }} · {{ offre.typeContrat.label }}
+                                {% if offre.secteur %} · {{ offre.secteur.nom }}{% endif %}
+                            </div>
+                        </div>
+                        <span class="badge-{{ offre.statut.value }} inline-flex items-center">{{ offre.statut.label }}</span>
+                        <div class="flex gap-2 flex-wrap items-center">
+                            <a href="{{ path('entreprise_offres_edit', {id: offre.id}) }}" class="btn-ghost btn-sm hover:bg-indigo-50 hover:text-brand-indigo hover:border-brand-indigo/30">Modifier</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="mt-4 text-right">
+                <a href="{{ path('entreprise_offres_index') }}" class="text-sm font-semibold text-brand-indigo hover:underline">Voir toutes mes offres →</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

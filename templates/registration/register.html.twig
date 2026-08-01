@@ -8,7 +8,7 @@
         <h1 class="text-2xl text-center mb-1.5">Créer un compte entreprise</h1>
         <p class="text-center text-sm text-slate-500 mb-7">Publiez vos offres en quelques minutes</p>
 
-        {{ form_start(registrationForm) }}
+        {{ form_start(registrationForm, {attr: {id: 'registration-form'}}) }}
             {# --- Email --- #}
             <label for="{{ registrationForm.email.vars.id }}" class="field-label">Email professionnel</label>
             <div class="relative">
@@ -20,7 +20,7 @@
             {{ form_errors(registrationForm.email) }}
 
             {# --- Mot de passe --- #}
-            <label for="{{ registrationForm.plainPassword.first.vars.id }}" class="field-label">Mot de passe</label>
+            <label for="password-field" class="field-label">Mot de passe</label>
             <div class="relative">
                 <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
@@ -36,7 +36,7 @@
             {# --- Jauge de force du mot de passe --- #}
             <div class="mt-2.5">
                 <div class="flex gap-1.5" id="strength-bars">
-                    <span class="h-1.5 flex-1 rounded-full bg-slate-150 bg-slate-200 transition-colors duration-200" data-bar></span>
+                    <span class="h-1.5 flex-1 rounded-full bg-slate-200 transition-colors duration-200" data-bar></span>
                     <span class="h-1.5 flex-1 rounded-full bg-slate-200 transition-colors duration-200" data-bar></span>
                     <span class="h-1.5 flex-1 rounded-full bg-slate-200 transition-colors duration-200" data-bar></span>
                     <span class="h-1.5 flex-1 rounded-full bg-slate-200 transition-colors duration-200" data-bar></span>
@@ -45,7 +45,7 @@
             </div>
 
             {# --- Confirmation --- #}
-            <label for="{{ registrationForm.plainPassword.second.vars.id }}" class="field-label">Confirmer le mot de passe</label>
+            <label for="password-confirm-field" class="field-label">Confirmer le mot de passe</label>
             <div class="relative">
                 <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
@@ -56,6 +56,7 @@
                     <svg data-eye-closed class="hidden" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 1 12s4 8 11 8a9.26 9.26 0 0 0 5.39-1.61"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
                 </button>
             </div>
+            <p id="match-indicator" class="text-xs mt-1.5 hidden"></p>
             {{ form_errors(registrationForm.plainPassword.second) }}
 
             {# --- Nom entreprise --- #}
@@ -71,9 +72,15 @@
             {{ form_row(registrationForm.siret) }}
             {{ form_row(registrationForm.description) }}
 
-            <button type="submit" class="btn-gradient w-full mt-6">
-                <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
-                Créer mon compte
+            <button type="submit" class="btn-gradient w-full mt-6" id="register-submit">
+                <span class="inline-flex items-center gap-2">
+                    <svg id="register-icon" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+                    <span id="register-text">Créer mon compte</span>
+                    <svg id="register-spinner" class="hidden animate-spin h-[17px] w-[17px] text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </span>
             </button>
         {{ form_end(registrationForm) }}
 
@@ -96,16 +103,20 @@
 
     (function () {
         var passwordField = document.getElementById('password-field');
+        var confirmField = document.getElementById('password-confirm-field');
         if (!passwordField) return;
 
         var bars = document.querySelectorAll('#strength-bars [data-bar]');
         var label = document.getElementById('strength-label');
+        var matchIndicator = document.getElementById('match-indicator');
 
+        // Classes ecrites en toutes lettres (et non construites dynamiquement)
+        // pour que Tailwind les detecte a la compilation.
         var levels = [
-            { color: 'bg-red-400', text: 'Faible — ajoutez majuscules, chiffres et symboles.' },
-            { color: 'bg-orange-400', text: 'Moyen — encore un peu court ou trop simple.' },
-            { color: 'bg-yellow-400', text: 'Bon — presque parfait.' },
-            { color: 'bg-brand-green', text: 'Excellent — mot de passe solide.' },
+            { bar: 'bg-red-400', text: 'text-red-500', label: 'Faible — ajoutez majuscules, chiffres et symboles.' },
+            { bar: 'bg-orange-400', text: 'text-orange-500', label: 'Moyen — encore un peu court ou trop simple.' },
+            { bar: 'bg-yellow-400', text: 'text-yellow-600', label: 'Bon — presque parfait.' },
+            { bar: 'bg-brand-green', text: 'text-brand-green', label: 'Excellent — mot de passe solide.' },
         ];
 
         function scorePassword(value) {
@@ -118,10 +129,12 @@
             return Math.min(score, 4);
         }
 
-        passwordField.addEventListener('input', function () {
+        function updateStrength() {
             var value = passwordField.value;
 
-            bars.forEach(function (bar) { bar.className = 'h-1.5 flex-1 rounded-full bg-slate-200 transition-colors duration-200'; });
+            bars.forEach(function (bar) {
+                bar.className = 'h-1.5 flex-1 rounded-full bg-slate-200 transition-colors duration-200';
+            });
 
             if (value.length === 0) {
                 label.textContent = 'Au moins 8 caractères, avec majuscule, chiffre et symbole recommandés.';
@@ -133,12 +146,69 @@
             var level = levels[Math.max(score - 1, 0)];
 
             for (var i = 0; i < score; i++) {
-                bars[i].className = 'h-1.5 flex-1 rounded-full transition-colors duration-200 ' + level.color;
+                bars[i].className = 'h-1.5 flex-1 rounded-full transition-colors duration-200 ' + level.bar;
             }
 
-            label.textContent = level.text;
-            label.className = 'text-xs mt-1.5 font-medium ' + level.color.replace('bg-', 'text-');
+            label.textContent = level.label;
+            label.className = 'text-xs mt-1.5 font-medium ' + level.text;
+        }
+
+        function updateMatch() {
+            if (!confirmField || !matchIndicator) return;
+
+            if (confirmField.value.length === 0) {
+                matchIndicator.classList.add('hidden');
+                return;
+            }
+
+            matchIndicator.classList.remove('hidden');
+
+            if (passwordField.value === confirmField.value) {
+                matchIndicator.textContent = '✓ Les mots de passe correspondent';
+                matchIndicator.className = 'text-xs mt-1.5 font-medium text-brand-green';
+            } else {
+                matchIndicator.textContent = '✕ Les mots de passe ne correspondent pas';
+                matchIndicator.className = 'text-xs mt-1.5 font-medium text-red-500';
+            }
+        }
+
+        passwordField.addEventListener('input', function () {
+            updateStrength();
+            updateMatch();
         });
+
+        if (confirmField) {
+            confirmField.addEventListener('input', updateMatch);
+        }
+
+        var form = passwordField.closest('form');
+        if (form) {
+            form.addEventListener('submit', function (e) {
+                if (passwordField.value !== confirmField.value) {
+                    e.preventDefault();
+                    matchIndicator.classList.remove('hidden');
+                    matchIndicator.textContent = '✕ Les mots de passe ne correspondent pas.';
+                    matchIndicator.className = 'text-xs mt-1.5 font-medium text-red-500';
+                    confirmField.focus();
+                }
+            });
+        }
     })();
+
+    var registrationForm = document.getElementById('registration-form');
+    if (registrationForm) {
+        registrationForm.addEventListener('submit', function () {
+            var button = document.getElementById('register-submit');
+            var icon = document.getElementById('register-icon');
+            var text = document.getElementById('register-text');
+            var spinner = document.getElementById('register-spinner');
+
+            button.disabled = true;
+            button.classList.add('opacity-75', 'cursor-not-allowed');
+            if (icon) icon.classList.add('hidden');
+            if (text) text.textContent = 'Création en cours...';
+            if (spinner) spinner.classList.remove('hidden');
+        });
+    }
 </script>
 {% endblock %}

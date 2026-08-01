@@ -1,0 +1,127 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Toutes les offres{% endblock %}
+
+{% block body %}
+<div class="bg-slate-50 py-12 px-6 pb-24">
+    <div class="max-w-6xl mx-auto">
+        <div data-aos="fade-up" class="mb-8">
+            <div class="text-sm text-slate-500 mb-2">
+                <a href="{{ path('app_home') }}" class="text-brand-indigo font-medium hover:underline">Accueil</a> / Registre des offres
+            </div>
+            <h1 class="text-[28px]">Toutes les offres</h1>
+            <p class="text-sm text-slate-500 mt-1">{{ total }} offre{{ total > 1 ? 's' : '' }} publiée{{ total > 1 ? 's' : '' }} au registre.</p>
+        </div>
+
+        <div data-aos="fade-up">
+            {% include 'offres/_filtres.html.twig' with {
+                action_url: path('app_offres_liste'),
+                filtres: filtres,
+                secteurs: secteurs,
+                typesContrat: typesContrat,
+            } %}
+        </div>
+
+        {% if filtresActifs %}
+            <div class="text-center -mt-4 mb-8" id="filtres-actifs-container">
+                <a href="{{ path('app_offres_liste') }}" class="text-sm font-medium text-brand-indigo hover:underline">✕ Réinitialiser les filtres</a>
+            </div>
+        {% endif %}
+
+        {% include 'offres/_liste.html.twig' with {
+            offres: offres,
+            filtres: filtres,
+            filtresActifs: filtresActifs,
+            secteurs: secteurs,
+            typesContrat: typesContrat,
+            total: total,
+            page: page,
+            totalPages: totalPages,
+        } %}
+    </div>
+</div>
+
+<script>
+(function () {
+    var grid = document.getElementById('offres-grid');
+    var pagination = document.getElementById('offres-pagination');
+    var filtresActifsContainer = document.getElementById('filtres-actifs-container');
+    var filterForm = document.querySelector('#offres-filters-form');
+
+    function buildQueryString(extra) {
+        var params = new URLSearchParams();
+        var q = document.querySelector('[data-filter-q]');
+        var ville = document.querySelector('[data-filter-ville]');
+        var secteur = document.querySelector('[data-filter-secteur]');
+        var typeContrat = document.querySelector('[data-filter-type-contrat]');
+
+        if (q && q.value) params.set('q', q.value);
+        if (ville && ville.value) params.set('ville', ville.value);
+        if (secteur && secteur.value) params.set('secteur', secteur.value);
+        if (typeContrat && typeContrat.value) params.set('typeContrat', typeContrat.value);
+        if (extra && extra.page) params.set('page', extra.page);
+
+        return params.toString();
+    }
+
+    function loadFragment(queryString, replaceUrl) {
+        var url = '{{ path('app_offres_liste') }}' + (queryString ? '?' + queryString : '');
+
+        fetch(url, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        })
+        .then(function (response) { return response.text(); })
+        .then(function (html) {
+            var parser = new DOMParser();
+            var doc = parser.parseFromString(html, 'text/html');
+            var newGrid = doc.getElementById('offres-grid');
+            var newPagination = doc.getElementById('offres-pagination');
+            var newFiltresActifs = doc.getElementById('filtres-actifs-container');
+
+            if (newGrid && grid) {
+                grid.outerHTML = newGrid.outerHTML;
+                grid = document.getElementById('offres-grid');
+            }
+            if (newPagination && pagination) {
+                pagination.outerHTML = newPagination.outerHTML;
+                pagination = document.getElementById('offres-pagination');
+            }
+            if (newFiltresActifs && filtresActifsContainer) {
+                filtresActifsContainer.outerHTML = newFiltresActifs.outerHTML;
+                filtresActifsContainer = document.getElementById('filtres-actifs-container');
+            } else if (filtresActifsContainer && !newFiltresActifs) {
+                filtresActifsContainer.remove();
+                filtresActifsContainer = null;
+            }
+
+            if (replaceUrl) {
+                history.pushState(null, '', url);
+            }
+        })
+        .catch(function () {
+            if (replaceUrl) {
+                window.location.href = url;
+            }
+        });
+    }
+
+    document.addEventListener('submit', function (e) {
+        var form = e.target.closest('#offres-filters-form');
+        if (!form) return;
+        e.preventDefault();
+        var qs = buildQueryString({ page: 1 });
+        loadFragment(qs, true);
+    });
+
+    document.addEventListener('click', function (e) {
+        var pageLink = e.target.closest('[data-page]');
+        if (!pageLink) return;
+
+        e.preventDefault();
+        var page = pageLink.getAttribute('data-page');
+        var qs = buildQueryString({ page: page });
+        loadFragment(qs, true);
+    });
+})();
+</script>
+{% endblock %}

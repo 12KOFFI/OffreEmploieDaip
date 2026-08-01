@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Enum\NiveauEtude;
 use App\Enum\StatutOffre;
 use App\Enum\TypeContrat;
 use App\Repository\OffreRepository;
@@ -46,8 +47,8 @@ class Offre
     #[ORM\Column]
     private int $nbAnneesExperience = 0;
 
-    #[ORM\Column(length: 50, nullable: true)]
-    private ?string $niveauEtude = null;
+    #[ORM\Column(length: 50, nullable: true, enumType: NiveauEtude::class)]
+    private ?NiveauEtude $niveauEtude = null;
 
     #[ORM\Column(length: 20, enumType: StatutOffre::class)]
     private StatutOffre $statut = StatutOffre::BROUILLON;
@@ -57,6 +58,12 @@ class Offre
 
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $dateExpiration = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $image = null;
+
+    #[ORM\Column]
+    private int $views = 0;
 
     /**
      * @var Collection<int, Competence>
@@ -175,12 +182,12 @@ class Offre
         return $this;
     }
 
-    public function getNiveauEtude(): ?string
+    public function getNiveauEtude(): ?NiveauEtude
     {
         return $this->niveauEtude;
     }
 
-    public function setNiveauEtude(?string $niveauEtude): static
+    public function setNiveauEtude(?NiveauEtude $niveauEtude): static
     {
         $this->niveauEtude = $niveauEtude;
         return $this;
@@ -216,6 +223,34 @@ class Offre
     public function setDateExpiration(?\DateTimeImmutable $dateExpiration): static
     {
         $this->dateExpiration = $dateExpiration;
+        return $this;
+    }
+
+    public function getImage(): ?string
+    {
+        return $this->image;
+    }
+
+    public function setImage(?string $image): static
+    {
+        $this->image = $image;
+        return $this;
+    }
+
+    public function getViews(): int
+    {
+        return $this->views;
+    }
+
+    public function setViews(int $views): static
+    {
+        $this->views = $views;
+        return $this;
+    }
+
+    public function incrementViews(): static
+    {
+        $this->views++;
         return $this;
     }
 

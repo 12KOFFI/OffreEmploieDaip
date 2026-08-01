@@ -1,6 +1,14 @@
-{% extends 'base.html.twig' %}
+{% extends 'dashboard_base.html.twig' %}
 
 {% block title %}{{ mode == 'creation' ? 'Nouvelle offre' : "Modifier l'offre" }}{% endblock %}
+
+{% block breadcrumb %}
+    <a href="{{ path('entreprise_dashboard') }}" class="hover:text-navy">Tableau de bord</a>
+    <span class="mx-1.5">/</span>
+    <a href="{{ path('entreprise_offres_index') }}" class="hover:text-navy">Mes offres</a>
+    <span class="mx-1.5">/</span>
+    <span class="text-navy font-semibold">{{ mode == 'creation' ? 'Nouvelle offre' : "Modifier l'offre" }}</span>
+{% endblock %}
 
 {% block body %}
 <div class="bg-slate-50 py-12 px-6 pb-24">
@@ -14,13 +22,15 @@
             {% endif %}
         </p>
 
-        {{ form_start(form) }}
-            {{ form_row(form.titre) }}
-            {{ form_row(form.description) }}
+        {{ form_start(form, {attr: {id: 'offre-form'}}) }}
+            <div class="grid sm:grid-cols-2 gap-x-4">
+                {{ form_row(form.titre) }}
+                {{ form_row(form.typeContrat) }}
+            </div>
 
             <div class="grid sm:grid-cols-2 gap-x-4">
-                {{ form_row(form.typeContrat) }}
                 {{ form_row(form.ville) }}
+                {{ form_row(form.secteur) }}
             </div>
 
             <div class="grid sm:grid-cols-2 gap-x-4">
@@ -33,19 +43,57 @@
                 {{ form_row(form.niveauEtude) }}
             </div>
 
-            {{ form_row(form.secteur) }}
+            {{ form_row(form.dateExpiration) }}
 
-            <label class="field-label">{{ form.competences.vars.label }}</label>
-            <div class="flex flex-wrap gap-2.5 mt-1.5">
-                {{ form_widget(form.competences) }}
-            </div>
-            <p class="text-xs text-slate-500 mt-2">Vous ne trouvez pas la compétence recherchée ? La gestion des nouvelles compétences sera bientôt disponible directement ici.</p>
+            {{ form_row(form.description) }}
+
+            <label class="field-label">Compétences requises</label>
+            <select id="competences-select" multiple class="field-input" size="6">
+                {% for competence in form.competences.vars.choices %}
+                    <option value="{{ competence.value }}" {% if competence.data in offre.competences %}selected{% endif %}>{{ competence.label }}</option>
+                {% endfor %}
+            </select>
+            <p class="text-xs text-slate-500 mt-1.5">Maintenez la touche Ctrl (Windows) ou Cmd (Mac) pour sélectionner plusieurs compétences.</p>
+            {{ form_widget(form.competences, {attr: {class: 'hidden'}}) }}
+
+            {% if mode == 'edition' and offre.image %}
+                <div class="mt-5">
+                    <label class="field-label">Image actuelle</label>
+                    <img src="{{ offre.image }}" alt="{{ offre.titre }}" class="mt-2 rounded-xl border border-slate-200 max-h-48 object-cover">
+                </div>
+            {% endif %}
+
+            {{ form_row(form.imageFile) }}
 
             <div class="flex gap-3 mt-8">
-                <button type="submit" class="btn-orange">{{ mode == 'creation' ? 'Enregistrer en brouillon' : 'Enregistrer les modifications' }}</button>
+                <button type="submit" class="btn-orange" id="offre-submit">
+                    <span class="inline-flex items-center gap-2">
+                        <span id="offre-text">{{ mode == 'creation' ? 'Enregistrer en brouillon' : 'Enregistrer les modifications' }}</span>
+                        <svg id="offre-spinner" class="hidden animate-spin h-[17px] w-[17px] text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </span>
+                </button>
                 <a href="{{ path('entreprise_offres_index') }}" class="btn-ghost">Annuler</a>
             </div>
         {{ form_end(form) }}
+
+        <script>
+            (function () {
+                var select = document.getElementById('competences-select');
+                var hiddenField = document.querySelector('input[name="offre[competences]"]');
+                if (!select || !hiddenField) return;
+
+                function syncHidden() {
+                    var values = Array.from(select.selectedOptions).map(function (opt) { return opt.value; });
+                    hiddenField.value = values.join(',');
+                }
+
+                select.addEventListener('change', syncHidden);
+                syncHidden();
+            })();
+        </script>
     </div>
 </div>
 {% endblock %}

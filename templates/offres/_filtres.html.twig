@@ -1,0 +1,18 @@
+{# Attend : action_url, filtres, secteurs, typesContrat #}
+<form method="get" action="{{ action_url }}" id="offres-filters-form" class="card grid md:grid-cols-[1.4fr_1fr_1fr_1fr_auto] gap-3 p-4.5 mb-8">
+    <input type="text" name="q" value="{{ filtres.q }}" placeholder="Poste ou entreprise" class="field-input" data-filter-q>
+    <input type="text" name="ville" value="{{ filtres.ville }}" placeholder="Ville" class="field-input" data-filter-ville>
+    <select name="secteur" class="field-input" data-filter-secteur>
+        <option value="">Tous les secteurs</option>
+        {% for secteur in secteurs %}
+            <option value="{{ secteur.id }}" {{ filtres.secteur == secteur.id ? 'selected' : '' }}>{{ secteur.nom }}</option>
+        {% endfor %}
+    </select>
+    <select name="typeContrat" class="field-input" data-filter-type-contrat>
+        <option value="">Tous les contrats</option>
+        {% for type in typesContrat %}
+            <option value="{{ type.value }}" {{ filtres.typeContrat == type.value ? 'selected' : '' }}>{{ type.label }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit" class="btn-orange">Filtrer</button>
+</form>

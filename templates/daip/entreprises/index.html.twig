@@ -1,0 +1,68 @@
+{% extends 'dashboard_base.html.twig' %}
+
+{% block title %}Registre des entreprises{% endblock %}
+
+{% block breadcrumb %}
+    <a href="{{ path('daip_dashboard') }}" class="hover:text-navy">Tableau de bord</a>
+    <span class="mx-1.5">/</span>
+    <span class="text-navy font-semibold">Registre des entreprises</span>
+{% endblock %}
+
+{% block body %}
+<div class="py-12 px-6 pb-24">
+    <div class="max-w-5xl mx-auto">
+        <div data-aos="fade-up" class="mb-8">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                    <h1 class="text-[26px]">Registre des entreprises</h1>
+                    <p class="text-sm text-slate-500 mt-1">Liste des entreprises partenaires inscrites sur la plateforme.</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="inline-flex items-center justify-center px-3 py-1.5 rounded-full bg-indigo-50 text-brand-indigo text-sm font-semibold">
+                        {{ total }} entreprise{{ total > 1 ? 's' : '' }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        {#
+        <div data-aos="fade-up" class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div class="rounded-2xl p-5 bg-brand-gradient text-white">
+                <span class="block font-display font-bold text-2xl">{{ total }}</span>
+                <span class="text-xs text-white/80">Total entreprises</span>
+            </div>
+            <div class="rounded-2xl p-5 bg-green-50 text-brand-green border border-slate-100">
+                <span class="block font-display font-bold text-2xl">{{ entreprises|length }}</span>
+                <span class="text-xs opacity-70">Affichées</span>
+            </div>
+            <div class="rounded-2xl p-5 bg-slate-50 text-slate-600 border border-slate-100">
+                <span class="block font-display font-bold text-2xl">{{ entreprises|reduce((carry, e) => carry + e.offres|length, 0) }}</span>
+                <span class="text-xs opacity-70">Offres publiées</span>
+            </div>
+            <div class="rounded-2xl p-5 bg-indigo-50 text-brand-indigo border border-slate-100">
+                <span class="block font-display font-bold text-2xl">{{ totalPages }}</span>
+                <span class="text-xs opacity-70">Pages</span>
+            </div>
+        </div>
+        #}
+
+        <div data-aos="fade-up" class="card p-4 mb-6">
+            <form method="get" action="{{ path('daip_entreprises_index') }}" class="flex gap-3">
+                <input type="text" name="q" value="{{ search }}" placeholder="Rechercher par nom ou email..." class="field-input flex-1">
+                <button type="submit" class="btn-orange">Rechercher</button>
+                {% if search %}
+                    <a href="{{ path('daip_entreprises_index') }}" class="btn-ghost">Effacer</a>
+                {% endif %}
+            </form>
+        </div>
+
+        {% include 'daip/entreprises/_tableau.html.twig' with {
+            entreprises: entreprises,
+            total: total,
+            totalPages: totalPages,
+            page: page,
+            search: search,
+        } %}
+    </div>
+</div>
+{% endblock %}

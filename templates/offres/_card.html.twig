@@ -1,0 +1,40 @@
+{# Attend une variable `offre`. Utilisé sur l'accueil et la page /offres. #}
+<div {% if aos_delay is defined %}data-aos="fade-up" data-aos-delay="{{ aos_delay }}"{% endif %} class="card card-zoom overflow-hidden flex flex-col">
+    {% if offre.image %}
+        <div class="aspect-[16/9] w-full overflow-hidden bg-slate-100">
+            <img src="{{ offre.image }}" alt="{{ offre.titre }}" class="w-full h-full object-cover">
+        </div>
+    {% endif %}
+    <div class="p-6 flex flex-col flex-1">
+        <div class="flex items-center gap-3 mb-4">
+            {% if offre.entreprise.logo %}
+                <img src="{{ offre.entreprise.logo }}" alt="{{ offre.entreprise.nom }}" class="w-11 h-11 rounded-xl object-cover border border-slate-100 flex-shrink-0">
+            {% else %}
+                <div class="w-11 h-11 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center flex-shrink-0 text-slate-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                    </svg>
+                </div>
+            {% endif %}
+            <div class="min-w-0">
+                <div class="text-sm font-semibold text-navy truncate">{{ offre.entreprise.nom }}</div>
+                <div class="text-xs text-slate-500">{{ offre.ville }}</div>
+            </div>
+            <span class="badge-{{ offre.statut.value }} inline-flex items-center ml-auto flex-shrink-0">{{ offre.statut.label }}</span>
+        </div>
+
+        <span class="text-[11px] text-slate-400 font-medium mb-1.5">RÉF. {{ 'DAIP-%s-%05d'|format(offre.datePublication|date('Y'), offre.id) }}</span>
+        <h4 class="text-lg font-semibold mb-3">{{ offre.titre }}</h4>
+
+        <div class="flex flex-wrap gap-1.5 mb-5">
+            <span class="tag-pill">{{ offre.typeContrat.label }}</span>
+            <span class="tag-pill">{{ offre.nbAnneesExperience }} an{{ offre.nbAnneesExperience > 1 ? 's' : '' }} exp.</span>
+            {% if offre.secteur %}<span class="tag-pill">{{ offre.secteur.nom }}</span>{% endif %}
+            {% if offre.dateExpiration %}
+                <span class="tag-pill bg-slate-50 text-slate-500">Expire le {{ offre.dateExpiration|date('d/m/Y') }}</span>
+            {% endif %}
+        </div>
+
+        <a href="{{ path('app_offre_show', {id: offre.id}) }}" class="mt-auto text-sm font-semibold text-brand-indigo border-t border-slate-100 pt-3.5">Voir le dossier complet →</a>
+    </div>
+</div>

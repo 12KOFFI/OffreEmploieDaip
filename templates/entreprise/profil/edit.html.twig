@@ -1,29 +1,63 @@
-{% extends 'base.html.twig' %}
+{% extends 'dashboard_base.html.twig' %}
 
 {% block title %}Mon profil entreprise{% endblock %}
 
+{% block breadcrumb %}
+    <a href="{{ path('entreprise_dashboard') }}" class="hover:text-navy">Tableau de bord</a>
+    <span class="mx-1.5">/</span>
+    <span class="text-navy font-semibold">Mon profil</span>
+{% endblock %}
+
 {% block body %}
-<div class="bg-slate-50 py-12 px-6 pb-24">
-    <div data-aos="fade-up" class="max-w-2xl mx-auto card p-10 sm:p-11">
-        <h1 class="text-2xl mb-1.5">Mon profil entreprise</h1>
-        <p class="text-sm text-slate-500 mb-7">Ces informations sont visibles sur vos offres publiées.</p>
+<div class="py-12 px-6 pb-24">
+    <div class="max-w-2xl mx-auto">
+        <div data-aos="fade-up" class="mb-8">
+            <h1 class="text-[26px]">Mon profil entreprise</h1>
+            <p class="text-sm text-slate-500 mt-1">Ces informations sont visibles sur vos offres publiées.</p>
+        </div>
 
-        {{ form_start(form) }}
-            {{ form_row(form.nom) }}
+        <div data-aos="fade-up" class="card card-zoom p-10 sm:p-11">
+            {{ form_start(form, {attr: {id: 'profil-form'}}) }}
+                {{ form_row(form.nom) }}
 
-            <div class="grid sm:grid-cols-2 gap-x-4">
-                {{ form_row(form.siret) }}
-                {{ form_row(form.siteWeb) }}
-            </div>
+                <div class="grid sm:grid-cols-2 gap-x-4">
+                    {{ form_row(form.siret) }}
+                    {{ form_row(form.siteWeb) }}
+                </div>
 
-            {{ form_row(form.logo) }}
-            {{ form_row(form.description) }}
+                {{ form_row(form.logo) }}
+                {{ form_row(form.description) }}
 
-            <div class="flex gap-3 mt-8">
-                <button type="submit" class="btn-orange">Enregistrer</button>
-                <a href="{{ path('entreprise_offres_index') }}" class="btn-ghost">Retour à mes offres</a>
-            </div>
-        {{ form_end(form) }}
+                <div class="flex gap-3 mt-8">
+                    <button type="submit" class="btn-orange" id="profil-submit">
+                        <span class="inline-flex items-center gap-2">
+                            <span id="profil-text">Enregistrer</span>
+                            <svg id="profil-spinner" class="hidden animate-spin h-[17px] w-[17px] text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </span>
+                    </button>
+                    <a href="{{ path('entreprise_offres_index') }}" class="btn-ghost">Retour à mes offres</a>
+                </div>
+            {{ form_end(form) }}
+        </div>
     </div>
 </div>
+
+<script>
+    var profilForm = document.getElementById('profil-form');
+    if (profilForm) {
+        profilForm.addEventListener('submit', function () {
+            var button = document.getElementById('profil-submit');
+            var text = document.getElementById('profil-text');
+            var spinner = document.getElementById('profil-spinner');
+
+            button.disabled = true;
+            button.classList.add('opacity-75', 'cursor-not-allowed');
+            if (text) text.textContent = 'Enregistrement...';
+            if (spinner) spinner.classList.remove('hidden');
+        });
+    }
+</script>
 {% endblock %}

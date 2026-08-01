@@ -1,0 +1,85 @@
+<div data-aos="fade-up" class="card card-zoom overflow-hidden">
+    <table class="w-full border-collapse">
+        <thead>
+            <tr class="bg-slate-50">
+                <th class="text-left text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3">Entreprise</th>
+                <th class="text-left text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3">SIRET</th>
+                <th class="text-left text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3">Email</th>
+                <th class="text-left text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3">Site web</th>
+                <th class="text-left text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3">Offres</th>
+                <th class="text-left text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3">Inscrite le</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entreprise in entreprises %}
+                <tr class="border-t border-slate-100 hover:bg-slate-50 transition-colors">
+                    <td class="px-5 py-4 text-sm">
+                        <a href="{{ path('daip_entreprises_show', {id: entreprise.id}) }}" class="flex items-center gap-3 group">
+                            {% if entreprise.logo %}
+                                <img src="{{ entreprise.logo }}" alt="{{ entreprise.nom }}" class="w-10 h-10 rounded-xl object-cover border border-slate-100 flex-shrink-0 group-hover:border-brand-indigo/30 transition-colors">
+                            {% else %}
+                                <div class="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center flex-shrink-0 text-slate-400 group-hover:border-brand-indigo/30 transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                    </svg>
+                                </div>
+                            {% endif %}
+                            <span class="font-medium text-navy group-hover:text-brand-indigo transition-colors">{{ entreprise.nom }}</span>
+                        </a>
+                    </td>
+                    <td class="px-5 py-4 text-sm">{{ entreprise.siret ?? '—' }}</td>
+                    <td class="px-5 py-4 text-sm">{{ entreprise.user.email }}</td>
+                    <td class="px-5 py-4 text-sm">
+                        {% if entreprise.siteWeb %}
+                            <a href="{{ entreprise.siteWeb }}" target="_blank" rel="noopener" class="text-brand-indigo hover:underline">Visiter →</a>
+                        {% else %}
+                            —
+                        {% endif %}
+                    </td>
+                    <td class="px-5 py-4 text-sm">
+                        <span class="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-brand-indigo">
+                            {{ entreprise.offres|length }}
+                        </span>
+                    </td>
+                    <td class="px-5 py-4 text-sm">{{ entreprise.user.createdAt|date('d/m/Y') }}</td>
+                </tr>
+            {% else %}
+                <tr><td colspan="6" class="text-center text-slate-500 py-10">Aucune entreprise enregistrée.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if totalPages > 1 %}
+    <div data-aos="fade-up" class="flex justify-center items-center gap-2 mt-6">
+        {% if page > 1 %}
+            <a href="{{ path('daip_entreprises_index', {q: search, page: 1}) }}" class="btn-ghost btn-sm" aria-label="Première page">«</a>
+            <a href="{{ path('daip_entreprises_index', {q: search, page: page - 1}) }}" class="btn-ghost btn-sm">← Précédent</a>
+        {% endif %}
+
+        {% set pagesAround = 2 %}
+        {% set startPage = max(1, page - pagesAround) %}
+        {% set endPage = min(totalPages, page + pagesAround) %}
+
+        {% if startPage > 1 %}
+            <span class="text-sm text-slate-400">…</span>
+        {% endif %}
+
+        {% for p in startPage..endPage %}
+            {% if p == page %}
+                <span class="text-sm font-semibold text-white bg-brand-indigo rounded-full w-9 h-9 flex items-center justify-center">{{ p }}</span>
+            {% else %}
+                <a href="{{ path('daip_entreprises_index', {q: search, page: p}) }}" class="text-sm font-medium text-slate-500 hover:text-navy w-9 h-9 flex items-center justify-center rounded-full hover:bg-slate-100 transition-colors">{{ p }}</a>
+            {% endif %}
+        {% endfor %}
+
+        {% if endPage < totalPages %}
+            <span class="text-sm text-slate-400">…</span>
+        {% endif %}
+
+        {% if page < totalPages %}
+            <a href="{{ path('daip_entreprises_index', {q: search, page: page + 1}) }}" class="btn-ghost btn-sm">Suivant →</a>
+            <a href="{{ path('daip_entreprises_index', {q: search, page: totalPages}) }}" class="btn-ghost btn-sm" aria-label="Dernière page">»</a>
+        {% endif %}
+    </div>
+{% endif %}

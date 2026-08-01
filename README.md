@@ -1,457 +1,292 @@
-# DAIP Emploi — Plateforme d'offres d'emploi (Symfony)
+# DAIP Emploi - Registre d'offres d'emploi supervisé par la DAIP
 
-## Pourquoi ces fichiers seulement ?
+Application Symfony de gestion et consultation d'offres d'emploi, avec deux espaces principaux :
+- **Espace public** : consultation du registre des offres
+- **Espace sécurisé** : tableaux de bord pour la DAIP et les entreprises inscrites
 
-Je n'ai pas accès à Packagist depuis mon environnement, donc je ne peux pas
-exécuter `composer create-project` moi-même. Les fichiers fournis ici
-(entités Doctrine, enums, repositories, config sécurité) sont à copier dans
-un projet Symfony fraîchement créé chez vous. Ça prend 5 minutes.
+## 📋 Table des matières
 
-## 1. Prérequis
+- [Fonctionnalités](#fonctionnalités)
+- [Architecture](#architecture)
+- [Prérequis](#prérequis)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Utilisation](#utilisation)
+- [Structure du projet](#structure-du-projet)
+- [Détail des fonctionnalités](#détail-des-fonctionnalités)
+- [Design & UX](#design--ux)
+- [Sécurité](#sécurité)
 
-- PHP 8.2 ou plus
+## ✨ Fonctionnalités
+
+### Espace public
+- Accueil avec présentation du registre
+- Consultation des offres publiées
+- Page de détail d'une offre (référence, description, compétences, rémunération, dates, partage)
+- Système d'authentification (connexion / inscription entreprise)
+- Mot de passe oublié avec réinitialisation par email
+- Footer et navigation responsive
+
+### Espace DAIP (ROLE_DAIP)
+- Tableau de bord avec KPIs (total, publiées, brouillons, retirées/expirées)
+- Registre des offres avec filtres (statut, secteur, ville, dates) et pagination
+- Registre des entreprises avec pagination
+- Page de détail d'une entreprise (infos, description, offres publiées)
+- Journal d'activité
+- Gestion des comptes entreprises
+
+### Espace Entreprise (ROLE_ENTREPRISE)
+- Tableau de bord personnel avec KPIs
+- Mes offres : création, modification, duplication, publication, retrait, suppression
+- Pagination sur la liste des offres
+- Formulaire d'offre avec image, date d'expiration et compétences
+- Page de profil entreprise (nom, SIRET, site web, logo, description)
+- Redirection automatique vers le bon dashboard selon le rôle
+
+## 🏗️ Architecture
+
+- **Framework** : Symfony 7.x
+- **Langage** : PHP 8.2+
+- **Base de données** : MySQL / MariaDB
+- **Frontend** : Tailwind CSS via AssetMapper
+- **Animations** : AOS (Animate On Scroll)
+- **Uploads** : images d'offres stockées dans `public/uploads/offres`
+- **Email** : Symfony Mailer (pour la réinitialisation de mot de passe)
+
+## 📦 Prérequis
+
+- PHP 8.2 ou supérieur
 - Composer
-- Symfony CLI (recommandé) : https://symfony.com/download
-- MySQL / MariaDB ou PostgreSQL
+- Node.js / npm (pour Tailwind CSS)
+- MySQL ou MariaDB
+- Extension PHP : pdo_mysql, intl, zip, gd (optionnel pour le traitement d'images)
 
-## 2. Créer le projet Symfony
-
-```bash
-symfony new jobboard --version="7.*" --webapp
-cd jobboard
-```
-
-Le flag `--webapp` installe déjà : Twig, Doctrine ORM, Doctrine Migrations,
-Security Bundle, Form, Validator, Mailer, Maker Bundle.
-
-## 3. Installer les paquets supplémentaires dont on aura besoin
+## 🚀 Installation
 
 ```bash
-composer require symfony/ux-turbo
-composer require knplabs/knp-paginator-bundle
-composer require easycorp/easyadmin-bundle
-composer require --dev symfony/maker-bundle
-```
+# 1. Cloner le dépôt
+git clone <url-du-depot>
+cd JobBoard-DAIP
 
-## 4. Copier les fichiers fournis
+# 2. Installer les dépendances PHP
+composer install
 
-Copiez le contenu de ce dossier dans votre projet fraîchement créé
-(en écrasant les fichiers de config équivalents) :
+# 3. Copier le fichier d'environnement
+cp .env.example .env
 
-```
-src/Entity/*.php        → jobboard/src/Entity/
-src/Repository/*.php    → jobboard/src/Repository/
-src/Enum/*.php          → jobboard/src/Enum/
-config/packages/security.yaml → jobboard/config/packages/security.yaml
-```
+# 4. Configurer la base de données dans .env
+# DATABASE_URL="mysql://db_user:db_password@127.0.0.1:3306/jobboard"
 
-## 5. Configurer la base de données
+# 5. Créer la base de données et exécuter les migrations
+php bin/console doctrine:database:create
+php bin/console doctrine:migrations:migrate
 
-Dans `.env`, adaptez la ligne :
+# 6. Charger les données de test (optionnel)
+php bin/console doctrine:fixtures:load
 
-```
-DATABASE_URL="mysql://user:password@127.0.0.1:3306/jobboard?serverVersion=8.0"
-```
-
-Puis créez la base :
-
-```bash
-symfony console doctrine:database:create
-```
-
-## 6. Générer et lancer la migration
-
-Comme les entités sont déjà écrites, Doctrine peut générer directement la
-migration SQL correspondante :
-
-```bash
-symfony console make:migration
-symfony console doctrine:migrations:migrate
-```
-
-Vérifiez le fichier de migration généré dans `migrations/` avant de
-l'exécuter — c'est une bonne habitude à prendre.
-
-## 7. Vérifier que tout est bien mappé
-
-```bash
-symfony console doctrine:schema:validate
-```
-
-Vous devriez voir "The mapping files are correct" et "The database schema
-is in sync".
-
-## 8. Lancer le serveur
-
-```bash
-symfony server:start
-```
-
-## Prochaine étape
-
-Une fois ces 8 étapes faites et validées chez vous, on enchaîne sur
-l'authentification : `make:auth` pour générer le contrôleur de connexion,
-puis un contrôleur d'inscription personnalisé qui gère le choix
-Candidat / Entreprise et crée le bon profil associé.
-
-## Périmètre du projet (mis à jour)
-
-Deux acteurs uniquement :
-
-- **Entreprise** (`ROLE_ENTREPRISE`) — s'inscrit librement, crée des offres,
-  et gère **elle-même tout le cycle de vie** de ses offres : brouillon,
-  publication, retrait. Aucune validation externe requise.
-- **DAIP** (`ROLE_DAIP`) — voit toutes les offres de toutes les entreprises,
-  en **lecture seule uniquement**. Ne crée, ne modifie, et ne change JAMAIS
-  le statut d'une offre. Son rôle se limite à la supervision/consultation
-  globale (utile par exemple pour des statistiques ou un suivi d'activité).
-
-Le grand public consulte librement les offres publiées, sans compte.
-Il n'y a pas de système de candidature dans ce périmètre.
-
-## Étape 9 — Authentification (nouveau)
-
-Fichiers ajoutés, à copier dans votre projet :
-
-```
-src/Controller/SecurityController.php      → src/Controller/
-src/Controller/RegistrationController.php  → src/Controller/
-src/Form/EntrepriseRegistrationType.php    → src/Form/
-src/Command/CreateDaipCommand.php          → src/Command/
-templates/security/login.html.twig         → templates/security/
-templates/registration/register.html.twig  → templates/registration/
-```
-
-Ces fichiers utilisent `{% extends 'base.html.twig' %}` avec un bloc
-`{% block body %}` — c'est le template généré par défaut par
-`symfony new --webapp`, vous n'avez rien à faire dessus pour l'instant.
-
-### Créer le tout premier compte DAIP
-
-```bash
-symfony console app:create-daip daip@example.com "un-mot-de-passe-solide"
-```
-
-### Tester
-
-```bash
-symfony server:start
-```
-
-- `http://localhost:8000/inscription` — créer un compte entreprise
-- `http://localhost:8000/connexion` — se connecter (entreprise ou DAIP)
-
-⚠️ **Attention** : `SecurityController::dashboardRedirect()` redirige vers
-`entreprise_offres_index` et `daip_offres_index`, qui **n'existent pas
-encore** — c'est normal, on les crée à la prochaine étape (dashboards +
-CRUD des offres). Tant que ces routes ne sont pas créées, la connexion
-réussira mais la redirection donnera une erreur 500 sur cette dernière
-étape. Rien de cassé, juste la suite à venir.
-
-## Étape 10 — Page d'accueil professionnelle (nouveau)
-
-Fichiers ajoutés :
-
-```
-src/Controller/HomeController.php   → src/Controller/
-templates/base.html.twig            → templates/  (remplace le base.html.twig par défaut)
-templates/home/index.html.twig      → templates/home/
-```
-
-⚠️ **Important** : `templates/base.html.twig` **remplace entièrement**
-celui généré par `symfony new --webapp`. Il contient tout le système de
-design (couleurs, typographie, nav, footer) utilisé par toutes les pages,
-y compris `login.html.twig` et `register.html.twig` déjà livrés — pas
-besoin de les retoucher, ils héritent automatiquement du nouveau style.
-
-Les offres affichées dans la section "Dans le registre en ce moment" sont
-des **données d'exemple codées en dur** dans `HomeController` — le temps
-qu'on branche le vrai CRUD `Offre` à l'étape suivante, qui remplacera ça
-par une vraie requête sur les offres publiées.
-
-### Tester
-
-```bash
-symfony server:start
-```
-
-Ouvrez `http://localhost:8000/` — vous devriez voir la page d'accueil
-complète (hero, "comment ça marche", registre d'exemple, chiffres clés).
-
-## Étape 10 — Design system aligné sur l'identité DAIP (mis à jour)
-
-Suite à l'analyse de captures d'écran du vrai site
-`1jeune1metier.daip.ci`, le design a été aligné sur leur identité
-réelle :
-
-- **Dégradé violet → bleu** (`#8258FF` → `#4A63F2`) pour le hero, les
-  boutons principaux et les bandeaux d'appel à l'action
-- **Orange** (`#F7941D`) pour le bouton "Publier une offre" (équivalent
-  de leur bouton "Connexion")
-- **Fond blanc/gris très clair** pour le contenu, **footer bleu marine
-  très foncé** (`#10173A`)
-- **Poppins** (titres) + **Inter** (texte courant), boutons et champs de
-  formulaire en pilule/coins très arrondis, comme sur le site DAIP
-
-Fichiers concernés (remplacent les versions précédentes) :
-
-```
-templates/base.html.twig
-templates/home/index.html.twig
-templates/security/login.html.twig
-templates/registration/register.html.twig
-```
-
-## Étape 11 — CRUD des offres (nouveau)
-
-Fichiers ajoutés :
-
-```
-src/Security/OffreVoter.php                        → src/Security/
-src/Form/OffreType.php                              → src/Form/
-src/Controller/Entreprise/OffreController.php       → src/Controller/Entreprise/
-src/Controller/Daip/OffreController.php             → src/Controller/Daip/
-templates/entreprise/offres/index.html.twig         → templates/entreprise/offres/
-templates/entreprise/offres/form.html.twig          → templates/entreprise/offres/
-templates/daip/offres/index.html.twig                → templates/daip/offres/
-```
-
-`OffreVoter` n'a rien à enregistrer manuellement : Symfony détecte
-automatiquement les classes qui étendent `Voter` grâce à
-`autoconfigure: true` (activé par défaut dans `services.yaml`).
-
-### Ce que fait chaque contrôleur
-
-- **`Entreprise\OffreController`** (préfixe `/entreprise/offres`) : liste,
-  création, édition, suppression, et les deux transitions de statut
-  (`publier`, `retirer`) — toutes protégées par `OffreVoter`, qui vérifie
-  que l'offre appartient bien à l'entreprise connectée.
-- **`Daip\OffreController`** (préfixe `/daip/offres`) : **une seule
-  route**, en lecture seule, listant les offres de toutes les
-  entreprises avec un filtre par statut. Il n'existe **aucune** route
-  d'édition dans ce contrôleur : c'est une garantie architecturale que
-  la DAIP ne peut techniquement rien modifier, pas seulement une
-  question d'interface cachée.
-
-### Tester
-
-```bash
-symfony console doctrine:schema:validate
-symfony server:start
-```
-
-1. Connectez-vous avec un compte entreprise → `/entreprise/offres`,
-   créez une offre (elle apparaît en `Brouillon`), publiez-la.
-2. Connectez-vous avec le compte DAIP créé à l'étape 9 → `/daip/offres`,
-   vérifiez que l'offre publiée apparaît, et qu'aucun bouton de
-   modification n'est disponible.
-3. Retournez sur `/` : la section "Dans le registre" affiche encore les
-   3 offres d'exemple codées en dur — la prochaine amélioration possible
-   est de les remplacer par une vraie requête sur les offres publiées.
-
-## Étape 12 — Filtres publics sur la page d'accueil (nouveau)
-
-Fichiers modifiés :
-
-```
-src/Repository/OffreRepository.php   → ajout de rechercherOffresPubliees()
-src/Controller/HomeController.php    → lit les filtres depuis l'URL (?q=&ville=&secteur=&typeContrat=)
-templates/home/index.html.twig       → barre de filtres + vraies offres (fini les exemples codés en dur)
-```
-
-La recherche filtre uniquement sur les offres au statut `publiee` — une
-entreprise ne verra jamais ses brouillons apparaître publiquement, et les
-filtres se combinent (mot-clé + ville + secteur + type de contrat en même
-temps).
-
-⚠️ Le lien "Voir le dossier complet" sur chaque carte pointe encore vers
-`#` — il n'y a pas encore de page de détail d'offre publique. À prévoir
-si vous voulez que le public consulte le détail complet d'une offre.
-
-## Étape 13 — Page de détail publique d'une offre (nouveau)
-
-Fichiers ajoutés/modifiés :
-
-```
-src/Controller/OffreController.php    → src/Controller/  (nouveau, route /offres/{id})
-templates/offres/show.html.twig       → templates/offres/  (nouveau)
-templates/home/index.html.twig        → le lien "Voir le dossier complet" pointe maintenant vers cette page
-```
-
-Protection via `OffreVoter::VIEW` : le grand public ne peut consulter que
-les offres au statut `publiee`. Si quelqu'un tente d'accéder à l'URL
-d'un brouillon ou d'une offre retirée sans être ni le propriétaire ni la
-DAIP, Symfony renvoie une 403 automatiquement.
-
-### Tester
-
-```bash
-symfony console doctrine:schema:validate
-symfony server:start
-```
-
-Publiez une offre depuis votre compte entreprise, puis cliquez sur
-"Voir le dossier complet" depuis la page d'accueil.
-
-## Étape 14 — Tailwind CSS + animations au scroll (build de production)
-
-Tout le front utilise **Tailwind CSS**, compilé via
-`symfonycasts/tailwind-bundle` (intégré à AssetMapper, déjà présent
-dans Symfony 7 `--webapp` — pas besoin de Node/npm), avec des
-animations au scroll via **AOS** (Animate On Scroll, via CDN, léger et
-sans étape de build nécessaire pour celui-ci).
-
-Fichiers fournis :
-
-```
-assets/styles/app.css     → source Tailwind (@tailwind + @layer components)
-tailwind.config.js        → couleurs/polices/dégradé de la marque DAIP Emploi
-templates/base.html.twig  → référence le CSS compilé via {{ asset('styles/app.css') }}
-```
-
-### Installation chez vous
-
-```bash
-composer require symfonycasts/tailwind-bundle
-```
-
-Le bundle télécharge automatiquement le binaire Tailwind CLI (pas besoin
-de Node.js). Copiez ensuite `assets/styles/app.css` et
-`tailwind.config.js` fournis ici dans votre projet (ils remplacent ceux
-générés par défaut si vous avez lancé `tailwind:init` avant).
-
-Compilez le CSS :
-
-```bash
+# 7. Installer les assets Tailwind
 php bin/console tailwind:build
-```
 
-Vous devriez voir un message de succès et un fichier généré (compilé)
-récupéré automatiquement par AssetMapper via `{{ asset('styles/app.css') }}`.
+# 8. Compiler les assets
+php bin/console asset-map:compile
 
-### Pendant que vous développez
-
-Le CSS compilé ne se met pas à jour tout seul quand vous modifiez les
-classes Tailwind dans vos templates. Lancez, dans un terminal séparé,
-laissé ouvert pendant que vous travaillez :
-
-```bash
-php bin/console tailwind:build --watch
-```
-
-### Tester
-
-```bash
+# 9. Lancer le serveur local
+php bin/console server:start
+# OU
 symfony server:start
 ```
 
-Si la page s'affiche sans style (police par défaut, pas de couleurs),
-c'est presque toujours signe que `tailwind:build` n'a pas tourné, ou que
-le `--watch` n'est pas actif après une modification de template.
+## ⚙️ Configuration
 
-### Ce qui a changé par rapport à la version précédente (CDN)
+### Variables d'environnement (.env)
 
-Uniquement le `<head>` de `base.html.twig` : le `<script
-src="https://cdn.tailwindcss.com">` et son `<style
-type="text/tailwindcss">` ont été remplacés par un simple `<link
-rel="stylesheet" href="{{ asset('styles/app.css') }}">`. Tous les autres
-fichiers (`home/index.html.twig`, `login.html.twig`, etc.) restent
-identiques — les classes Tailwind utilisées dans les templates ne
-changent pas entre le mode CDN et le mode compilé.
+```env
+APP_ENV=dev
+APP_SECRET=<secret-generé-par-symfony>
 
-### Animations
+DATABASE_URL="mysql://root:root@127.0.0.1:3306/jobboard?serverVersion=8.0"
 
-Chaque section importante a un attribut `data-aos="fade-up"` (ou
-`fade-down`, `zoom-in`) avec des `data-aos-delay` échelonnés sur les
-listes (offres, étapes) pour un effet de cascade au scroll. AOS
-s'initialise une seule fois dans `base.html.twig`.
-
-## Étape 15 — Formulaires améliorés + 3 nouvelles fonctionnalités
-
-### Connexion / Inscription avec icônes, afficher/masquer, jauge de force
-
-```
-templates/security/login.html.twig          → icônes email/cadenas + bouton œil
-templates/registration/register.html.twig   → idem + jauge de force du mot de passe (JS)
-src/Form/EntrepriseRegistrationType.php      → ajout d'une contrainte Regex (lettre + chiffre obligatoires)
+MAILER_DSN=smtp://localhost:1025
 ```
 
-La jauge de force est **visuelle uniquement** (JS, feedback immédiat) —
-la vraie validation qui bloque un mot de passe trop faible se fait
-**côté serveur** via la contrainte `Regex` ajoutée au champ
-`plainPassword` : au minimum 8 caractères + au moins une lettre et un
-chiffre. Le champ affiché seul (`password-field`) sert d'ancre pour le
-script JS de la jauge.
+### Comptes par défaut
 
-### Comptes DAIP : formulaire au lieu de la commande console uniquement
+| Rôle | Email | Mot de passe |
+|------|-------|--------------|
+| DAIP | daip@daip-emploi.local | password |
+| Entreprise | entreprise@example.com | password |
+
+## 📖 Utilisation
+
+### Workflow entreprise
+
+1. **Inscription** : créer un compte entreprise sur la page d'inscription
+2. **Connexion** : se connecter avec ses identifiants
+3. **Tableau de bord** : vue d'ensemble des KPIs (total, publiées, brouillons, retirées)
+4. **Mes offres** :
+   - Créer une nouvelle offre (brouillon par défaut)
+   - Modifier / Dupliquer / Publier / Retirer / Supprimer
+   - Pagination automatique (10 par page)
+5. **Profil** : modifier les informations de l'entreprise
+
+### Workflow DAIP
+
+1. **Connexion** : se connecter avec un compte DAIP
+2. **Tableau de bord** : supervision globale
+3. **Registre des offres** :
+   - Filtrer par statut, secteur, ville, dates
+   - Consulter le détail d'une offre
+   - Pagination
+4. **Registre des entreprises** :
+   - Rechercher par nom ou email
+   - Consulter le détail d'une entreprise et ses offres publiées
+5. **Journal d'activité** : trace des actions
+
+## 📁 Structure du projet
 
 ```
-src/Form/CreateDaipType.php
-src/Controller/Daip/CompteController.php    → /daip/comptes (liste) + /daip/comptes/nouveau (création)
-templates/daip/comptes/index.html.twig
-templates/daip/comptes/new.html.twig
+jobboard/
+├── assets/
+│   ├── controllers.json
+│   ├── styles/
+│   │   └── app.css              # Styles Tailwind + composants personnalisés
+│   └── ...
+├── config/
+│   ├── packages/
+│   │   └── security.yaml        # Configuration sécurité et rôles
+│   └── routes/
+├── migrations/
+├── public/
+│   ├── uploads/
+│   │   └── offres/              # Images uploadées des offres
+│   └── ...
+├── src/
+│   ├── Controller/
+│   │   ├── Daip/
+│   │   │   ├── DashboardController.php
+│   │   │   ├── EntrepriseController.php
+│   │   │   ├── JournalController.php
+│   │   │   ├── OffreController.php
+│   │   │   └── ProfilController.php
+│   │   ├── Entreprise/
+│   │   │   ├── DashboardController.php
+│   │   │   ├── OffreController.php
+│   │   │   └── ProfilController.php
+│   │   ├── ForgotPasswordController.php
+│   │   ├── HomeController.php
+│   │   ├── OffreController.php
+│   │   ├── RegistrationController.php
+│   │   └── SecurityController.php
+│   ├── Entity/
+│   │   ├── Offre.php
+│   │   ├── Entreprise.php
+│   │   ├── User.php
+│   │   └── ...
+│   ├── Enum/
+│   │   ├── NiveauEtude.php
+│   │   └── StatutOffre.php
+│   ├── Form/
+│   │   ├── OffreType.php
+│   │   ├── DaipProfilType.php
+│   │   ├── ForgotPasswordRequestFormType.php
+│   │   └── ResetPasswordFormType.php
+│   ├── Repository/
+│   │   ├── OffreRepository.php
+│   │   └── ...
+│   ├── Security/
+│   │   └── OffreVoter.php
+│   └── Service/
+│       └── OffreManager.php
+├── templates/
+│   ├── base.html.twig
+│   ├── dashboard_base.html.twig
+│   ├── offres/
+│   │   ├── show.html.twig
+│   │   ├── _card.html.twig
+│   │   └── ...
+│   ├── daip/
+│   │   ├── dashboard.html.twig
+│   │   ├── entreprises/
+│   │   │   ├── index.html.twig
+│   │   │   ├── show.html.twig
+│   │   │   └── _tableau.html.twig
+│   │   └── offres/
+│   │       ├── index.html.twig
+│   │       └── _tableau.html.twig
+│   ├── entreprise/
+│   │   ├── dashboard.html.twig
+│   │   ├── offres/
+│   │   │   ├── form.html.twig
+│   │   │   └── index.html.twig
+│   │   └── profil/
+│   │       └── edit.html.twig
+│   ├── security/
+│   │   ├── login.html.twig
+│   │   ├── forgot_password.html.twig
+│   │   └── reset_password.html.twig
+│   └── partials/
+│       ├── _flashes.html.twig
+│       └── _scripts.html.twig
+└── tailwind.config.js
 ```
 
-Toujours protégé par `#[IsGranted('ROLE_DAIP')]` — comme convenu, seul
-un compte DAIP déjà connecté peut en créer un nouveau. La commande
-`app:create-daip` reste nécessaire pour le tout premier compte.
+## 🔍 Détail des fonctionnalités
 
-### Profil entreprise
+### Authentification
+- Connexion avec redirection automatique selon le rôle (DAIP / Entreprise)
+- Inscription entreprise
+- Mot de passe oublié avec token et lien de réinitialisation
+- Effet de chargement sur les boutons
 
-```
-src/Form/EntrepriseProfilType.php
-src/Controller/Entreprise/ProfilController.php   → /entreprise/profil
-templates/entreprise/profil/edit.html.twig
-```
+### Offres
+- Création en brouillon avec image, date d'expiration, compétences
+- Sélection multiple de compétences existantes
+- Statuts : Brouillon, Publiée, Retirée, Expirée
+- Badges colorés par statut
+- Pagination sur les listes (10 par page)
+- Cards cliquables vers le détail
+- Détail complet avec image, description, compétences, rémunération, dates, partage
 
-Permet de modifier nom, SIRET, site web, logo (URL pour l'instant, pas
-d'upload de fichier) et description après l'inscription.
+### Entreprises
+- Profil entreprise modifiable
+- Registre des entreprises pour la DAIP
+- Page de détail entreprise avec offres publiées
 
-### Vraies statistiques sur la page d'accueil
+### Design
+- Thème professionnel sans mode sombre
+- Sidebar responsive avec menu hamburger
+- Effets de survol sur les cards
+- Notifications flash avec disparition automatique après 4 secondes
+- Animations AOS
+- Typographie : Poppins (titres) + Inter (corps)
 
-`HomeController` calcule maintenant `entreprises` (nombre de comptes),
-`offresPubliees` (uniquement statut `publiee`) et `secteurs` via
-`$repository->count([...])`. Seul le "100% Supervisé DAIP" reste un
-texte fixe (ce n'est pas un compteur, juste une affirmation).
+## 🎨 Design & UX
 
-### Liens de navigation
+- **Palette** : navy, indigo, orange, vert
+- **Badges** : brouillon (slate), publiée (vert), retirée (rouge), expirée (slate)
+- **Cards** : bordures colorées, ombres portées, effet de zoom au survol
+- **Boutons** : styles variés (orange, gradient, ghost, danger)
+- **Inputs** : icônes intégrées, états de focus
 
-`base.html.twig` affiche désormais "Mon profil" pour une entreprise
-connectée et "Comptes DAIP" pour un compte DAIP connecté, en plus de
-"Mon espace" commun aux deux.
+## 🔒 Sécurité
 
-### Tester
+- Authentification par formulaire CSRF protégé
+- Rôles : ROLE_USER, ROLE_DAIP, ROLE_ENTREPRISE
+- Voters Symfony pour les actions sur les offres
+- Mots de passe hashés
+- Token de réinitialisation de mot de passe avec expiration
+- Accès refusé si l'utilisateur n'a pas de profil entreprise associé
 
-```bash
-php bin/console tailwind:build
-symfony console doctrine:schema:validate
-symfony server:start
-```
+## 📝 Notes
 
-1. Inscrivez-vous → observez la jauge de force qui réagit en tapant
-2. Connectez-vous en DAIP → `/daip/comptes` → créez un second compte DAIP
-3. Connectez-vous en entreprise → `/entreprise/profil` → modifiez la description
-4. Retournez sur `/` → les chiffres reflètent maintenant vos vraies données
+- Les images d'offres sont stockées dans `public/uploads/offres/`
+- Les migrations sont dans le dossier `migrations/`
+- Les fixtures de test sont disponibles pour peupler la base de données
 
-## Structure des entités livrées
+## 🤝 Contribution
 
-- `User` — authentification (email, password, roles : ROLE_ENTREPRISE ou ROLE_DAIP)
-- `Entreprise` — profil entreprise, lié 1-1 à `User`
-- `Secteur` — catégories d'offres
-- `Competence` — compétences, relation many-to-many avec `Offre`
-- `Offre` — l'offre d'emploi elle-même (voir enums `StatutOffre`, `TypeContrat`).
-  `StatutOffre` inclut : brouillon, publiee, retiree, expiree.
+Ce projet est privé. Toute contribution doit être validée par le responsable technique.
 
-## Règle métier importante à implémenter avec un Voter
+## 📄 Licence
 
-`OffreVoter` doit être simple mais stricte sur la propriété :
-
-- `EDIT` / `DELETE` / `CHANGE_STATUT` : réservés à `ROLE_ENTREPRISE`, et
-  uniquement si l'offre lui appartient (`offre.entreprise.user === user`
-  connecté). Une entreprise ne doit jamais pouvoir agir sur l'offre d'une
-  autre entreprise.
-- `ROLE_DAIP` n'a accès à **aucune** de ces trois permissions, sur aucune
-  offre — uniquement `VIEW`.
-
-C'est ce qui garantit dans le code que "la DAIP ne modifie jamais rien" et
-que "une entreprise ne touche jamais aux offres d'une autre entreprise".
+Propriétaire - Tous droits réservés.

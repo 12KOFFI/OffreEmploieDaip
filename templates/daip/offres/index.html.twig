@@ -1,55 +1,193 @@
-{% extends 'base.html.twig' %}
+{% extends 'dashboard_base.html.twig' %}
 
 {% block title %}Registre DAIP — Toutes les offres{% endblock %}
+
+{% block breadcrumb %}
+    <a href="{{ path('daip_dashboard') }}" class="hover:text-navy">Tableau de bord</a>
+    <span class="mx-1.5">/</span>
+    <span class="text-navy font-semibold">Registre des offres</span>
+{% endblock %}
 
 {% block body %}
 <div class="py-12 px-6 pb-24">
     <div class="max-w-5xl mx-auto">
-        <div data-aos="fade-up">
-            <h1 class="text-[26px]">Registre des offres</h1>
-            <p class="text-sm text-slate-500 mt-1">Vue de supervision sur l'ensemble des entreprises inscrites.</p>
-
-            <div class="inline-block bg-indigo-50 text-brand-indigo text-sm font-medium px-4 py-2.5 rounded-xl my-5">
-                👁 Lecture seule — la DAIP consulte, sans pouvoir modifier ni publier d'offre.
+        <div data-aos="fade-up" class="mb-8">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                    <h1 class="text-[26px]">Registre des offres</h1>
+                    <p class="text-sm text-slate-500 mt-1">Vue de supervision sur l'ensemble des entreprises inscrites.</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="inline-flex items-center justify-center px-3 py-1.5 rounded-full bg-indigo-50 text-brand-indigo text-sm font-semibold">
+                        {{ total }} offre{{ total > 1 ? 's' : '' }}
+                    </span>
+                </div>
             </div>
         </div>
 
+        <div data-aos="fade-up" class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+            <div class="rounded-2xl p-5 bg-brand-gradient text-white">
+                <span class="block font-display font-bold text-2xl">{{ total }}</span>
+                <span class="text-xs text-white/80">Total offres</span>
+            </div>
+            <div class="rounded-2xl p-5 bg-green-50 text-brand-green border border-4 border-slate-100">
+                <span class="block font-display font-bold text-2xl">{{ compteurs.publiee|default(0) }}</span>
+                <span class="text-xs opacity-70">Publiées</span>
+            </div>
+            <div class="rounded-2xl p-5 bg-slate-50 text-slate-600 border border-4 border-slate-100">
+                <span class="block font-display font-bold text-2xl">{{ compteurs.brouillon|default(0) }}</span>
+                <span class="text-xs opacity-70">Brouillons</span>
+            </div>
+            <div class="rounded-2xl p-5 bg-red-50 text-red-600 border border-4 border-slate-100">
+                <span class="block font-display font-bold text-2xl">{{ compteurs.retiree|default(0) + compteurs.expiree|default(0) }}</span>
+                <span class="text-xs opacity-70">Retirées / Expirées</span>
+            </div>
+            {#
+            <div class="rounded-2xl p-5 bg-indigo-50 text-brand-indigo border border-slate-100">
+                <span class="block font-display font-bold text-2xl">{{ totalEntreprises }}</span>
+                <span class="text-xs opacity-70">Entreprises</span>
+            </div>
+            #}
+        </div>
+
         <div data-aos="fade-up" class="flex gap-2 flex-wrap mb-6">
-            {% set filtres_nav = [{k: null, l: 'Toutes'}, {k: 'brouillon', l: 'Brouillons'}, {k: 'publiee', l: 'Publiées'}, {k: 'retiree', l: 'Retirées'}] %}
+            {% set filtres_nav = [{k: '', l: 'Toutes'}, {k: 'brouillon', l: 'Brouillons'}, {k: 'publiee', l: 'Publiées'}, {k: 'retiree', l: 'Retirées'}] %}
             {% for f in filtres_nav %}
-                <a href="{{ f.k ? path('daip_offres_index', {statut: f.k}) : path('daip_offres_index') }}"
-                   class="text-sm font-medium px-4 py-1.5 rounded-full border {{ statutFiltre == f.k ? 'bg-navy border-navy text-white' : 'border-slate-200 text-slate-500' }}">
+                {% set isActive = (filtres.statut|default('') == f.k) %}
+                <a href="{{ path('daip_offres_index', {statut: f.k}|merge(filtres|default({})|merge({statut: f.k}))) }}"
+                   class="text-sm font-medium px-4 py-1.5 rounded-full border border-2 hover:text-white hover:bg-navy focus:outline-none focus:ring-2 focus:ring-brand-indigo/40 focus:ring-offset-1 {{ isActive ? 'bg-navy border-navy text-white' : 'border-slate-200 text-slate-500 hover:border-slate-300' }}"
+                   data-filter-statut-link="{{ f.k|default('__all__') }}">
                     {{ f.l }}
                 </a>
             {% endfor %}
+
+            <a href="{{ path('daip_offres_export_csv') }}{% if filtres.statut %}?statut={{ filtres.statut }}{% endif %}"
+               class="text-sm font-medium px-4 py-1.5 rounded-full border border-2 border-slate-200 text-slate-500 hover:text-white hover:bg-navy ml-auto">
+                Exporter CSV
+            </a>
         </div>
 
-        <div data-aos="fade-up" class="card overflow-hidden">
-            <table class="w-full border-collapse">
-                <thead>
-                    <tr class="bg-slate-50">
-                        <th class="text-left text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3">Offre</th>
-                        <th class="text-left text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3">Entreprise</th>
-                        <th class="text-left text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3">Ville</th>
-                        <th class="text-left text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3">Statut</th>
-                        <th class="text-left text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3">Date</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for offre in offres %}
-                        <tr class="border-t border-slate-100">
-                            <td class="px-5 py-4 text-sm">{{ offre.titre }}</td>
-                            <td class="px-5 py-4 text-sm">{{ offre.entreprise.nom }}</td>
-                            <td class="px-5 py-4 text-sm">{{ offre.ville }}</td>
-                            <td class="px-5 py-4"><span class="badge-{{ offre.statut.value }}">{{ offre.statut.label }}</span></td>
-                            <td class="px-5 py-4 text-sm">{{ offre.datePublication ? offre.datePublication|date('d/m/Y') : '—' }}</td>
-                        </tr>
-                    {% else %}
-                        <tr><td colspan="5" class="text-center text-slate-500 py-10">Aucune offre pour ce filtre.</td></tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+        {% include 'daip/offres/_tableau.html.twig' with {
+            offres: offres,
+            filtres: filtres,
+            secteurs: secteurs,
+            page: page,
+            totalPages: totalPages,
+            total: total,
+        } %}
     </div>
 </div>
+
+<script>
+(function () {
+    var container = document.getElementById('daip-table-container');
+    var pagination = document.getElementById('daip-pagination');
+    var filterForm = document.querySelector('[data-filter-form]');
+    var statutLinks = document.querySelectorAll('[data-filter-statut-link]');
+
+    function buildQueryString(extra) {
+        var params = new URLSearchParams();
+        var statut = document.querySelector('[data-filter-statut]');
+        var secteur = document.querySelector('[data-filter-secteur]');
+        var ville = document.querySelector('[data-filter-ville]');
+        var dateDebut = document.querySelector('[data-filter-date-debut]');
+        var dateFin = document.querySelector('[data-filter-date-fin]');
+
+        if (statut && statut.value) params.set('statut', statut.value);
+        if (secteur && secteur.value) params.set('secteur', secteur.value);
+        if (ville && ville.value) params.set('ville', ville.value);
+        if (dateDebut && dateDebut.value) params.set('dateDebut', dateDebut.value);
+        if (dateFin && dateFin.value) params.set('dateFin', dateFin.value);
+
+        if (extra && extra.page) {
+            params.set('page', extra.page);
+        }
+
+        return params.toString();
+    }
+
+    function loadFragment(queryString, replaceUrl) {
+        var url = '{{ path('daip_offres_index') }}' + (queryString ? '?' + queryString : '');
+
+        fetch(url, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        })
+        .then(function (response) { return response.text(); })
+        .then(function (html) {
+            var parser = new DOMParser();
+            var doc = parser.parseFromString(html, 'text/html');
+            var newContainer = doc.getElementById('daip-table-container');
+            var newPagination = doc.getElementById('daip-pagination');
+
+            if (newContainer && container) {
+                container.outerHTML = newContainer.outerHTML;
+                container = document.getElementById('daip-table-container');
+            }
+            if (newPagination && pagination) {
+                pagination.outerHTML = newPagination.outerHTML;
+                pagination = document.getElementById('daip-pagination');
+            }
+
+            if (replaceUrl) {
+                history.pushState(null, '', url);
+            }
+        })
+        .catch(function () {
+            if (replaceUrl) {
+                window.location.href = url;
+            }
+        });
+    }
+
+    if (filterForm) {
+        filterForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            var qs = buildQueryString({ page: 1 });
+            loadFragment(qs, true);
+        });
+    }
+
+    document.addEventListener('submit', function (e) {
+        var form = e.target.closest('[data-filter-form]');
+        if (!form) return;
+        e.preventDefault();
+        var qs = buildQueryString({ page: 1 });
+        loadFragment(qs, true);
+    });
+
+    statutLinks.forEach(function (link) {
+        link.addEventListener('click', function (e) {
+            e.preventDefault();
+
+            var statut = this.getAttribute('data-filter-statut-link');
+            var statutSelect = document.querySelector('[data-filter-statut]');
+            if (statutSelect && statut !== '__all__') {
+                statutSelect.value = statut;
+            } else if (statutSelect && statut === '__all__') {
+                statutSelect.value = '';
+            }
+
+            statutLinks.forEach(function (l) {
+                l.classList.remove('bg-navy', 'border-navy', 'text-white');
+                l.classList.add('border-slate-200', 'text-slate-500');
+            });
+            this.classList.remove('border-slate-200', 'text-slate-500');
+            this.classList.add('bg-navy', 'border-navy', 'text-white');
+
+            var qs = buildQueryString({ page: 1 });
+            loadFragment(qs, true);
+        });
+    });
+
+    document.addEventListener('click', function (e) {
+        var pageLink = e.target.closest('[data-page]');
+        if (!pageLink) return;
+
+        e.preventDefault();
+        var page = pageLink.getAttribute('data-page');
+        var qs = buildQueryString({ page: page });
+        loadFragment(qs, true);
+    });
+})();
+</script>
 {% endblock %}

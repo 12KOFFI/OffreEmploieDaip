@@ -1,0 +1,183 @@
+{% extends 'dashboard_base.html.twig' %}
+
+{% block title %}Tableau de bord DAIP{% endblock %}
+
+{% block breadcrumb %}
+    <span class="text-navy font-semibold">Tableau de bord</span> — Supervision
+{% endblock %}
+
+{% block body %}
+<div class="max-w-5xl mx-auto">
+    <div data-aos="fade-up" class="mb-8">
+        <h1 class="text-[26px]">Tableau de bord</h1>
+        <p class="text-sm text-slate-500 mt-1">Vue d'ensemble de l'activité du registre des offres d'emploi.</p>
+    </div>
+
+    {# ── KPI Cards ────────────────────────────────────────────── #}
+    <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-10">
+        {% set kpis = [
+            { label: 'Total offres',   value: totalOffres,                               color: 'bg-brand-gradient text-white' },
+            { label: 'Publiées',       value: compteurs.publiee   | default(0),           color: 'bg-green-50 text-brand-green' },
+            { label: 'Brouillons',     value: compteurs.brouillon | default(0),           color: 'bg-slate-50 text-slate-600' },
+            { label: 'Retirées',       value: compteurs.retiree   | default(0),           color: 'bg-red-50 text-red-600' },
+            { label: 'Entreprises',    value: totalEntreprises,                            color: 'bg-indigo-50 text-brand-indigo' },
+        ] %}
+        {% for kpi in kpis %}
+            <div data-aos="zoom-in" data-aos-delay="{{ loop.index0 * 70 }}" class="rounded-2xl p-5 {{ kpi.color }} {{ loop.first ? '' : 'border border-4 border-slate-100' }}">
+                <span class="block font-display font-bold text-2xl">{{ kpi.value }}</span>
+                <span class="text-xs {{ loop.first ? 'text-white/80' : 'opacity-70' }}">{{ kpi.label }}</span>
+            </div>
+        {% endfor %}
+    </div>
+
+    {# ── Lecture seule notice ─────────────────────────────────── #}
+    <div data-aos="fade-up" class="inline-block bg-indigo-50 text-brand-indigo text-sm font-medium px-4 py-2.5 rounded-xl mb-6">
+        👁 Lecture seule — la DAIP consulte et supervise, sans pouvoir modifier les offres.
+    </div>
+
+    {# ── Graphiques ──────────────────────────────────────────── #}
+    <div class="grid lg:grid-cols-2 gap-6 mb-10">
+        <div data-aos="fade-up" class="card border border-2 border-indigo-100 card-zoom p-6">
+            <h3 class="text-lg mb-4">Évolution des publications</h3>
+            <div class="relative" style="height: 280px;">
+                <canvas id="chart-evolution" class="absolute inset-0 w-full h-full"></canvas>
+            </div>
+        </div>
+        <div data-aos="fade-up" class="card border border-2 border-indigo-100 card-zoom p-6">
+            <h3 class="text-lg mb-4">Répartition par secteur</h3>
+            <div class="relative" style="height: 280px;">
+                <canvas id="chart-secteurs" class="absolute inset-0 w-full h-full"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div data-aos="fade-up" class="card border border-2 border-indigo-100 card-zoom p-6 mb-10">
+        <h3 class="text-lg mb-4">Répartition par ville</h3>
+        <div class="relative" style="height: 260px;">
+            <canvas id="chart-villes" class="absolute inset-0 w-full h-full"></canvas>
+        </div>
+    </div>
+
+    {# ── Dernières offres ─────────────────────────────────────── #}
+    <div data-aos="fade-up">
+        <h2 class="text-lg mb-4">Dernières offres enregistrées</h2>
+        <div class="card-1 overflow-hidden">
+            <table class="w-full border-collapse">
+                <thead>
+                    <tr class="bg-slate-50">
+                        <th class="text-left text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3">Offre</th>
+                        <th class="text-left text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3">Entreprise</th>
+                        <th class="text-left text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3">Ville</th>
+                        <th class="text-left text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3">Statut</th>
+                        <th class="text-left text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3">Date publication</th>
+                        <th class="text-left text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3">Date expiration</th>
+                        <th class="text-left text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for offre in dernieresOffres %}
+                        <tr class="border-t border-slate-100 hover:bg-slate-50 transition-colors">
+                            <td class="px-5 py-4 text-sm font-medium text-navy">{{ offre.titre }}</td>
+                            <td class="px-5 py-4 text-sm">{{ offre.entreprise.nom }}</td>
+                            <td class="px-5 py-4 text-sm">{{ offre.ville }}</td>
+                            <td class="px-5 py-4"><span class="badge-{{ offre.statut.value }} inline-flex items-center">{{ offre.statut.label }}</span></td>
+                            <td class="px-5 py-4 text-sm">{{ offre.datePublication ? offre.datePublication|date('d/m/Y') : '—' }}</td>
+                            <td class="px-5 py-4 text-sm">{{ offre.dateExpiration ? offre.dateExpiration|date('d/m/Y') : '—' }}</td>
+                            <td class="px-5 py-4">
+                                <a href="{{ path('app_offre_show', {id: offre.id}) }}" class="text-sm font-semibold text-brand-indigo hover:underline">Consulter</a>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr><td colspan="7" class="text-center text-slate-500 py-10">Aucune offre enregistrée.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if dernieresOffres|length > 0 %}
+            <div class="mt-4 flex items-center justify-end gap-4">
+                <a href="{{ path('daip_offres_index') }}" class="text-sm font-semibold text-brand-indigo hover:underline inline-flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    Voir tout le registre
+                </a>
+                <a href="{{ path('daip_journal_index') }}" class="text-sm font-semibold text-brand-indigo hover:underline inline-flex items-center gap-1">
+                    Journal d'activité
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+        (function () {
+            var evolutionData = {{ evolutionParMois|json_encode|raw }};
+            var secteursData = {{ repartitionSecteurs|json_encode|raw }};
+            var villesData = {{ repartitionVilles|json_encode|raw }};
+
+            function createChart(id, labels, data, label, type) {
+                var ctx = document.getElementById(id);
+                if (!ctx) return;
+
+                new Chart(ctx, {
+                    type: type || 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: label,
+                            data: data,
+                            borderColor: '#4A63F2',
+                            backgroundColor: type === 'line' ? 'rgba(74,99,242,0.1)' : '#4A63F2',
+                            tension: 0.3,
+                            fill: type === 'line',
+                            pointRadius: 4,
+                            pointBackgroundColor: '#4A63F2',
+                        }],
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { stepSize: 1 },
+                            },
+                        },
+                    },
+                });
+            }
+
+            createChart(
+                'chart-evolution',
+                evolutionData.map(function (item) { return item.mois; }),
+                evolutionData.map(function (item) { return item.total; }),
+                'Offres publiées',
+                'line'
+            );
+
+            createChart(
+                'chart-secteurs',
+                secteursData.map(function (item) { return item.nom; }),
+                secteursData.map(function (item) { return item.total; }),
+                'Offres',
+                'bar'
+            );
+
+            createChart(
+                'chart-villes',
+                villesData.map(function (item) { return item.ville; }),
+                villesData.map(function (item) { return item.total; }),
+                'Offres',
+                'bar'
+            );
+        })();
+    </script>
+{% endblock %}

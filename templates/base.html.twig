@@ -1,55 +1,52 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}DAIP Emploi{% endblock %}</title>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-
-    <link rel="stylesheet" href="{{ asset('styles/app.css') }}">
+    {% include 'partials/_head.html.twig' %}
     {% block stylesheets %}{% endblock %}
 </head>
 <body class="antialiased">
     <header class="sticky top-0 z-20 bg-white border-b border-slate-100">
         <div class="max-w-6xl mx-auto px-8 h-[76px] flex items-center justify-between">
-            <a href="{{ path('app_home') }}" class="font-display font-bold text-xl text-navy">
-                DAIP <span class="text-brand-orange">Emploi</span>
+            <a href="{{ path('app_home') }}" class="flex items-center">
+                <img src="{{ asset('img/imgi_2_logo.png') }}" alt="DAIP Emploi" class="h-10 w-auto">
             </a>
-            <nav class="flex items-center gap-8">
-                <a href="{{ path('app_home') }}#offres" class="hidden sm:inline text-sm font-medium text-slate-500 hover:text-navy transition-colors">Offres</a>
-                <a href="{{ path('app_home') }}#comment-ca-marche" class="hidden sm:inline text-sm font-medium text-slate-500 hover:text-navy transition-colors">Comment ça marche</a>
+            <nav class="hidden md:flex items-center gap-6">
+                <a href="{{ path('app_home') }}" class="text-sm font-medium {{ app.request.get('_route') == 'app_home' ? 'text-navy font-semibold focus:outline-none focus:ring-2 focus:ring-brand-indigo/40 focus:ring-offset-1' : 'text-slate-500 hover:text-navy focus:outline-none focus:ring-2 focus:ring-brand-indigo/40 focus:ring-offset-1' }} transition-colors">Accueil</a>
+                <a href="{{ path('app_offres_liste') }}" data-nav-offres data-target="#offres" class="text-sm font-medium {{ app.request.get('_route') == 'app_offres_liste' ? 'text-navy font-semibold focus:outline-none focus:ring-2 focus:ring-brand-indigo/40 focus:ring-offset-1' : 'text-slate-500 hover:text-navy focus:outline-none focus:ring-2 focus:ring-brand-indigo/40 focus:ring-offset-1' }} transition-colors">Offres</a>
+                <a href="{{ path('app_home') }}#comment-ca-marche" class="text-sm font-medium text-slate-500 hover:text-navy transition-colors focus:outline-none focus:ring-2 focus:ring-brand-indigo/40 focus:ring-offset-1">Comment ça marche</a>
                 {% if app.user %}
-                    <a href="{{ path('app_dashboard_redirect') }}" class="hidden sm:inline text-sm font-medium text-slate-500 hover:text-navy transition-colors">Mon espace</a>
-                    {% if is_granted('ROLE_ENTREPRISE') %}
-                        <a href="{{ path('entreprise_profil_edit') }}" class="hidden sm:inline text-sm font-medium text-slate-500 hover:text-navy transition-colors">Mon profil</a>
-                    {% endif %}
-                    {% if is_granted('ROLE_DAIP') %}
-                        <a href="{{ path('daip_comptes_index') }}" class="hidden sm:inline text-sm font-medium text-slate-500 hover:text-navy transition-colors">Comptes DAIP</a>
-                    {% endif %}
-                    <a href="{{ path('app_logout') }}" class="btn-ghost btn-sm">Déconnexion</a>
+                    <a href="{{ path('app_dashboard_redirect') }}" class="btn-orange btn-sm sm:text-sm sm:px-6 sm:py-3">Mon espace</a>
+                    <a href="{{ path('app_logout') }}" class="bg-red-500 hover:bg-red-600 text-white transition-colors rounded-full font-semibold text-sm px-5 py-2.5 shadow-sm">Déconnexion</a>
                 {% else %}
-                    <a href="{{ path('app_login') }}" class="hidden sm:inline text-sm font-medium text-slate-500 hover:text-navy transition-colors">Connexion</a>
+                    <a href="{{ path('app_login') }}" class="text-sm font-medium {{ app.request.get('_route') == 'app_login' ? 'text-navy font-semibold focus:outline-none focus:ring-2 focus:ring-brand-indigo/40 focus:ring-offset-1' : 'text-slate-500 hover:text-navy focus:outline-none focus:ring-2 focus:ring-brand-indigo/40 focus:ring-offset-1' }} transition-colors">Connexion</a>
                     <a href="{{ path('app_login') }}" class="btn-orange btn-sm sm:text-sm sm:px-6 sm:py-3">Publier une offre</a>
                 {% endif %}
             </nav>
+            <button type="button" id="mobile-menu-toggle" class="md:hidden inline-flex items-center justify-center w-10 h-10 rounded-xl border border-slate-200 text-slate-600 hover:text-navy hover:border-navy transition-colors" aria-label="Menu">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden border-t border-slate-100 bg-white">
+            <div class="px-8 py-5 space-y-4">
+                <a href="{{ path('app_home') }}" class="block text-base font-medium {{ app.request.get('_route') == 'app_home' ? 'text-navy font-semibold focus:outline-none focus:ring-2 focus:ring-brand-indigo/40 focus:ring-offset-1' : 'text-slate-700 hover:text-navy focus:outline-none focus:ring-2 focus:ring-brand-indigo/40 focus:ring-offset-1' }}">Accueil</a>
+                <a href="{{ path('app_offres_liste') }}" data-nav-offres data-target="#offres" class="block text-base font-medium {{ app.request.get('_route') == 'app_offres_liste' ? 'text-navy font-semibold focus:outline-none focus:ring-2 focus:ring-brand-indigo/40 focus:ring-offset-1' : 'text-slate-700 hover:text-navy focus:outline-none focus:ring-2 focus:ring-brand-indigo/40 focus:ring-offset-1' }}">Offres</a>
+                <a href="{{ path('app_home') }}#comment-ca-marche" class="block text-base font-medium text-slate-700 hover:text-navy focus:outline-none focus:ring-2 focus:ring-brand-indigo/40 focus:ring-offset-1">Comment ça marche</a>
+                {% if app.user %}
+                    <a href="{{ path('app_dashboard_redirect') }}" class="block text-base font-medium text-slate-700 hover:text-navy focus:outline-none focus:ring-2 focus:ring-brand-indigo/40 focus:ring-offset-1">Mon espace</a>
+                    <a href="{{ path('app_logout') }}" class="block text-base font-medium text-red-600 hover:text-red-700 focus:outline-none focus:ring-2 focus:ring-brand-indigo/40 focus:ring-offset-1">Déconnexion</a>
+                {% else %}
+                    <a href="{{ path('app_login') }}" class="block text-base font-medium {{ app.request.get('_route') == 'app_login' ? 'text-navy font-semibold focus:outline-none focus:ring-2 focus:ring-brand-indigo/40 focus:ring-offset-1' : 'text-slate-700 hover:text-navy focus:outline-none focus:ring-2 focus:ring-brand-indigo/40 focus:ring-offset-1' }}">Connexion</a>
+                    <a href="{{ path('app_login') }}" class="btn-orange btn-sm w-full text-center">Publier une offre</a>
+                {% endif %}
+            </div>
         </div>
     </header>
 
     <main>
-        {% for label, messages in app.flashes %}
-            {% for message in messages %}
-                <div class="max-w-6xl mx-auto px-8 pt-6">
-                    <div class="text-sm rounded-xl px-4 py-3 {{ label == 'error' ? 'bg-red-50 border border-red-200 text-red-700' : 'bg-green-50 border border-green-200 text-brand-green' }}">
-                        {{ message }}
-                    </div>
-                </div>
-            {% endfor %}
-        {% endfor %}
+        {% include 'partials/_flashes.html.twig' with { wrapper_class: 'max-w-6xl mx-auto px-8 pt-6' } %}
 
         {% block body %}{% endblock %}
     </main>
@@ -58,13 +55,13 @@
         <div class="max-w-6xl mx-auto px-8">
             <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
                 <div class="col-span-2 md:col-span-1">
-                    <div class="font-display font-bold text-lg text-white mb-3">DAIP <span class="text-brand-orange">Emploi</span></div>
+                    <img src="{{ asset('img/imgi_2_logo.png') }}" alt="DAIP Emploi" class="h-10 w-auto mb-4">
                     <p class="text-sm max-w-xs">Le registre public des offres d'emploi des entreprises partenaires de la DAIP.</p>
                 </div>
                 <div>
                     <h4 class="text-xs uppercase tracking-wide font-semibold text-white/90 mb-3">Plateforme</h4>
                     <ul class="space-y-2 text-sm">
-                        <li><a href="{{ path('app_home') }}#offres" class="hover:text-white">Consulter les offres</a></li>
+                        <li><a href="{{ path('app_offres_liste') }}" data-nav-offres data-target="#offres" class="hover:text-white">Consulter les offres</a></li>
                         <li><a href="{{ path('app_home') }}#comment-ca-marche" class="hover:text-white">Comment ça marche</a></li>
                     </ul>
                 </div>
@@ -83,14 +80,57 @@
                 </div>
             </div>
             <div class="mt-11 pt-6 border-t border-white/10 flex flex-col sm:flex-row justify-between gap-2 text-xs text-white/45">
-                <span>© {{ "now"|date("Y") }} DAIP Emploi — Registre d'ofrres d'emploi supervisé par la DAIP</span>
+                <span>© {{ "now"|date("Y") }} DAIP Emploi — Registre d'offres d'emploi supervisé par la DAIP</span>
                 <span>Abidjan, Côte d'Ivoire</span>
             </div>
         </div>
     </footer>
 
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    <script>AOS.init({ duration: 700, easing: 'ease-out-cubic', once: true, offset: 40 });</script>
-    {% block javascripts %}{% endblock %}
+    {% include 'partials/_scripts.html.twig' %}
+    {% block javascripts %}
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const offresLinks = document.querySelectorAll('[data-nav-offres]');
+                offresLinks.forEach(function(link) {
+                    link.addEventListener('click', function(e) {
+                        if (window.location.pathname === '/') {
+                            e.preventDefault();
+                            const target = document.querySelector(this.getAttribute('data-target'));
+                            if (target) {
+                                target.scrollIntoView({ behavior: 'smooth' });
+                            }
+                        }
+                    });
+                });
+
+                const flashes = document.querySelectorAll('[data-flash-auto-hide]');
+                flashes.forEach(function(flash) {
+                    setTimeout(function() {
+                        flash.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                        flash.style.opacity = '0';
+                        flash.style.transform = 'translateY(-10px)';
+                        setTimeout(function() {
+                            flash.remove();
+                        }, 500);
+                    }, 4000);
+                });
+
+                const mobileToggle = document.getElementById('mobile-menu-toggle');
+                const mobileMenu = document.getElementById('mobile-menu');
+                if (mobileToggle && mobileMenu) {
+                    mobileToggle.addEventListener('click', function() {
+                        const isHidden = mobileMenu.classList.contains('hidden');
+                        mobileMenu.classList.toggle('hidden', !isHidden);
+                    });
+
+                    mobileMenu.querySelectorAll('a').forEach(function(link) {
+                        link.addEventListener('click', function() {
+                            mobileMenu.classList.add('hidden');
+                        });
+                    });
+                }
+            });
+        </script>
+    {% endblock %}
 </body>
 </html>

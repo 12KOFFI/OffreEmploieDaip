@@ -4,6 +4,13 @@ module.exports = {
         './assets/**/*.js',
         './templates/**/*.html.twig',
     ],
+    safelist: [
+        'badge-brouillon',
+        'badge-publiee',
+        'badge-retiree',
+        'badge-expiree',
+        'badge',
+    ],
     theme: {
         extend: {
             colors: {

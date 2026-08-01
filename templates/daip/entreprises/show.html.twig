@@ -1,0 +1,77 @@
+{% extends 'dashboard_base.html.twig' %}
+
+{% block title %}{{ entreprise.nom }}{% endblock %}
+
+{% block breadcrumb %}
+    <a href="{{ path('daip_entreprises_index') }}" class="hover:text-navy">Registre des entreprises</a>
+    <span class="mx-1.5">/</span>
+    <span class="text-navy font-semibold">{{ entreprise.nom }}</span>
+{% endblock %}
+
+{% block body %}
+<div class="py-12 px-6 pb-24">
+    <div class="max-w-5xl mx-auto">
+        <div data-aos="fade-up" class="mb-8">
+            <div class="flex items-center gap-4 mb-4">
+                {% if entreprise.logo %}
+                    <img src="{{ entreprise.logo }}" alt="{{ entreprise.nom }}" class="w-16 h-16 rounded-2xl object-cover border border-slate-100">
+                {% else %}
+                    <div class="w-16 h-16 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                    </div>
+                {% endif %}
+                <div>
+                    <h1 class="text-[26px]">{{ entreprise.nom }}</h1>
+                    <p class="text-sm text-slate-500">Inscrite le {{ entreprise.user.createdAt|date('d/m/Y') }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid lg:grid-cols-[2fr_1fr] gap-7 items-start">
+            <div data-aos="fade-up" class="card card-zoom p-9 sm:p-11">
+                <h3 class="text-sm uppercase tracking-wide text-slate-500 font-semibold mb-4">À propos</h3>
+                {% if entreprise.description %}
+                    <p class="text-[15px] leading-relaxed whitespace-pre-line text-slate-700">{{ entreprise.description }}</p>
+                {% else %}
+                    <p class="text-sm text-slate-500">Aucune description fournie.</p>
+                {% endif %}
+
+                {% if entreprise.siteWeb %}
+                    <div class="mt-6">
+                        <a href="{{ entreprise.siteWeb }}" target="_blank" rel="noopener" class="btn-orange">Visiter le site web →</a>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div data-aos="fade-up" data-aos-delay="120" class="card p-7">
+                <h3 class="text-sm font-semibold mb-4">Informations</h3>
+
+                <div class="flex justify-between text-sm py-2.5">
+                    <span class="text-slate-500">Email</span>
+                    <span class="font-medium text-navy text-right">{{ entreprise.user.email }}</span>
+                </div>
+                <div class="flex justify-between text-sm py-2.5 border-t border-slate-100"><span class="text-slate-500">SIRET</span><span class="font-medium text-navy">{{ entreprise.siret }}</span></div>
+                {% if entreprise.siteWeb %}
+                    <div class="flex justify-between text-sm py-2.5 border-t border-slate-100"><span class="text-slate-500">Site web</span><a href="{{ entreprise.siteWeb }}" target="_blank" rel="noopener" class="font-medium text-brand-indigo">Visiter →</a></div>
+                {% endif %}
+                <div class="flex justify-between text-sm py-2.5 border-t border-slate-100"><span class="text-slate-500">Inscrite le</span><span class="font-medium text-navy">{{ entreprise.user.createdAt|date('d/m/Y') }}</span></div>
+            </div>
+        </div>
+
+        <div class="mt-14">
+            <h2 class="text-2xl mb-6">Offres publiées</h2>
+            <div class="grid md:grid-cols-3 gap-5">
+                {% for offre in entreprise.offres %}
+                    {% if offre.statut.value == 'publiee' %}
+                        {% include 'offres/_card.html.twig' with {offre: offre, aos_delay: loop.index0 * 80} %}
+                    {% endif %}
+                {% else %}
+                    <div class="card text-center py-10 px-6 text-slate-500 md:col-span-3">
+                        <p>Aucune offre publiée pour le moment.</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -8,15 +8,21 @@
         <div data-aos="fade-up" class="text-sm text-slate-500 mb-6">
             <a href="{{ path('app_home') }}" class="text-brand-indigo font-medium hover:underline">Accueil</a> /
             <a href="{{ path('app_home') }}#offres" class="text-brand-indigo font-medium hover:underline">Registre des offres</a> /
-            {{ offre.titre }}
+            <span class="text-navy font-semibold">{{ offre.titre }}</span>
         </div>
 
         <div class="grid lg:grid-cols-[2fr_1fr] gap-7 items-start">
-            <div data-aos="fade-up" class="card p-9 sm:p-11">
+            <div data-aos="fade-up" class="card card-zoom p-9 sm:p-11">
                 <div class="flex justify-between items-center mb-4.5">
                     <span class="text-xs text-slate-500 font-medium">RÉF. {{ 'DAIP-%s-%05d'|format(offre.datePublication|date('Y'), offre.id) }}</span>
-                    <span class="badge-{{ offre.statut.value }}">{{ offre.statut.label }}</span>
+                    <span class="badge-{{ offre.statut.value }} inline-flex items-center">{{ offre.statut.label }}</span>
                 </div>
+
+                {% if offre.image %}
+                    <div class="mb-8 mt-6 rounded-2xl overflow-hidden border border-slate-100">
+                        <img src="{{ offre.image }}" alt="{{ offre.titre }}" class="w-full h-64 object-cover">
+                    </div>
+                {% endif %}
 
                 <h1 class="text-[28px] mb-2">{{ offre.titre }}</h1>
                 <div class="text-[15px] text-slate-500 mb-6">Chez <strong class="text-navy">{{ offre.entreprise.nom }}</strong> — {{ offre.ville }}</div>
@@ -24,7 +30,7 @@
                 <div class="flex flex-wrap gap-2 mb-7">
                     <span class="tag-pill">{{ offre.typeContrat.label }}</span>
                     <span class="tag-pill">{{ offre.nbAnneesExperience }} an{{ offre.nbAnneesExperience > 1 ? 's' : '' }} d'expérience</span>
-                    {% if offre.niveauEtude %}<span class="tag-pill">{{ offre.niveauEtude }}</span>{% endif %}
+                    {% if offre.niveauEtude %}<span class="tag-pill">{{ offre.niveauEtude.value }}</span>{% endif %}
                     {% if offre.secteur %}<span class="tag-pill">{{ offre.secteur.nom }}</span>{% endif %}
                 </div>
 
@@ -58,6 +64,9 @@
                 {% if offre.datePublication %}
                     <div class="flex justify-between text-sm py-2.5 border-t border-slate-100"><span class="text-slate-500">Publiée le</span><span class="font-medium text-navy">{{ offre.datePublication|date('d/m/Y') }}</span></div>
                 {% endif %}
+                {% if offre.dateExpiration %}
+                    <div class="flex justify-between text-sm py-2.5 border-t border-slate-100"><span class="text-slate-500">Date d'expiration</span><span class="font-medium text-navy">{{ offre.dateExpiration|date('d/m/Y') }}</span></div>
+                {% endif %}
                 {% if offre.entreprise.siteWeb %}
                     <div class="flex justify-between text-sm py-2.5 border-t border-slate-100"><span class="text-slate-500">Site web</span><a href="{{ offre.entreprise.siteWeb }}" target="_blank" rel="noopener" class="font-medium text-brand-indigo">Visiter →</a></div>
                 {% endif %}
@@ -65,8 +74,42 @@
                 <div class="mt-5 bg-slate-50 rounded-xl p-4 text-xs text-slate-500">
                     Cette offre est publiée directement par l'entreprise et supervisée par la DAIP. Aucune candidature en ligne n'est disponible sur cette plateforme pour le moment.
                 </div>
+
+                <div class="mt-5">
+                    <h3 class="text-sm font-semibold mb-3">Partager cette offre</h3>
+                    <div class="flex gap-2">
+                        <button type="button" id="copy-link-btn" class="btn-ghost btn-sm flex-1">📋 Copier le lien</button>
+                        <a href="https://wa.me/?text={{ offre.titre|url_encode }} - {{ app.request.uri|url_encode }}" target="_blank" rel="noopener" class="btn-ghost btn-sm flex-1 text-center">💬 WhatsApp</a>
+                    </div>
+                    <p id="copy-feedback" class="text-xs text-brand-green mt-2 hidden">Lien copié dans le presse-papier.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-14">
+            <h2 class="text-2xl mb-6">Offres similaires</h2>
+            <div class="grid md:grid-cols-3 gap-5">
+                {% for similaire in offres_similaires %}
+                    {% include 'offres/_card.html.twig' with {offre: similaire, aos_delay: loop.index0 * 80} %}
+                {% else %}
+                    <div class="card text-center py-10 px-6 text-slate-500 md:col-span-3">
+                        <p>Aucune offre similaire pour le moment.</p>
+                    </div>
+                {% endfor %}
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    document.getElementById('copy-link-btn')?.addEventListener('click', function () {
+        navigator.clipboard.writeText(window.location.href).then(function () {
+            var feedback = document.getElementById('copy-feedback');
+            if (feedback) {
+                feedback.classList.remove('hidden');
+                setTimeout(function () { feedback.classList.add('hidden'); }, 2000);
+            }
+        });
+    });
+</script>
 {% endblock %}

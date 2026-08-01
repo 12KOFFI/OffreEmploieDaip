@@ -28,15 +28,13 @@ class HomeController extends AbstractController
             'typeContrat' => $request->query->get('typeContrat', ''),
         ];
 
+        // Un filtre est "actif" des qu'un des champs ci-dessus est renseigne
         $filtresActifs = array_filter($filtres) !== [];
 
-        $offres = $offreRepository->rechercherOffresPubliees($filtres);
+        $offres = $offreRepository->rechercherOffresPubliees($filtres, limit: 12);
 
-        $stats = [
-            'entreprises' => $entrepriseRepository->count([]),
-            'offresPubliees' => $offreRepository->count(['statut' => StatutOffre::PUBLIEE]),
-            'secteurs' => $secteurRepository->count([]),
-        ];
+        // Statistiques dynamiques pour la section hero
+        $statsCompteurs = $offreRepository->countByStatut();
 
         return $this->render('home/index.html.twig', [
             'offres' => $offres,
@@ -44,7 +42,9 @@ class HomeController extends AbstractController
             'filtresActifs' => $filtresActifs,
             'secteurs' => $secteurRepository->findBy([], ['nom' => 'ASC']),
             'typesContrat' => TypeContrat::cases(),
-            'stats' => $stats,
+            'statsEntreprises' => $entrepriseRepository->count([]),
+            'statsOffresPubliees' => $statsCompteurs['publiee'] ?? 0,
+            'statsSecteurs' => $secteurRepository->count([]),
         ]);
     }
 }

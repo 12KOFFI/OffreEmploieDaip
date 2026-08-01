@@ -1,0 +1,46 @@
+{% if offres|length == 0 %}
+    <div data-aos="fade-up" class="card text-center py-14 px-6 text-slate-500">
+        <h3 class="text-navy font-semibold text-[17px] mb-2">Aucune offre ne correspond à ces critères</h3>
+        <p>Essayez d'élargir votre recherche ou revenez plus tard.</p>
+    </div>
+{% else %}
+    <div id="offres-grid" class="grid md:grid-cols-3 gap-5 mb-10">
+        {% for offre in offres %}
+            {% include 'offres/_card.html.twig' with {offre: offre, aos_delay: loop.index0 * 60} %}
+        {% endfor %}
+    </div>
+
+    {% if totalPages > 1 %}
+        <div data-aos="fade-up" class="flex justify-center items-center gap-2 mt-10" id="offres-pagination">
+            {% if page > 1 %}
+                <a href="{{ path('app_offres_liste', filtres|merge({page: 1})) }}" class="btn-ghost btn-sm" data-page="1" aria-label="Première page">«</a>
+                <a href="{{ path('app_offres_liste', filtres|merge({page: page - 1})) }}" class="btn-ghost btn-sm" data-page="{{ page - 1 }}">← Précédent</a>
+            {% endif %}
+
+            {% set pagesAround = 2 %}
+            {% set startPage = max(1, page - pagesAround) %}
+            {% set endPage = min(totalPages, page + pagesAround) %}
+
+            {% if startPage > 1 %}
+                <span class="text-sm text-slate-400">…</span>
+            {% endif %}
+
+            {% for p in startPage..endPage %}
+                {% if p == page %}
+                    <span class="text-sm font-semibold text-white bg-brand-indigo rounded-full w-9 h-9 flex items-center justify-center">{{ p }}</span>
+                {% else %}
+                    <a href="{{ path('app_offres_liste', filtres|merge({page: p})) }}" class="text-sm font-medium text-slate-500 hover:text-navy w-9 h-9 flex items-center justify-center rounded-full hover:bg-slate-100 transition-colors" data-page="{{ p }}">{{ p }}</a>
+                {% endif %}
+            {% endfor %}
+
+            {% if endPage < totalPages %}
+                <span class="text-sm text-slate-400">…</span>
+            {% endif %}
+
+            {% if page < totalPages %}
+                <a href="{{ path('app_offres_liste', filtres|merge({page: page + 1})) }}" class="btn-ghost btn-sm" data-page="{{ page + 1 }}">Suivant →</a>
+                <a href="{{ path('app_offres_liste', filtres|merge({page: totalPages})) }}" class="btn-ghost btn-sm" data-page="{{ totalPages }}" aria-label="Dernière page">»</a>
+            {% endif %}
+        </div>
+    {% endif %}
+{% endif %}

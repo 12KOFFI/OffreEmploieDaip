@@ -23,7 +23,11 @@
                 <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                 </span>
-                {{ form_widget(form.plainPassword.first, {attr: {class: 'field-input pl-10', placeholder: '••••••••'}}) }}
+                {{ form_widget(form.plainPassword.first, {attr: {class: 'field-input pl-10 pr-10', placeholder: '••••••••', id: 'daip-password-field'}}) }}
+                <button type="button" data-toggle-password="daip-password-field" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                    <svg data-eye-open xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg>
+                    <svg data-eye-closed class="hidden" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 1 12s4 8 11 8a9.26 9.26 0 0 0 5.39-1.61"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                </button>
             </div>
             {{ form_errors(form.plainPassword.first) }}
 
@@ -37,7 +41,19 @@
                 <p id="strength-label" class="text-xs text-slate-400 mt-1.5">Au moins 8 caractères, avec lettre et chiffre.</p>
             </div>
 
-            {{ form_row(form.plainPassword.second) }}
+            <label for="{{ form.plainPassword.second.vars.id }}" class="field-label">Confirmer le mot de passe</label>
+            <div class="relative">
+                <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </span>
+                {{ form_widget(form.plainPassword.second, {attr: {class: 'field-input pl-10 pr-10', placeholder: '••••••••', id: 'daip-password-confirm-field'}}) }}
+                <button type="button" data-toggle-password="daip-password-confirm-field" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                    <svg data-eye-open xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg>
+                    <svg data-eye-closed class="hidden" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 1 12s4 8 11 8a9.26 9.26 0 0 0 5.39-1.61"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                </button>
+            </div>
+            <p id="match-indicator" class="text-xs mt-1.5 hidden"></p>
+            {{ form_errors(form.plainPassword.second) }}
 
             <div class="flex gap-3 mt-6">
                 <button type="submit" class="btn-gradient">Créer le compte</button>
@@ -48,17 +64,30 @@
 </div>
 
 <script>
+    document.querySelectorAll('[data-toggle-password]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var input = document.getElementById(btn.getAttribute('data-toggle-password'));
+            var isHidden = input.type === 'password';
+            input.type = isHidden ? 'text' : 'password';
+            btn.querySelector('[data-eye-open]').classList.toggle('hidden', isHidden);
+            btn.querySelector('[data-eye-closed]').classList.toggle('hidden', !isHidden);
+        });
+    });
+
     (function () {
-        var passwordField = document.getElementById('{{ form.plainPassword.first.vars.id }}');
+        var passwordField = document.getElementById('daip-password-field');
+        var confirmField = document.getElementById('daip-password-confirm-field');
         if (!passwordField) return;
 
         var bars = document.querySelectorAll('#strength-bars [data-bar]');
         var label = document.getElementById('strength-label');
+        var matchIndicator = document.getElementById('match-indicator');
+
         var levels = [
-            { color: 'bg-red-400', text: 'Faible — ajoutez majuscules, chiffres et symboles.' },
-            { color: 'bg-orange-400', text: 'Moyen — encore un peu court ou trop simple.' },
-            { color: 'bg-yellow-400', text: 'Bon — presque parfait.' },
-            { color: 'bg-brand-green', text: 'Excellent — mot de passe solide.' },
+            { bar: 'bg-red-400', text: 'text-red-500', label: 'Faible — ajoutez majuscules, chiffres et symboles.' },
+            { bar: 'bg-orange-400', text: 'text-orange-500', label: 'Moyen — encore un peu court ou trop simple.' },
+            { bar: 'bg-yellow-400', text: 'text-yellow-600', label: 'Bon — presque parfait.' },
+            { bar: 'bg-brand-green', text: 'text-brand-green', label: 'Excellent — mot de passe solide.' },
         ];
 
         function scorePassword(value) {
@@ -71,9 +100,11 @@
             return Math.min(score, 4);
         }
 
-        passwordField.addEventListener('input', function () {
+        function updateStrength() {
             var value = passwordField.value;
-            bars.forEach(function (bar) { bar.className = 'h-1.5 flex-1 rounded-full bg-slate-200 transition-colors duration-200'; });
+            bars.forEach(function (bar) {
+                bar.className = 'h-1.5 flex-1 rounded-full bg-slate-200 transition-colors duration-200';
+            });
 
             if (value.length === 0) {
                 label.textContent = 'Au moins 8 caractères, avec lettre et chiffre.';
@@ -84,11 +115,39 @@
             var score = scorePassword(value);
             var level = levels[Math.max(score - 1, 0)];
             for (var i = 0; i < score; i++) {
-                bars[i].className = 'h-1.5 flex-1 rounded-full transition-colors duration-200 ' + level.color;
+                bars[i].className = 'h-1.5 flex-1 rounded-full transition-colors duration-200 ' + level.bar;
             }
-            label.textContent = level.text;
-            label.className = 'text-xs mt-1.5 font-medium ' + level.color.replace('bg-', 'text-');
+            label.textContent = level.label;
+            label.className = 'text-xs mt-1.5 font-medium ' + level.text;
+        }
+
+        function updateMatch() {
+            if (!confirmField || !matchIndicator) return;
+
+            if (confirmField.value.length === 0) {
+                matchIndicator.classList.add('hidden');
+                return;
+            }
+
+            matchIndicator.classList.remove('hidden');
+
+            if (passwordField.value === confirmField.value) {
+                matchIndicator.textContent = '✓ Les mots de passe correspondent';
+                matchIndicator.className = 'text-xs mt-1.5 font-medium text-brand-green';
+            } else {
+                matchIndicator.textContent = '✕ Les mots de passe ne correspondent pas';
+                matchIndicator.className = 'text-xs mt-1.5 font-medium text-red-500';
+            }
+        }
+
+        passwordField.addEventListener('input', function () {
+            updateStrength();
+            updateMatch();
         });
+
+        if (confirmField) {
+            confirmField.addEventListener('input', updateMatch);
+        }
     })();
 </script>
 {% endblock %}

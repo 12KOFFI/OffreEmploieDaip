@@ -40,10 +40,13 @@
 
             <div class="grid sm:grid-cols-2 gap-x-4">
                 {{ form_row(form.nbAnneesExperience) }}
-                {{ form_row(form.niveauEtude) }}
+                {{ form_row(form.nombrePostes) }}
             </div>
 
-            {{ form_row(form.dateExpiration) }}
+            <div class="grid sm:grid-cols-2 gap-x-4">
+                {{ form_row(form.niveauEtude) }}
+                {{ form_row(form.dateExpiration) }}
+            </div>
 
             {{ form_row(form.description) }}
 

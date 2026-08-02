@@ -22,7 +22,7 @@ Application Symfony de gestion et consultation d'offres d'emploi, avec deux espa
 ### Espace public
 - Accueil avec présentation du registre
 - Consultation des offres publiées
-- Page de détail d'une offre (référence, description, compétences, rémunération, dates, partage)
+- Page de détail d'une offre (référence, description, compétences, rémunération, dates, nombre de postes, partage)
 - Système d'authentification (connexion / inscription entreprise)
 - Mot de passe oublié avec réinitialisation par email
 - Footer et navigation responsive
@@ -39,7 +39,7 @@ Application Symfony de gestion et consultation d'offres d'emploi, avec deux espa
 - Tableau de bord personnel avec KPIs
 - Mes offres : création, modification, duplication, publication, retrait, suppression
 - Pagination sur la liste des offres
-- Formulaire d'offre avec image, date d'expiration et compétences
+- Formulaire d'offre avec image, date d'expiration, compétences et nombre de postes
 - Page de profil entreprise (nom, SIRET, site web, logo, description)
 - Redirection automatique vers le bon dashboard selon le rôle
 
@@ -245,7 +245,7 @@ jobboard/
 - Badges colorés par statut
 - Pagination sur les listes (10 par page)
 - Cards cliquables vers le détail
-- Détail complet avec image, description, compétences, rémunération, dates, partage
+- Détail complet avec image, description, compétences, rémunération, dates, nombre de postes, partage
 
 ### Entreprises
 - Profil entreprise modifiable

@@ -66,6 +66,11 @@ class OffreType extends AbstractType
                 'attr' => self::INPUT_ATTR,
                 'label_attr' => self::LABEL_ATTR,
             ])
+            ->add('nombrePostes', IntegerType::class, [
+                'label' => 'Nombre de postes à pourvoir',
+                'attr' => self::INPUT_ATTR,
+                'label_attr' => self::LABEL_ATTR,
+            ])
             ->add('niveauEtude', EnumType::class, [
                 'label' => "Niveau d'étude (optionnel)",
                 'required' => false,

@@ -29,6 +29,7 @@
         <div class="flex flex-wrap gap-1.5 mb-5">
             <span class="tag-pill">{{ offre.typeContrat.label }}</span>
             <span class="tag-pill">{{ offre.nbAnneesExperience }} an{{ offre.nbAnneesExperience > 1 ? 's' : '' }} exp.</span>
+            <span class="tag-pill">{{ offre.nombrePostes }} poste{{ offre.nombrePostes > 1 ? 's' : '' }}</span>
             {% if offre.secteur %}<span class="tag-pill">{{ offre.secteur.nom }}</span>{% endif %}
             {% if offre.dateExpiration %}
                 <span class="tag-pill bg-slate-50 text-slate-500">Expire le {{ offre.dateExpiration|date('d/m/Y') }}</span>

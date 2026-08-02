@@ -47,6 +47,9 @@ class Offre
     #[ORM\Column]
     private int $nbAnneesExperience = 0;
 
+    #[ORM\Column]
+    private int $nombrePostes = 1;
+
     #[ORM\Column(length: 50, nullable: true, enumType: NiveauEtude::class)]
     private ?NiveauEtude $niveauEtude = null;
 
@@ -179,6 +182,17 @@ class Offre
     public function setNbAnneesExperience(int $nbAnneesExperience): static
     {
         $this->nbAnneesExperience = $nbAnneesExperience;
+        return $this;
+    }
+
+    public function getNombrePostes(): int
+    {
+        return $this->nombrePostes;
+    }
+
+    public function setNombrePostes(int $nombrePostes): static
+    {
+        $this->nombrePostes = $nombrePostes;
         return $this;
     }
 

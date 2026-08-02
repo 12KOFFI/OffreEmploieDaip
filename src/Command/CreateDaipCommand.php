@@ -50,7 +50,7 @@ class CreateDaipCommand extends Command
 
         $user = new User();
         $user->setEmail($email);
-        $user->setRoles(['ROLE_DAIP_ADMIN']);
+        $user->setRoles(['ROLE_DAIP']);
         $user->setPassword($this->passwordHasher->hashPassword($user, $plainPassword));
 
         $this->entityManager->persist($user);

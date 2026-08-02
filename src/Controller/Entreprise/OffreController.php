@@ -160,7 +160,7 @@ class OffreController extends AbstractController
     }
 
     #[Route('/{id}/dupliquer', name: 'entreprise_offres_duplicate', methods: ['POST'])]
-    public function duplicate(Offre $offre, Request $request, OffreManager $offreManager): Response
+    public function duplicate(Offre $offre, Request $request, OffreManager $offreManager, EntityManagerInterface $entityManager): Response
     {
         $this->denyAccessUnlessGranted(OffreVoter::EDIT, $offre);
 
@@ -179,6 +179,7 @@ class OffreController extends AbstractController
         $copie->setSalaireMin($offre->getSalaireMin());
         $copie->setSalaireMax($offre->getSalaireMax());
         $copie->setNbAnneesExperience($offre->getNbAnneesExperience());
+        $copie->setNombrePostes($offre->getNombrePostes());
         $copie->setNiveauEtude($offre->getNiveauEtude());
         $copie->setSecteur($offre->getSecteur());
         $copie->setImage($offre->getImage());
@@ -187,8 +188,8 @@ class OffreController extends AbstractController
             $copie->addCompetence($competence);
         }
 
-        $this->getDoctrine()->getManager()->persist($copie);
-        $this->getDoctrine()->getManager()->flush();
+        $entityManager->persist($copie);
+        $entityManager->flush();
 
         $this->addFlash('success', 'Offre dupliquée avec succès. Vous pouvez maintenant la modifier.');
 
@@ -217,7 +218,7 @@ class OffreController extends AbstractController
 
     private function processCompetences(Offre $offre, Request $request, EntityManagerInterface $entityManager): void
     {
-        $ids = $request->request->all('competences', []);
+        $ids = $request->request->all('competences') ?? [];
         if (!is_array($ids)) {
             return;
         }

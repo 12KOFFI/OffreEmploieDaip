@@ -19,7 +19,8 @@ class DaipProfilType extends AbstractType
     {
         $builder
             ->add('email', EmailType::class, [
-                'label' => 'Email',
+                'label' => 'Email <span class="text-red-500">*</span>',
+                'label_html' => true,
                 'constraints' => [
                     new NotBlank(),
                     new Email(),

@@ -55,6 +55,9 @@
                     <div class="flex justify-between text-sm py-2.5 border-t border-slate-100"><span class="text-slate-500">Site web</span><a href="{{ entreprise.siteWeb }}" target="_blank" rel="noopener" class="font-medium text-brand-indigo">Visiter →</a></div>
                 {% endif %}
                 <div class="flex justify-between text-sm py-2.5 border-t border-slate-100"><span class="text-slate-500">Inscrite le</span><span class="font-medium text-navy">{{ entreprise.user.createdAt|date('d/m/Y') }}</span></div>
+                {% if entreprise.contact %}
+                    <div class="flex justify-between text-sm py-2.5 border-t border-slate-100"><span class="text-slate-500">Contact</span><span class="font-medium text-navy">{{ entreprise.contact }}</span></div>
+                {% endif %}
             </div>
         </div>
 

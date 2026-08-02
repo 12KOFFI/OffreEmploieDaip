@@ -5,12 +5,14 @@ namespace App\Form;
 use App\Entity\User;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\File;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Regex;
@@ -24,15 +26,16 @@ class EntrepriseRegistrationType extends AbstractType
     {
         $builder
             ->add('email', EmailType::class, [
-                'label' => 'Email professionnel',
+                'label' => 'Email professionnel <span class="text-red-500">*</span>',
+                'label_html' => true,
                 'attr' => self::INPUT_ATTR,
                 'label_attr' => self::LABEL_ATTR,
             ])
             ->add('plainPassword', RepeatedType::class, [
                 'type' => PasswordType::class,
                 'mapped' => false,
-                'first_options' => ['label' => 'Mot de passe', 'attr' => self::INPUT_ATTR, 'label_attr' => self::LABEL_ATTR],
-                'second_options' => ['label' => 'Confirmer le mot de passe', 'attr' => self::INPUT_ATTR, 'label_attr' => self::LABEL_ATTR],
+                'first_options' => ['label' => 'Mot de passe <span class="text-red-500">*</span>', 'label_html' => true, 'attr' => self::INPUT_ATTR, 'label_attr' => self::LABEL_ATTR],
+                'second_options' => ['label' => 'Confirmer le mot de passe <span class="text-red-500">*</span>', 'label_html' => true, 'attr' => self::INPUT_ATTR, 'label_attr' => self::LABEL_ATTR],
                 'invalid_message' => 'Les deux mots de passe ne correspondent pas.',
                 'constraints' => [
                     new NotBlank(message: 'Merci de saisir un mot de passe.'),
@@ -48,7 +51,8 @@ class EntrepriseRegistrationType extends AbstractType
                 ],
             ])
             ->add('nom', TextType::class, [
-                'label' => "Nom de l'entreprise",
+                'label' => "Nom de l'entreprise <span class=\"text-red-500\">*</span>",
+                'label_html' => true,
                 'property_path' => 'entreprise.nom',
                 'attr' => self::INPUT_ATTR,
                 'label_attr' => self::LABEL_ATTR,
@@ -65,6 +69,24 @@ class EntrepriseRegistrationType extends AbstractType
                 'required' => false,
                 'property_path' => 'entreprise.description',
                 'attr' => self::INPUT_ATTR + ['rows' => 4],
+                'label_attr' => self::LABEL_ATTR,
+            ])
+            ->add('logo', FileType::class, [
+                'label' => 'Logo de l\'entreprise (optionnel)',
+                'required' => false,
+                'mapped' => false,
+                'constraints' => [
+                    new File([
+                        'maxSize' => '2M',
+                        'mimeTypes' => [
+                            'image/jpeg',
+                            'image/png',
+                            'image/webp',
+                        ],
+                        'mimeTypesMessage' => 'Veuillez uploader une image valide (JPG, PNG ou WebP).',
+                    ])
+                ],
+                'attr' => self::INPUT_ATTR,
                 'label_attr' => self::LABEL_ATTR,
             ])
         ;

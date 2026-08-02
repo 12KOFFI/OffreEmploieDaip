@@ -31,14 +31,16 @@ security:
                 secret: '%kernel.secret%'
                 lifetime: 604800 # 1 semaine
 
-    # Pas de hierarchie de roles ici, volontairement : ROLE_ENTREPRISE et
-    # ROLE_DAIP sont deux perimetres totalement etanches. La DAIP a son
-    # propre espace, mais en LECTURE SEULE (consultation de toutes les
-    # offres) : jamais les routes de creation/edition/changement de statut
-    # d'une offre, qui restent reservees a ROLE_ENTREPRISE sur ses propres
-    # offres uniquement.
+    # Hierarchie de roles DAIP :
+    # - ROLE_DAIP_ADMIN : gestion des comptes DAIP + tous les droits DAIP
+    # - ROLE_DAIP : consultation / actions métier DAIP (offres, entreprises, journal)
+    # ROLE_ENTREPRISE reste totalement séparé.
+
+    role_hierarchy:
+        ROLE_DAIP_ADMIN: [ROLE_DAIP]
 
     access_control:
+        - { path: ^/daip/comptes, roles: ROLE_DAIP_ADMIN }
         - { path: ^/daip, roles: ROLE_DAIP }
         - { path: ^/entreprise, roles: ROLE_ENTREPRISE }
         - { path: ^/inscription, roles: PUBLIC_ACCESS }

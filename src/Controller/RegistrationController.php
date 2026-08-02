@@ -50,6 +50,17 @@ class RegistrationController extends AbstractController
             // Relie l'entreprise a son user (relation bidirectionnelle)
             $user->getEntreprise()->setUser($user);
 
+            $uploadedFile = $form->get('logo')->getData();
+            if ($uploadedFile) {
+                $uploadsDirectory = $this->getParameter('kernel.project_dir') . '/public/uploads/entreprises';
+                if (!is_dir($uploadsDirectory)) {
+                    mkdir($uploadsDirectory, 0775, true);
+                }
+                $newFilename = uniqid() . '.' . $uploadedFile->guessExtension();
+                $uploadedFile->move($uploadsDirectory, $newFilename);
+                $user->getEntreprise()->setLogo('/uploads/entreprises/' . $newFilename);
+            }
+
             $entityManager->persist($user);
             $entityManager->flush();
 

@@ -14,7 +14,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 #[AsCommand(
     name: 'app:create-daip',
-    description: 'Cree un compte DAIP (admin). A utiliser pour le tout premier compte, ensuite ca passe par le formulaire admin protege.',
+    description: 'Cree un compte DAIP admin (ROLE_DAIP_ADMIN). A utiliser pour le tout premier compte, ensuite ca passe par le formulaire admin protege.',
 )]
 class CreateDaipCommand extends Command
 {
@@ -28,7 +28,7 @@ class CreateDaipCommand extends Command
     protected function configure(): void
     {
         $this
-            ->addArgument('email', InputArgument::REQUIRED, "Email du compte DAIP")
+            ->addArgument('email', InputArgument::REQUIRED, "Email du compte DAIP admin")
             ->addArgument('password', InputArgument::REQUIRED, "Mot de passe (change-le ensuite si besoin)")
         ;
     }
@@ -50,13 +50,13 @@ class CreateDaipCommand extends Command
 
         $user = new User();
         $user->setEmail($email);
-        $user->setRoles(['ROLE_DAIP']);
+        $user->setRoles(['ROLE_DAIP_ADMIN']);
         $user->setPassword($this->passwordHasher->hashPassword($user, $plainPassword));
 
         $this->entityManager->persist($user);
         $this->entityManager->flush();
 
-        $io->success(sprintf('Compte DAIP cree pour "%s".', $email));
+        $io->success(sprintf('Compte DAIP admin cree pour "%s".', $email));
 
         return Command::SUCCESS;
     }

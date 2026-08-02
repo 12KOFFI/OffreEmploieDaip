@@ -55,6 +55,7 @@
                         </div>
                         <span class="badge-{{ offre.statut.value }} inline-flex items-center">{{ offre.statut.label }}</span>
                         <div class="flex gap-2 flex-wrap items-center">
+                            <a href="{{ path('app_offre_show', {id: offre.id}) }}" class="btn-ghost btn-sm hover:bg-indigo-50 hover:text-brand-indigo hover:border-brand-indigo/30">Voir l'offre</a>
                             <a href="{{ path('entreprise_offres_edit', {id: offre.id}) }}" class="btn-ghost btn-sm hover:bg-indigo-50 hover:text-brand-indigo hover:border-brand-indigo/30">Modifier</a>
                         </div>
                     </div>

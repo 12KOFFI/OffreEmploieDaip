@@ -40,7 +40,7 @@ Application Symfony de gestion et consultation d'offres d'emploi, avec deux espa
 - Mes offres : création, modification, duplication, publication, retrait, suppression
 - Pagination sur la liste des offres
 - Formulaire d'offre avec image, date d'expiration, compétences et nombre de postes
-- Page de profil entreprise (nom, SIRET, site web, logo, description)
+- Page de profil entreprise (nom, SIRET, site web, logo, contact, description)
 - Redirection automatique vers le bon dashboard selon le rôle
 
 ## 🏗️ Architecture

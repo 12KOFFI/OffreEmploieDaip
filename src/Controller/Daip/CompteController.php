@@ -19,7 +19,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
  * la commande console app:create-daip, cf README.
  */
 #[Route('/daip/comptes')]
-#[IsGranted('ROLE_DAIP')]
+#[IsGranted('ROLE_DAIP_ADMIN')]
 class CompteController extends AbstractController
 {
     #[Route('', name: 'daip_comptes_index', methods: ['GET'])]

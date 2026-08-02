@@ -34,6 +34,9 @@ class Entreprise
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $siteWeb = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $contact = null;
+
     /**
      * @var Collection<int, Offre>
      */
@@ -113,6 +116,17 @@ class Entreprise
     public function setSiteWeb(?string $siteWeb): static
     {
         $this->siteWeb = $siteWeb;
+        return $this;
+    }
+
+    public function getContact(): ?string
+    {
+        return $this->contact;
+    }
+
+    public function setContact(?string $contact): static
+    {
+        $this->contact = $contact;
         return $this;
     }
 

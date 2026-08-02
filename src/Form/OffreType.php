@@ -28,24 +28,28 @@ class OffreType extends AbstractType
     {
         $builder
             ->add('titre', TextType::class, [
-                'label' => 'Titre du poste',
+                'label' => 'Titre du poste <span class="text-red-500">*</span>',
+                'label_html' => true,
                 'attr' => self::INPUT_ATTR,
                 'label_attr' => self::LABEL_ATTR,
             ])
             ->add('description', TextareaType::class, [
-                'label' => 'Description',
+                'label' => 'Description <span class="text-red-500">*</span>',
+                'label_html' => true,
                 'attr' => self::INPUT_ATTR + ['rows' => 6],
                 'label_attr' => self::LABEL_ATTR,
             ])
             ->add('typeContrat', EnumType::class, [
-                'label' => 'Type de contrat',
+                'label' => 'Type de contrat <span class="text-red-500">*</span>',
+                'label_html' => true,
                 'class' => TypeContrat::class,
                 'choice_label' => fn (TypeContrat $t) => $t->label(),
                 'attr' => self::INPUT_ATTR,
                 'label_attr' => self::LABEL_ATTR,
             ])
             ->add('ville', TextType::class, [
-                'label' => 'Ville',
+                'label' => 'Ville <span class="text-red-500">*</span>',
+                'label_html' => true,
                 'attr' => self::INPUT_ATTR,
                 'label_attr' => self::LABEL_ATTR,
             ])
@@ -62,12 +66,14 @@ class OffreType extends AbstractType
                 'label_attr' => self::LABEL_ATTR,
             ])
             ->add('nbAnneesExperience', IntegerType::class, [
-                'label' => "Années d'expérience requises",
+                'label' => "Années d'expérience requises <span class=\"text-red-500\">*</span>",
+                'label_html' => true,
                 'attr' => self::INPUT_ATTR,
                 'label_attr' => self::LABEL_ATTR,
             ])
             ->add('nombrePostes', IntegerType::class, [
-                'label' => 'Nombre de postes à pourvoir',
+                'label' => 'Nombre de postes à pourvoir <span class="text-red-500">*</span>',
+                'label_html' => true,
                 'attr' => self::INPUT_ATTR,
                 'label_attr' => self::LABEL_ATTR,
             ])

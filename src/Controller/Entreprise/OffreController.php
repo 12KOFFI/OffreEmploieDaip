@@ -210,7 +210,7 @@ class OffreController extends AbstractController
             mkdir($uploadsDirectory, 0775, true);
         }
 
-        $newFilename = uniqid() . '.' . $uploadedFile->guessExtension();
+        $newFilename = uniqid() . '.' . ($uploadedFile->guessExtension() ?? 'bin');
         $uploadedFile->move($uploadsDirectory, $newFilename);
 
         $offre->setImage('/uploads/offres/' . $newFilename);

@@ -19,7 +19,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
  * la commande console app:create-daip, cf README.
  */
 #[Route('/daip/comptes')]
-#[IsGranted('ROLE_DAIP')]
+#[IsGranted('ROLE_DAIP_ADMIN')]
 class CompteController extends AbstractController
 {
     #[Route('', name: 'daip_comptes_index', methods: ['GET'])]
@@ -49,13 +49,6 @@ class CompteController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $existing = $userRepository->findOneBy(['email' => $user->getEmail()]);
-
-            if ($existing) {
-                $this->addFlash('error', 'Un compte existe déjà avec cet email.');
-                return $this->render('daip/comptes/new.html.twig', ['form' => $form]);
-            }
-
             $plainPassword = $form->get('plainPassword')->getData();
             $user->setPassword($passwordHasher->hashPassword($user, $plainPassword));
             $user->setRoles(['ROLE_DAIP']);

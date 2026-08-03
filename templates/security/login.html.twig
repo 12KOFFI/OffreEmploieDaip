@@ -9,8 +9,13 @@
         <p class="text-center text-sm text-slate-500 mb-7">Accédez à votre espace personnel</p>
 
         {% if error %}
-            <div class="text-sm rounded-xl px-4 py-3 bg-red-50 border border-red-200 text-red-700 mb-5">
-                {{ error.messageKey|trans(error.messageData, 'security') }}
+            <div class="text-sm rounded-xl px-4 py-3 bg-red-50 border border-red-200 text-red-700 mb-5 font-medium flex items-center gap-2">
+                <svg class="shrink-0" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                {% if error.messageKey == 'Invalid credentials.' %}
+                    Email ou mot de passe incorrect.
+                {% else %}
+                    {{ error.messageKey|trans(error.messageData, 'security') }}
+                {% endif %}
             </div>
         {% endif %}
 

@@ -7,6 +7,7 @@ use App\Entity\User;
 use App\Form\EntrepriseRegistrationType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -31,18 +32,6 @@ class RegistrationController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Un email deja utilise ? On evite le conflit UniqueEntity ici,
-            // ideal serait d'ajouter la contrainte #[UniqueEntity] sur User
-            $existing = $entityManager->getRepository(User::class)
-                ->findOneBy(['email' => $user->getEmail()]);
-
-            if ($existing) {
-                $this->addFlash('error', 'Un compte existe deja avec cet email.');
-                return $this->render('registration/register.html.twig', [
-                    'registrationForm' => $form,
-                ]);
-            }
-
             $plainPassword = $form->get('plainPassword')->getData();
             $user->setPassword($passwordHasher->hashPassword($user, $plainPassword));
             $user->setRoles(['ROLE_ENTREPRISE']);
@@ -56,7 +45,7 @@ class RegistrationController extends AbstractController
                 if (!is_dir($uploadsDirectory)) {
                     mkdir($uploadsDirectory, 0775, true);
                 }
-                $newFilename = uniqid() . '.' . $uploadedFile->guessExtension();
+                $newFilename = uniqid() . '.' . ($uploadedFile->guessExtension() ?? 'bin');
                 $uploadedFile->move($uploadsDirectory, $newFilename);
                 $user->getEntreprise()->setLogo('/uploads/entreprises/' . $newFilename);
             }

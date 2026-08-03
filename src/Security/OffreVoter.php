@@ -58,6 +58,11 @@ class OffreVoter extends Voter
 
     private function estDaip(mixed $user): bool
     {
-        return $user instanceof User && in_array('ROLE_DAIP', $user->getRoles(), true);
+        if (!$user instanceof User) {
+            return false;
+        }
+
+        $roles = $user->getRoles();
+        return in_array('ROLE_DAIP', $roles, true) || in_array('ROLE_DAIP_ADMIN', $roles, true);
     }
 }

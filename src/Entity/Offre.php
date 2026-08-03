@@ -9,6 +9,7 @@ use App\Repository\OffreRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: OffreRepository::class)]
 class Offre
@@ -27,15 +28,18 @@ class Offre
     private ?Secteur $secteur = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'Le titre de l\'offre est requis.')]
     private ?string $titre = null;
 
     #[ORM\Column(type: 'text')]
+    #[Assert\NotBlank(message: 'La description est requise.')]
     private ?string $description = null;
 
     #[ORM\Column(length: 20, enumType: TypeContrat::class)]
     private ?TypeContrat $typeContrat = null;
 
     #[ORM\Column(length: 100)]
+    #[Assert\NotBlank(message: 'La ville est requise.')]
     private ?string $ville = null;
 
     #[ORM\Column(nullable: true)]

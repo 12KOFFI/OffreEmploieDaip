@@ -40,7 +40,7 @@ security:
         ROLE_DAIP_ADMIN: [ROLE_DAIP]
 
     access_control:
-        - { path: ^/daip/comptes, roles: ROLE_DAIP }
+        - { path: ^/daip/comptes, roles: ROLE_DAIP_ADMIN }
         - { path: ^/daip, roles: ROLE_DAIP }
         - { path: ^/entreprise, roles: ROLE_ENTREPRISE }
         - { path: ^/inscription, roles: PUBLIC_ACCESS }

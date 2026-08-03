@@ -4,7 +4,7 @@
         <p>Essayez d'élargir votre recherche ou revenez plus tard.</p>
     </div>
 {% else %}
-    <div id="offres-grid" class="grid md:grid-cols-3 gap-5 mb-10">
+    <div id="offres-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
         {% for offre in offres %}
             {% include 'offres/_card.html.twig' with {offre: offre, aos_delay: loop.index0 * 60} %}
         {% endfor %}

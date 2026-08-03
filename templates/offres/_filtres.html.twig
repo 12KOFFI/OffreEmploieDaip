@@ -1,18 +1,35 @@
 {# Attend : action_url, filtres, secteurs, typesContrat #}
-<form method="get" action="{{ action_url }}" id="offres-filters-form" class="card grid md:grid-cols-[1.4fr_1fr_1fr_1fr_auto] gap-3 p-4.5 mb-8">
-    <input type="text" name="q" value="{{ filtres.q }}" placeholder="Poste ou entreprise" class="field-input" data-filter-q>
-    <input type="text" name="ville" value="{{ filtres.ville }}" placeholder="Ville" class="field-input" data-filter-ville>
-    <select name="secteur" class="field-input" data-filter-secteur>
+<form method="get" action="{{ action_url }}" id="offres-filters-form" class="bg-white border border-slate-200/80 shadow-md rounded-3xl p-5 md:p-6 mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.3fr_1fr_1fr_1fr_auto] gap-3.5 items-center">
+    <div class="relative">
+        <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+        </span>
+        <input type="text" name="q" value="{{ filtres.q }}" placeholder="Poste ou entreprise..." class="field-input pl-10 text-sm" data-filter-q>
+    </div>
+
+    <div class="relative">
+        <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
+        </span>
+        <input type="text" name="ville" value="{{ filtres.ville }}" placeholder="Ville..." class="field-input pl-10 text-sm" data-filter-ville>
+    </div>
+
+    <select name="secteur" class="field-input text-sm" data-filter-secteur>
         <option value="">Tous les secteurs</option>
         {% for secteur in secteurs %}
             <option value="{{ secteur.id }}" {{ filtres.secteur == secteur.id ? 'selected' : '' }}>{{ secteur.nom }}</option>
         {% endfor %}
     </select>
-    <select name="typeContrat" class="field-input" data-filter-type-contrat>
+
+    <select name="typeContrat" class="field-input text-sm" data-filter-type-contrat>
         <option value="">Tous les contrats</option>
         {% for type in typesContrat %}
             <option value="{{ type.value }}" {{ filtres.typeContrat == type.value ? 'selected' : '' }}>{{ type.label }}</option>
         {% endfor %}
     </select>
-    <button type="submit" class="btn-orange">Filtrer</button>
+
+    <button type="submit" class="btn-orange w-full sm:w-auto px-6 py-3 justify-center shadow-sm flex items-center gap-2 font-medium">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 01-.659 1.591l-5.432 5.432a2.25 2.25 0 00-.659 1.591v2.927a2.25 2.25 0 01-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 00-.659-1.591L3.659 7.409A2.25 2.25 0 013 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0112 3z"/></svg>
+        Filtrer
+    </button>
 </form>

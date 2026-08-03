@@ -7,7 +7,7 @@
 /config/secrets/prod/prod.decrypt.private.php
 /public/bundles/
 /var/
-/vendor/
+# /vendor/  <-- Commenté pour envoyer les librairies PHP sur le serveur sans SSH
 ###< symfony/framework-bundle ###
 
 ###> phpunit/phpunit ###

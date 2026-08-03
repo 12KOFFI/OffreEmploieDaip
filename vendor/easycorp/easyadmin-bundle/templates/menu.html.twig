@@ -1,0 +1,124 @@
+{# @var ea \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext #}
+
+{% set main_menu_contents %}
+    {% block main_menu_before %}{% endblock %}
+
+    {% block main_menu %}
+        {# the main menu is a flat list of items where 'section' items mark the start of a new group #}
+        {% set menu_groups = [] %}
+        {% set current_group = {section: null, items: []} %}
+        {% for menuItem in ea().mainMenu.items %}
+            {% if menuItem.isMenuSection %}
+                {% if current_group.section is not null or current_group.items is not empty %}
+                    {% set menu_groups = menu_groups|merge([current_group]) %}
+                {% endif %}
+                {% set current_group = {section: menuItem, items: []} %}
+            {% else %}
+                {# a submenu can be empty when its items define permissions and the current user can't
+                   see any of them; in that case, don't display anything for the submenu #}
+                {% set is_submenu_item_with_no_items = menuItem.type == constant('EasyCorp\\Bundle\\EasyAdminBundle\\Dto\\MenuItemDto::TYPE_SUBMENU') and not menuItem.hasSubItems %}
+                {% if not is_submenu_item_with_no_items %}
+                    {% set current_group = current_group|merge({items: current_group.items|merge([menuItem])}) %}
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+        {% if current_group.section is not null or current_group.items is not empty %}
+            {% set menu_groups = menu_groups|merge([current_group]) %}
+        {% endif %}
+
+        {# badges and submenus are rendered into variables before calling the components
+           because macros (and other template-level constructs) are not available inside
+           the component slots, which are compiled as separate templates #}
+        {% for menu_group in menu_groups %}
+            {% set group_items %}
+                {% for menuItem in menu_group.items %}
+                    {% set item_badge %}
+                        {%- if menuItem.hasVisibleBadge -%}
+                            {{ _self.render_menu_badge(menuItem.badge) }}
+                        {%- endif -%}
+                    {% endset %}
+
+                    {% set item_submenu %}
+                        {% if menuItem.hasSubItems %}
+                            {% set submenu_items %}
+                                {% for menuSubItem in menuItem.subItems %}
+                                    {% if menuSubItem.isMenuSection %}
+                                        <li class="ea-sidebar-submenu-header">{{ menuSubItem.label|trans|raw }}</li>
+                                    {% else %}
+                                        {% set subitem_badge %}
+                                            {%- if menuSubItem.hasVisibleBadge -%}
+                                                {{ _self.render_menu_badge(menuSubItem.badge) }}
+                                            {%- endif -%}
+                                        {% endset %}
+
+                                        <twig:ea:Sidebar:Item
+                                            label="{{ menuSubItem.label|trans }}"
+                                            href="{{ menuSubItem.linkUrl }}"
+                                            icon="{{ menuSubItem.icon }}"
+                                            active="{{ menuSubItem.isSelected }}"
+                                            target="{{ menuSubItem.linkTarget }}"
+                                            rel="{{ menuSubItem.linkRel }}"
+                                            cssClass="{{ menuSubItem.cssClass }}"
+                                            htmlAttributes="{{ menuSubItem.htmlAttributes }}"
+                                        >
+                                            <twig:block name="badge">{{ subitem_badge }}</twig:block>
+                                        </twig:ea:Sidebar:Item>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endset %}
+
+                            <twig:ea:Sidebar:Submenu label="{{ menuItem.label|trans }}">
+                                {{ submenu_items }}
+                            </twig:ea:Sidebar:Submenu>
+                        {% endif %}
+                    {% endset %}
+
+                    <twig:ea:Sidebar:Item
+                        label="{{ menuItem.label|trans }}"
+                        href="{{ menuItem.hasSubItems ? null : menuItem.linkUrl }}"
+                        icon="{{ menuItem.icon }}"
+                        active="{{ menuItem.isSelected }}"
+                        expanded="{{ menuItem.isExpanded }}"
+                        hasSubmenu="{{ menuItem.hasSubItems }}"
+                        keepOpen="{{ menuItem.keepsOpen }}"
+                        target="{{ menuItem.linkTarget }}"
+                        rel="{{ menuItem.linkRel }}"
+                        cssClass="{{ menuItem.cssClass }}"
+                        htmlAttributes="{{ menuItem.htmlAttributes }}"
+                    >
+                        <twig:block name="badge">{{ item_badge }}</twig:block>
+                        <twig:block name="submenu">{{ item_submenu }}</twig:block>
+                    </twig:ea:Sidebar:Item>
+                {% endfor %}
+            {% endset %}
+
+            {% set group_badge %}
+                {%- if menu_group.section and menu_group.section.badge -%}
+                    {{ _self.render_menu_badge(menu_group.section.badge) }}
+                {%- endif -%}
+            {% endset %}
+            {% set section_attributes = menu_group.section ? menu_group.section.htmlAttributes : {} %}
+
+            <twig:ea:Sidebar:Group
+                label="{{ menu_group.section ? menu_group.section.label|trans : null }}"
+                icon="{{ menu_group.section ? menu_group.section.icon : null }}"
+                class="{{ menu_group.section ? menu_group.section.cssClass }}"
+                {{ ...section_attributes }}
+            >
+                <twig:block name="badge">{{ group_badge }}</twig:block>
+                {{ group_items }}
+            </twig:ea:Sidebar:Group>
+        {% endfor %}
+    {% endblock main_menu %}
+
+    {% block main_menu_after %}{% endblock %}
+{% endset %}
+
+<twig:ea:Sidebar:Content>
+    {{ main_menu_contents }}
+</twig:ea:Sidebar:Content>
+
+{% macro render_menu_badge(badge) %}
+    {%- set badge_attributes = badge.htmlStyle ? badge.htmlAttributes|merge({style: badge.htmlStyle}) : badge.htmlAttributes -%}
+    <twig:ea:Badge variant="{{ badge.cssClass|replace({'badge-': ''}) }}" radius="full" class="ea-sidebar-badge" {{ ...badge_attributes }}>{{ badge.content }}</twig:ea:Badge>
+{%- endmacro %}

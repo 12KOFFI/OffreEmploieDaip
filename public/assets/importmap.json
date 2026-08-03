@@ -1,0 +1,74 @@
+{
+    "app": {
+        "path": "\/assets\/app-EI5wrsv.js",
+        "type": "js"
+    },
+    "\/assets\/stimulus_bootstrap.js": {
+        "path": "\/assets\/stimulus_bootstrap-fWNU0-I.js",
+        "type": "js"
+    },
+    "\/assets\/@symfony\/stimulus-bundle\/controllers.js": {
+        "path": "\/assets\/@symfony\/stimulus-bundle\/controllers-obm40E8.js",
+        "type": "js"
+    },
+    "\/assets\/@symfony\/ux-autocomplete\/controller.js": {
+        "path": "\/assets\/@symfony\/ux-autocomplete\/controller-FEEd2HP.js",
+        "type": "js"
+    },
+    "\/assets\/@symfony\/ux-turbo\/turbo_controller.js": {
+        "path": "\/assets\/@symfony\/ux-turbo\/turbo_controller-bFCo5ub.js",
+        "type": "js"
+    },
+    "\/assets\/controllers\/hello_controller.js": {
+        "path": "\/assets\/controllers\/hello_controller-h7Y4WCm.js",
+        "type": "js"
+    },
+    "\/assets\/controllers\/csrf_protection_controller.js": {
+        "path": "\/assets\/controllers\/csrf_protection_controller-xsifGyW.js",
+        "type": "js"
+    },
+    "\/assets\/styles\/app.css": {
+        "path": "\/assets\/styles\/app-7taLCxj.css",
+        "type": "css"
+    },
+    "@hotwired\/stimulus": {
+        "path": "\/assets\/vendor\/@hotwired\/stimulus\/stimulus.index-ryewcoo.js",
+        "type": "js"
+    },
+    "@symfony\/stimulus-bundle": {
+        "path": "\/assets\/@symfony\/stimulus-bundle\/loader-IOzBDLu.js",
+        "type": "js"
+    },
+    "@hotwired\/turbo": {
+        "path": "\/assets\/vendor\/@hotwired\/turbo\/turbo.index-J4AkTcK.js",
+        "type": "js"
+    },
+    "tom-select": {
+        "path": "\/assets\/vendor\/tom-select\/tom-select.index-jpggcVr.js",
+        "type": "js"
+    },
+    "@orchidjs\/sifter": {
+        "path": "\/assets\/vendor\/@orchidjs\/sifter\/sifter.index-dBmLgbU.js",
+        "type": "js"
+    },
+    "@orchidjs\/unicode-variants": {
+        "path": "\/assets\/vendor\/@orchidjs\/unicode-variants\/unicode-variants.index-r1umWCL.js",
+        "type": "js"
+    },
+    "tom-select\/dist\/css\/tom-select.default.min.css": {
+        "path": "\/assets\/vendor\/tom-select\/dist\/css\/tom-select.default.min-wLi1e_D.css",
+        "type": "css"
+    },
+    "tom-select\/dist\/css\/tom-select.default.css": {
+        "path": "\/assets\/vendor\/tom-select\/dist\/css\/tom-select.default-kJuSzGY.css",
+        "type": "css"
+    },
+    "tom-select\/dist\/css\/tom-select.bootstrap4.css": {
+        "path": "\/assets\/vendor\/tom-select\/dist\/css\/tom-select.bootstrap4-FSRevBM.css",
+        "type": "css"
+    },
+    "tom-select\/dist\/css\/tom-select.bootstrap5.css": {
+        "path": "\/assets\/vendor\/tom-select\/dist\/css\/tom-select.bootstrap5-jTM0nYn.css",
+        "type": "css"
+    }
+}

@@ -16,6 +16,6 @@
 ###< phpunit/phpunit ###
 
 ###> symfony/asset-mapper ###
-/public/assets/
+# /public/assets/  <-- Commenté pour pouvoir envoyer les assets compilés sur le serveur
 /assets/vendor/
 ###< symfony/asset-mapper ###

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
     <title>{% block title %}Tableau de bord{% endblock %} — DAIP Emploi</title>
@@ -118,18 +118,22 @@
 
     {% include 'partials/_scripts.html.twig' %}
     <script>
-        function toggleSidebar() {
+        window.toggleSidebar = function() {
             const sidebar = document.getElementById('dashboard-sidebar');
             const overlay = document.getElementById('sidebar-overlay');
-            sidebar.classList.toggle('-translate-x-full');
-            overlay.classList.toggle('hidden');
-        }
-        function closeSidebar() {
+            if (sidebar && overlay) {
+                sidebar.classList.toggle('-translate-x-full');
+                overlay.classList.toggle('hidden');
+            }
+        };
+        window.closeSidebar = function() {
             const sidebar = document.getElementById('dashboard-sidebar');
             const overlay = document.getElementById('sidebar-overlay');
-            sidebar.classList.add('-translate-x-full');
-            overlay.classList.add('hidden');
-        }
+            if (sidebar && overlay) {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            }
+        };
     </script>
     {% block javascripts %}{% endblock %}
 </body>

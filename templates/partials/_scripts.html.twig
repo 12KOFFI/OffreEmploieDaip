@@ -1,46 +1,6 @@
 <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 <script>
-    AOS.init({ duration: 700, easing: 'ease-out-cubic', once: true, offset: 40 });
-
-    document.addEventListener('DOMContentLoaded', function() {
-        const offresLinks = document.querySelectorAll('[data-nav-offres]');
-        offresLinks.forEach(function(link) {
-            link.addEventListener('click', function(e) {
-                if (window.location.pathname === '/') {
-                    e.preventDefault();
-                    const target = document.querySelector(this.getAttribute('data-target'));
-                    if (target) {
-                        target.scrollIntoView({ behavior: 'smooth' });
-                    }
-                }
-            });
-        });
-
-        const flashes = document.querySelectorAll('[data-flash-auto-hide]');
-        flashes.forEach(function(flash) {
-            setTimeout(function() {
-                flash.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-                flash.style.opacity = '0';
-                flash.style.transform = 'translateY(-10px)';
-                setTimeout(function() {
-                    flash.remove();
-                }, 500);
-            }, 4000);
-        });
-
-        const mobileToggle = document.getElementById('mobile-menu-toggle');
-        const mobileMenu = document.getElementById('mobile-menu');
-        if (mobileToggle && mobileMenu) {
-            mobileToggle.addEventListener('click', function() {
-                const isHidden = mobileMenu.classList.contains('hidden');
-                mobileMenu.classList.toggle('hidden', !isHidden);
-            });
-
-            mobileMenu.querySelectorAll('a').forEach(function(link) {
-                link.addEventListener('click', function() {
-                    mobileMenu.classList.add('hidden');
-                });
-            });
-        }
-    });
+    if (typeof AOS !== 'undefined') {
+        AOS.init({ duration: 700, easing: 'ease-out-cubic', once: true, offset: 40 });
+    }
 </script>

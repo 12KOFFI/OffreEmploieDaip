@@ -22,35 +22,35 @@
     </div>
 </form>
 
-<div data-aos="fade-up" class="card overflow-hidden shadow-sm border border-slate-200/80 rounded-3xl bg-white" id="daip-table-container">
-    <div class="overflow-x-auto scrollbar-thin">
-        <table class="w-full border-collapse min-w-[800px]">
+<div data-aos="fade-up" class="card card-zoom overflow-hidden" id="daip-table-container">
+    <div class="overflow-x-auto w-full">
+        <table class="w-full min-w-[800px] border-collapse">
             <thead>
-                <tr class="bg-slate-50 border-b border-slate-100">
-                    <th class="text-left text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3.5">Offre</th>
-                    <th class="text-left text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3.5">Entreprise</th>
-                    <th class="text-left text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3.5">Ville</th>
-                    <th class="text-left text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3.5">Statut</th>
-                    <th class="text-left text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3.5">Date publication</th>
-                    <th class="text-left text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3.5">Date expiration</th>
-                    <th class="text-right text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3.5">Action</th>
+                <tr class="bg-slate-50">
+                    <th class="text-left text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3">Offre</th>
+                    <th class="text-left text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3">Entreprise</th>
+                    <th class="text-left text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3">Ville</th>
+                    <th class="text-left text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3">Statut</th>
+                    <th class="text-left text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3">Date publication</th>
+                    <th class="text-left text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3">Date expiration</th>
+                    <th class="text-left text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3">Action</th>
                 </tr>
             </thead>
             <tbody id="daip-table-body">
                 {% for offre in offres %}
-                    <tr class="border-t border-slate-100 hover:bg-slate-50/80 transition-colors cursor-pointer" onclick="window.location='{{ path('app_offre_show', {id: offre.id}) }}'">
-                        <td class="px-5 py-4 text-sm font-semibold text-navy">{{ offre.titre }}</td>
-                        <td class="px-5 py-4 text-sm text-slate-600">{{ offre.entreprise.nom }}</td>
-                        <td class="px-5 py-4 text-sm text-slate-600">{{ offre.ville }}</td>
+                    <tr class="border-t border-slate-100 hover:bg-slate-75 transition-colors cursor-pointer" onclick="window.location='{{ path('app_offre_show', {id: offre.id}) }}'">
+                        <td class="px-5 py-4 text-sm font-medium text-navy">{{ offre.titre }}</td>
+                        <td class="px-5 py-4 text-sm">{{ offre.entreprise.nom }}</td>
+                        <td class="px-5 py-4 text-sm">{{ offre.ville }}</td>
                         <td class="px-5 py-4"><span class="badge-{{ offre.statut.value }} inline-flex items-center">{{ offre.statut.label }}</span></td>
-                        <td class="px-5 py-4 text-sm text-slate-500">{{ offre.datePublication ? offre.datePublication|date('d/m/Y') : '—' }}</td>
-                        <td class="px-5 py-4 text-sm text-slate-500">{{ offre.dateExpiration ? offre.dateExpiration|date('d/m/Y') : '—' }}</td>
-                        <td class="px-5 py-4 text-right">
-                            <a href="{{ path('app_offre_show', {id: offre.id}) }}" class="text-sm font-semibold text-brand-indigo hover:underline">Consulter →</a>
+                        <td class="px-5 py-4 text-sm">{{ offre.datePublication ? offre.datePublication|date('d/m/Y') : '—' }}</td>
+                        <td class="px-5 py-4 text-sm">{{ offre.dateExpiration ? offre.dateExpiration|date('d/m/Y') : '—' }}</td>
+                        <td class="px-5 py-4">
+                            <a href="{{ path('app_offre_show', {id: offre.id}) }}" class="text-sm font-semibold text-brand-indigo hover:underline">Consulter</a>
                         </td>
                     </tr>
                 {% else %}
-                    <tr><td colspan="7" class="text-center text-slate-500 py-12">Aucune offre pour ce filtre.</td></tr>
+                    <tr><td colspan="7" class="text-center text-slate-500 py-10">Aucune offre pour ce filtre.</td></tr>
                 {% endfor %}
             </tbody>
         </table>

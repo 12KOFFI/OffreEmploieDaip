@@ -2,14 +2,11 @@
 
 namespace App\Entity;
 
-use App\Enum\NiveauEtude;
 use App\Enum\StatutOffre;
-use App\Enum\TypeContrat;
 use App\Repository\OffreRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: OffreRepository::class)]
 class Offre
@@ -23,48 +20,11 @@ class Offre
     #[ORM\JoinColumn(nullable: false)]
     private ?Entreprise $entreprise = null;
 
-    #[ORM\ManyToOne(inversedBy: 'offres', targetEntity: Secteur::class)]
-    #[ORM\JoinColumn(nullable: true)]
-    private ?Secteur $secteur = null;
-
-    #[ORM\Column(length: 255)]
-    #[Assert\NotBlank(message: 'Le titre de l\'offre est requis.')]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $titre = null;
 
-    #[ORM\Column(type: 'text')]
-    #[Assert\NotBlank(message: 'La description est requise.')]
+    #[ORM\Column(type: 'text', nullable: true)]
     private ?string $description = null;
-
-    #[ORM\Column(length: 20, enumType: TypeContrat::class)]
-    private ?TypeContrat $typeContrat = null;
-
-    #[ORM\Column(length: 100)]
-    #[Assert\NotBlank(message: 'La ville est requise.')]
-    private ?string $ville = null;
-
-    #[ORM\Column(nullable: true)]
-    private ?int $salaireMin = null;
-
-    #[ORM\Column(nullable: true)]
-    private ?int $salaireMax = null;
-
-    #[ORM\Column]
-    private int $nbAnneesExperience = 0;
-
-    #[ORM\Column]
-    private int $nombrePostes = 1;
-
-    #[ORM\Column(length: 50, nullable: true, enumType: NiveauEtude::class)]
-    private ?NiveauEtude $niveauEtude = null;
-
-    #[ORM\Column(length: 20, enumType: StatutOffre::class)]
-    private StatutOffre $statut = StatutOffre::BROUILLON;
-
-    #[ORM\Column]
-    private ?\DateTimeImmutable $datePublication = null;
-
-    #[ORM\Column(nullable: true)]
-    private ?\DateTimeImmutable $dateExpiration = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $image = null;
@@ -72,17 +32,29 @@ class Offre
     #[ORM\Column]
     private int $views = 0;
 
+    #[ORM\Column(length: 20, enumType: StatutOffre::class)]
+    private StatutOffre $statut = StatutOffre::BROUILLON;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $datePublication = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $dateExpiration = null;
+
     /**
-     * @var Collection<int, Competence>
+     * @var Collection<int, OffreMetier>
      */
-    #[ORM\ManyToMany(targetEntity: Competence::class, inversedBy: 'offres')]
-    #[ORM\JoinTable(name: 'offre_competence')]
-    private Collection $competences;
+    #[ORM\OneToMany(
+        targetEntity: OffreMetier::class,
+        mappedBy: 'offre',
+        cascade: ['persist', 'remove'],
+        orphanRemoval: true,
+    )]
+    private Collection $offreMetiers;
 
     public function __construct()
     {
-        $this->datePublication = new \DateTimeImmutable();
-        $this->competences = new ArrayCollection();
+        $this->offreMetiers = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -101,23 +73,12 @@ class Offre
         return $this;
     }
 
-    public function getSecteur(): ?Secteur
-    {
-        return $this->secteur;
-    }
-
-    public function setSecteur(?Secteur $secteur): static
-    {
-        $this->secteur = $secteur;
-        return $this;
-    }
-
     public function getTitre(): ?string
     {
         return $this->titre;
     }
 
-    public function setTitre(string $titre): static
+    public function setTitre(?string $titre): static
     {
         $this->titre = $titre;
         return $this;
@@ -128,119 +89,9 @@ class Offre
         return $this->description;
     }
 
-    public function setDescription(string $description): static
+    public function setDescription(?string $description): static
     {
         $this->description = $description;
-        return $this;
-    }
-
-    public function getTypeContrat(): ?TypeContrat
-    {
-        return $this->typeContrat;
-    }
-
-    public function setTypeContrat(TypeContrat $typeContrat): static
-    {
-        $this->typeContrat = $typeContrat;
-        return $this;
-    }
-
-    public function getVille(): ?string
-    {
-        return $this->ville;
-    }
-
-    public function setVille(string $ville): static
-    {
-        $this->ville = $ville;
-        return $this;
-    }
-
-    public function getSalaireMin(): ?int
-    {
-        return $this->salaireMin;
-    }
-
-    public function setSalaireMin(?int $salaireMin): static
-    {
-        $this->salaireMin = $salaireMin;
-        return $this;
-    }
-
-    public function getSalaireMax(): ?int
-    {
-        return $this->salaireMax;
-    }
-
-    public function setSalaireMax(?int $salaireMax): static
-    {
-        $this->salaireMax = $salaireMax;
-        return $this;
-    }
-
-    public function getNbAnneesExperience(): int
-    {
-        return $this->nbAnneesExperience;
-    }
-
-    public function setNbAnneesExperience(int $nbAnneesExperience): static
-    {
-        $this->nbAnneesExperience = $nbAnneesExperience;
-        return $this;
-    }
-
-    public function getNombrePostes(): int
-    {
-        return $this->nombrePostes;
-    }
-
-    public function setNombrePostes(int $nombrePostes): static
-    {
-        $this->nombrePostes = $nombrePostes;
-        return $this;
-    }
-
-    public function getNiveauEtude(): ?NiveauEtude
-    {
-        return $this->niveauEtude;
-    }
-
-    public function setNiveauEtude(?NiveauEtude $niveauEtude): static
-    {
-        $this->niveauEtude = $niveauEtude;
-        return $this;
-    }
-
-    public function getStatut(): StatutOffre
-    {
-        return $this->statut;
-    }
-
-    public function setStatut(StatutOffre $statut): static
-    {
-        $this->statut = $statut;
-        return $this;
-    }
-
-    public function getDatePublication(): ?\DateTimeImmutable
-    {
-        return $this->datePublication;
-    }
-
-    public function setDatePublication(\DateTimeImmutable $datePublication): static
-    {
-        $this->datePublication = $datePublication;
-        return $this;
-    }
-
-    public function getDateExpiration(): ?\DateTimeImmutable
-    {
-        return $this->dateExpiration;
-    }
-
-    public function setDateExpiration(?\DateTimeImmutable $dateExpiration): static
-    {
-        $this->dateExpiration = $dateExpiration;
         return $this;
     }
 
@@ -272,26 +123,113 @@ class Offre
         return $this;
     }
 
+    public function getStatut(): StatutOffre
+    {
+        return $this->statut;
+    }
+
+    public function setStatut(StatutOffre $statut): static
+    {
+        $this->statut = $statut;
+        return $this;
+    }
+
+    public function getDatePublication(): ?\DateTimeImmutable
+    {
+        return $this->datePublication;
+    }
+
+    public function setDatePublication(?\DateTimeImmutable $datePublication): static
+    {
+        $this->datePublication = $datePublication;
+        return $this;
+    }
+
+    public function getDateExpiration(): ?\DateTimeImmutable
+    {
+        return $this->dateExpiration;
+    }
+
+    public function setDateExpiration(?\DateTimeImmutable $dateExpiration): static
+    {
+        $this->dateExpiration = $dateExpiration;
+        return $this;
+    }
+
     /**
-     * @return Collection<int, Competence>
+     * @return Collection<int, OffreMetier>
      */
-    public function getCompetences(): Collection
+    public function getOffreMetiers(): Collection
     {
-        return $this->competences;
+        return $this->offreMetiers;
     }
 
-    public function addCompetence(Competence $competence): static
+    public function addOffreMetier(OffreMetier $offreMetier): static
     {
-        if (!$this->competences->contains($competence)) {
-            $this->competences->add($competence);
+        if (!$this->offreMetiers->contains($offreMetier)) {
+            $this->offreMetiers->add($offreMetier);
+            $offreMetier->setOffre($this);
         }
+
         return $this;
     }
 
-    public function removeCompetence(Competence $competence): static
+    public function removeOffreMetier(OffreMetier $offreMetier): static
     {
-        $this->competences->removeElement($competence);
+        if ($this->offreMetiers->removeElement($offreMetier)) {
+            if ($offreMetier->getOffre() === $this) {
+                $offreMetier->setOffre(null);
+            }
+        }
+
         return $this;
+    }
+
+    public function getVilles(): array
+    {
+        $villes = [];
+        foreach ($this->getOffreMetiers() as $om) {
+            $ville = $om->getVille();
+            if ($ville && !in_array($ville, $villes, true)) {
+                $villes[] = $ville;
+            }
+        }
+        return $villes;
+    }
+
+    public function getSalaireMinGlobal(): ?int
+    {
+        $min = null;
+        foreach ($this->getOffreMetiers() as $om) {
+            if ($om->getSalaireMin() !== null) {
+                if ($min === null || $om->getSalaireMin() < $min) {
+                    $min = $om->getSalaireMin();
+                }
+            }
+        }
+        return $min;
+    }
+
+    public function getSalaireMaxGlobal(): ?int
+    {
+        $max = null;
+        foreach ($this->getOffreMetiers() as $om) {
+            if ($om->getSalaireMax() !== null) {
+                if ($max === null || $om->getSalaireMax() > $max) {
+                    $max = $om->getSalaireMax();
+                }
+            }
+        }
+        return $max;
+    }
+
+    public function getTotalPostes(): int
+    {
+        $total = 0;
+        foreach ($this->getOffreMetiers() as $om) {
+            $total += $om->getNombrePostes();
+        }
+        return $total;
     }
 
     public function __toString(): string

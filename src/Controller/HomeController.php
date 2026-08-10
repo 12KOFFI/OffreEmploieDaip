@@ -6,7 +6,7 @@ use App\Enum\StatutOffre;
 use App\Enum\TypeContrat;
 use App\Repository\EntrepriseRepository;
 use App\Repository\OffreRepository;
-use App\Repository\SecteurRepository;
+use App\Repository\MetierRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,13 +18,13 @@ class HomeController extends AbstractController
     public function index(
         Request $request,
         OffreRepository $offreRepository,
-        SecteurRepository $secteurRepository,
+        MetierRepository $metierRepository,
         EntrepriseRepository $entrepriseRepository,
     ): Response {
         $filtres = [
             'q' => $request->query->get('q', ''),
             'ville' => $request->query->get('ville', ''),
-            'secteur' => $request->query->get('secteur', ''),
+            'metier' => $request->query->get('metier', ''),
             'typeContrat' => $request->query->get('typeContrat', ''),
         ];
 
@@ -40,11 +40,11 @@ class HomeController extends AbstractController
             'offres' => $offres,
             'filtres' => $filtres,
             'filtresActifs' => $filtresActifs,
-            'secteurs' => $secteurRepository->findBy([], ['nom' => 'ASC']),
+            'metiers' => $metierRepository->findBy([], ['nom' => 'ASC']),
             'typesContrat' => TypeContrat::cases(),
             'statsEntreprises' => $entrepriseRepository->count([]),
             'statsOffresPubliees' => $statsCompteurs['publiee'] ?? 0,
-            'statsSecteurs' => $secteurRepository->count([]),
+            'statsMetiers' => $metierRepository->count([]),
         ]);
     }
 }

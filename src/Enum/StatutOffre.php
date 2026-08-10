@@ -13,9 +13,9 @@ enum StatutOffre: string
     {
         return match ($this) {
             self::BROUILLON => 'Brouillon',
-            self::PUBLIEE => 'Publiee',
-            self::RETIREE => 'Retiree',
-            self::EXPIREE => 'Expiree',
+            self::PUBLIEE   => 'Publiée',
+            self::RETIREE   => 'Retirée',
+            self::EXPIREE   => 'Expirée',
         };
     }
 }

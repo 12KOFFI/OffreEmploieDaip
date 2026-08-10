@@ -15,7 +15,14 @@
             <div data-aos="fade-up" class="card card-zoom p-9 sm:p-11">
                 <div class="flex justify-between items-center mb-4.5">
                     <span class="text-xs text-slate-500 font-medium">RÉF. {{ 'DAIP-%s-%05d'|format(offre.datePublication|date('Y'), offre.id) }}</span>
-                    <span class="badge-{{ offre.statut.value }} inline-flex items-center">{{ offre.statut.label }}</span>
+                    <div class="flex items-center gap-2">
+                        <span class="badge-{{ offre.statut.value }} inline-flex items-center">{{ offre.statut.label }}</span>
+                        {% if is_granted('OFFRE_EDIT', offre) %}
+                            <a href="{{ path('entreprise_offres_edit', {id: offre.id}) }}" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition shadow-sm">
+                                <i class="fa-solid fa-pen" aria-hidden="true"></i> Modifier
+                            </a>
+                        {% endif %}
+                    </div>
                 </div>
 
                 {% if offre.image %}
@@ -25,27 +32,59 @@
                 {% endif %}
 
                 <h1 class="text-[28px] mb-2">{{ offre.titre }}</h1>
-                <div class="text-[15px] text-slate-500 mb-6">Chez <strong class="text-navy">{{ offre.entreprise.nom }}</strong> — {{ offre.ville }}</div>
+                <div class="text-[15px] text-slate-500 mb-6">Chez <strong class="text-navy">{{ offre.entreprise.nom }}</strong></div>
 
                 <div class="flex flex-wrap gap-2 mb-7">
-                    <span class="tag-pill">{{ offre.typeContrat.label }}</span>
-                    <span class="tag-pill">{{ offre.nbAnneesExperience }} an{{ offre.nbAnneesExperience > 1 ? 's' : '' }} d'expérience</span>
-                    <span class="tag-pill">{{ offre.nombrePostes }} poste{{ offre.nombrePostes > 1 ? 's' : '' }}</span>
-                    {% if offre.niveauEtude %}<span class="tag-pill">{{ offre.niveauEtude.value }}</span>{% endif %}
-                    {% if offre.secteur %}<span class="tag-pill">{{ offre.secteur.nom }}</span>{% endif %}
+                    <span class="tag-pill">{{ offre.offreMetiers|length }} profil{{ offre.offreMetiers|length > 1 ? 's' : '' }} recherché{{ offre.offreMetiers|length > 1 ? 's' : '' }}</span>
+                    <span class="tag-pill">{{ offre.totalPostes }} poste{{ offre.totalPostes > 1 ? 's' : '' }} à pourvoir</span>
+                    {% if offre.villes|length > 0 %}
+                        <span class="tag-pill">{{ offre.villes|join(', ') }}</span>
+                    {% endif %}
                 </div>
 
-                <h3 class="text-sm uppercase tracking-wide text-slate-500 font-semibold mb-3">Description du poste</h3>
-                <p class="text-[15px] leading-relaxed whitespace-pre-line">{{ offre.description }}</p>
-
-                {% if offre.competences|length > 0 %}
-                    <h3 class="text-sm uppercase tracking-wide text-slate-500 font-semibold mt-7 mb-3">Compétences requises</h3>
-                    <div class="flex flex-wrap gap-2">
-                        {% for competence in offre.competences %}
-                            <span class="text-xs font-medium px-3 py-1.5 rounded-full bg-slate-50 text-navy">{{ competence.nom }}</span>
-                        {% endfor %}
-                    </div>
+                {% if offre.description %}
+                    <h3 class="text-sm uppercase tracking-wide text-slate-500 font-semibold mb-3">Contexte de l'offre</h3>
+                    <p class="text-[15px] leading-relaxed whitespace-pre-line">{{ offre.description }}</p>
                 {% endif %}
+
+                <h3 class="text-sm uppercase tracking-wide text-slate-500 font-semibold mt-8 mb-4">Profils recherchés ({{ offre.offreMetiers|length }})</h3>
+                <div class="space-y-4">
+                    {% for om in offre.offreMetiers %}
+                        <div class="border border-slate-200 rounded-xl p-5 bg-white shadow-sm">
+                            <h4 class="font-bold text-lg text-slate-800 mb-1">{{ om.metier.nom }}</h4>
+                            <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-600 mb-3">
+                                <span title="Ville"><i class="fa-solid fa-location-dot text-slate-400 mr-1.5"></i>{{ om.ville }}</span>
+                                <span title="Postes"><i class="fa-solid fa-users text-slate-400 mr-1.5"></i>{{ om.nombrePostes }} poste(s)</span>
+                                {% if om.typeContrat %}
+                                    <span title="Contrat"><i class="fa-solid fa-file-contract text-slate-400 mr-1.5"></i>{{ om.typeContrat.label }}</span>
+                                {% endif %}
+                                {% if om.salaireMin or om.salaireMax %}
+                                    <span title="Rémunération"><i class="fa-solid fa-money-bill-wave text-slate-400 mr-1.5"></i>{{ om.salaireMin ? om.salaireMin|number_format(0, ',', ' ') : '?' }} – {{ om.salaireMax ? om.salaireMax|number_format(0, ',', ' ') : '?' }} FCFA</span>
+                                {% endif %}
+                            </div>
+                            
+                            {% if om.nbAnneesExperience or om.niveauEtude or om.diplome %}
+                                <div class="flex gap-2 mb-3 flex-wrap">
+                                    {% if om.nbAnneesExperience %}
+                                        <span class="text-xs font-semibold bg-slate-100 text-slate-700 px-2.5 py-1 rounded-md">{{ om.nbAnneesExperience }} an(s) d'expérience</span>
+                                    {% endif %}
+                                    {% if om.niveauEtude %}
+                                        <span class="text-xs font-semibold bg-slate-100 text-slate-700 px-2.5 py-1 rounded-md">{{ om.niveauEtude.label }}</span>
+                                    {% endif %}
+                                    {% if om.diplome %}
+                                        <span class="text-xs font-semibold bg-slate-100 text-slate-700 px-2.5 py-1 rounded-md">{{ om.diplome.label }}</span>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                            
+                            {% if om.prerequis %}
+                                <div class="mt-3 text-sm text-slate-500 whitespace-pre-line border-t border-slate-100 pt-3">
+                                    <strong>Prérequis :</strong><br>{{ om.prerequis }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
             </div>
 
             <div data-aos="fade-up" data-aos-delay="120" class="card p-7">
@@ -54,27 +93,22 @@
                 <div class="flex justify-between text-sm py-2.5">
                     <span class="text-slate-500">Rémunération</span>
                     <span class="font-medium text-navy text-right">
-                        {% if offre.salaireMin or offre.salaireMax %}
-                            {{ offre.salaireMin ? offre.salaireMin|number_format(0, ',', ' ') : '?' }} – {{ offre.salaireMax ? offre.salaireMax|number_format(0, ',', ' ') : '?' }} FCFA
+                        {% if offre.salaireMinGlobal or offre.salaireMaxGlobal %}
+                            {{ offre.salaireMinGlobal ? offre.salaireMinGlobal|number_format(0, ',', ' ') : '?' }} – {{ offre.salaireMaxGlobal ? offre.salaireMaxGlobal|number_format(0, ',', ' ') : '?' }} FCFA
                         {% else %}Non communiquée{% endif %}
                     </span>
                 </div>
-                <div class="flex justify-between text-sm py-2.5 border-t border-slate-100"><span class="text-slate-500">Ville</span><span class="font-medium text-navy">{{ offre.ville }}</span></div>
-                <div class="flex justify-between text-sm py-2.5 border-t border-slate-100"><span class="text-slate-500">Contrat</span><span class="font-medium text-navy">{{ offre.typeContrat.label }}</span></div>
-                <div class="flex justify-between text-sm py-2.5 border-t border-slate-100"><span class="text-slate-500">Expérience</span><span class="font-medium text-navy">{{ offre.nbAnneesExperience }} an{{ offre.nbAnneesExperience > 1 ? 's' : '' }}</span></div>
+                <div class="flex justify-between text-sm py-2.5 border-t border-slate-100"><span class="text-slate-500">Ville(s)</span><span class="font-medium text-navy text-right">{{ offre.villes|join(', ') }}</span></div>
+                <div class="flex justify-between text-sm py-2.5 border-t border-slate-100"><span class="text-slate-500">Postes</span><span class="font-medium text-navy text-right">{{ offre.totalPostes }}</span></div>
                 {% if offre.datePublication %}
                     <div class="flex justify-between text-sm py-2.5 border-t border-slate-100"><span class="text-slate-500">Publiée le</span><span class="font-medium text-navy">{{ offre.datePublication|date('d/m/Y') }}</span></div>
                 {% endif %}
                 {% if offre.dateExpiration %}
                     <div class="flex justify-between text-sm py-2.5 border-t border-slate-100"><span class="text-slate-500">Date d'expiration</span><span class="font-medium text-navy">{{ offre.dateExpiration|date('d/m/Y') }}</span></div>
                 {% endif %}
-                {% if offre.entreprise.siteWeb %}
-                    <div class="flex justify-between text-sm py-2.5 border-t border-slate-100"><span class="text-slate-500">Site web</span><a href="{{ offre.entreprise.siteWeb }}" target="_blank" rel="noopener" class="font-medium text-brand-indigo">Visiter →</a></div>
-                {% endif %}
 
-                <div class="mt-5 bg-slate-50 rounded-xl p-4 text-xs text-slate-500">
-                    Cette offre est publiée directement par l'entreprise et supervisée par la DAIP. Aucune candidature en ligne n'est disponible sur cette plateforme pour le moment.
-                </div>
+
+               
 
                 <div class="mt-5">
                     <h3 class="text-sm font-semibold mb-3">Partager cette offre</h3>
@@ -85,8 +119,70 @@
                     <p id="copy-feedback" class="text-xs text-brand-green mt-2 hidden">Lien copié dans le presse-papier.</p>
                 </div>
             </div>
-        </div>
 
+            {# ===== Section À propos de l'entreprise ===== #}
+            {% if not is_granted('ROLE_ENTREPRISE') %}
+            <div data-aos="fade-up" data-aos-delay="200" class="card p-7">
+                <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500 mb-5">
+                    À propos de l'entreprise
+                </h3>
+
+                {# Logo + nom #}
+                <div class="flex items-center gap-4 mb-5">
+                    {% if offre.entreprise.logo %}
+                        <img src="{{ offre.entreprise.logo }}"
+                             alt="Logo {{ offre.entreprise.nom }}"
+                             class="w-16 h-16 object-contain rounded-xl border border-slate-100 bg-white p-1 shadow-sm shrink-0">
+                    {% else %}
+                        <div class="w-16 h-16 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-brand-indigo" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4M9 9v.01M9 12v.01M9 15v.01M9 18v.01"/>
+                            </svg>
+                        </div>
+                    {% endif %}
+                    <div class="min-w-0">
+                        <p class="font-bold text-navy text-base leading-tight">{{ offre.entreprise.nom }}</p>
+                    </div>
+                </div>
+
+                {# Description #}
+                {% if offre.entreprise.description %}
+                    <p class="text-sm text-slate-600 leading-relaxed mb-5 whitespace-pre-line border-t border-slate-100 pt-4">
+                        {{ offre.entreprise.description|length > 280
+                            ? offre.entreprise.description|slice(0, 280) ~ '…'
+                            : offre.entreprise.description }}
+                    </p>
+                {% endif %}
+
+                {# Coordonnées #}
+                <div class="space-y-3 {% if offre.entreprise.description %}{% else %}border-t border-slate-100 pt-4{% endif %}">
+                    {% if offre.entreprise.contact %}
+                        <div class="flex items-center gap-3 text-sm">
+                            <span class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z"/>
+                                </svg>
+                            </span>
+                            <span class="text-slate-700 font-medium break-all">{{ offre.entreprise.contact }}</span>
+                        </div>
+                    {% endif %}
+
+                </div>
+
+                {# Lien "toutes les offres de cette entreprise" #}
+                <a href="{{ path('app_offres_liste', {q: offre.entreprise.nom}) }}"
+                   class="mt-6 flex items-center justify-center gap-2 w-full text-sm font-semibold text-brand-indigo border border-brand-indigo/30 bg-indigo-50/60 hover:bg-indigo-100 rounded-xl py-2.5 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    </svg>
+                    Voir toutes les offres de {{ offre.entreprise.nom }}
+                </a>
+            </div>
+
+        </div>
+        {% endif %}
+
+        {% if not is_granted('ROLE_ENTREPRISE') %}
         <div class="mt-14">
             <h2 class="text-2xl mb-6">Offres similaires</h2>
             <div class="grid md:grid-cols-3 gap-5">
@@ -99,6 +195,7 @@
                 {% endfor %}
             </div>
         </div>
+        {% endif %}
     </div>
 </div>
 

@@ -57,13 +57,6 @@ class EntrepriseRegistrationType extends AbstractType
                 'attr' => self::INPUT_ATTR,
                 'label_attr' => self::LABEL_ATTR,
             ])
-            ->add('siret', TextType::class, [
-                'label' => 'SIRET (optionnel)',
-                'required' => false,
-                'property_path' => 'entreprise.siret',
-                'attr' => self::INPUT_ATTR,
-                'label_attr' => self::LABEL_ATTR,
-            ])
             ->add('description', TextareaType::class, [
                 'label' => "Description de l'entreprise (optionnel)",
                 'required' => false,

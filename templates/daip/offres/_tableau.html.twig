@@ -1,5 +1,5 @@
 {# Tableau + pagination du registre DAIP #}
-{# Attend : offres, filtres, secteurs, page, totalPages, total #}
+{# Attend : offres, filtres, metiers, page, totalPages, total #}
 <form method="get" action="{{ path('daip_offres_index') }}" class="card grid sm:grid-cols-2 md:grid-cols-5 gap-3 p-4 mb-6" data-filter-form>
     <select name="statut" class="field-input" data-filter-statut>
         <option value="">Tous les statuts</option>
@@ -8,10 +8,10 @@
             <option value="{{ f.k|default('') }}" {{ filtres.statut == f.k|default('') ? 'selected' : '' }}>{{ f.l }}</option>
         {% endfor %}
     </select>
-    <select name="secteur" class="field-input" data-filter-secteur>
-        <option value="">Tous les secteurs</option>
-        {% for secteur in secteurs %}
-            <option value="{{ secteur.id }}" {{ filtres.secteur == secteur.id ? 'selected' : '' }}>{{ secteur.nom }}</option>
+    <select name="metier" class="field-input" data-filter-metier>
+        <option value="">Tous les metiers</option>
+        {% for metier in metiers %}
+            <option value="{{ metier.id }}" {{ filtres.metier == metier.id ? 'selected' : '' }}>{{ metier.nom }}</option>
         {% endfor %}
     </select>
     <input type="text" name="ville" value="{{ filtres.ville|default('') }}" placeholder="Ville" class="field-input" data-filter-ville>
@@ -41,7 +41,7 @@
                     <tr class="border-t border-slate-100 hover:bg-slate-75 transition-colors cursor-pointer" onclick="window.location='{{ path('app_offre_show', {id: offre.id}) }}'">
                         <td class="px-5 py-4 text-sm font-medium text-navy">{{ offre.titre }}</td>
                         <td class="px-5 py-4 text-sm">{{ offre.entreprise.nom }}</td>
-                        <td class="px-5 py-4 text-sm">{{ offre.ville }}</td>
+                        <td class="px-5 py-4 text-sm">{% if offre.villes|length > 0 %}{{ offre.villes|join(', ') }}{% else %}—{% endif %}</td>
                         <td class="px-5 py-4"><span class="badge-{{ offre.statut.value }} inline-flex items-center">{{ offre.statut.label }}</span></td>
                         <td class="px-5 py-4 text-sm">{{ offre.datePublication ? offre.datePublication|date('d/m/Y') : '—' }}</td>
                         <td class="px-5 py-4 text-sm">{{ offre.dateExpiration ? offre.dateExpiration|date('d/m/Y') : '—' }}</td>

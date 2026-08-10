@@ -71,7 +71,7 @@
         {% include 'daip/offres/_tableau.html.twig' with {
             offres: offres,
             filtres: filtres,
-            secteurs: secteurs,
+            metiers: metiers,
             page: page,
             totalPages: totalPages,
             total: total,
@@ -89,13 +89,13 @@
     function buildQueryString(extra) {
         var params = new URLSearchParams();
         var statut = document.querySelector('[data-filter-statut]');
-        var secteur = document.querySelector('[data-filter-secteur]');
+        var metier = document.querySelector('[data-filter-metier]');
         var ville = document.querySelector('[data-filter-ville]');
         var dateDebut = document.querySelector('[data-filter-date-debut]');
         var dateFin = document.querySelector('[data-filter-date-fin]');
 
         if (statut && statut.value) params.set('statut', statut.value);
-        if (secteur && secteur.value) params.set('secteur', secteur.value);
+        if (metier && metier.value) params.set('metier', metier.value);
         if (ville && ville.value) params.set('ville', ville.value);
         if (dateDebut && dateDebut.value) params.set('dateDebut', dateDebut.value);
         if (dateFin && dateFin.value) params.set('dateFin', dateFin.value);

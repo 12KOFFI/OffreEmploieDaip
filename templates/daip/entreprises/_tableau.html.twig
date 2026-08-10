@@ -4,9 +4,7 @@
             <thead>
                 <tr class="bg-slate-50">
                     <th class="text-left text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3">Entreprise</th>
-                    <th class="text-left text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3">SIRET</th>
                     <th class="text-left text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3">Email</th>
-                    <th class="text-left text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3">Site web</th>
                     <th class="text-left text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3">Offres</th>
                     <th class="text-left text-xs uppercase tracking-wide text-slate-500 font-semibold px-5 py-3">Inscrite le</th>
                 </tr>
@@ -28,15 +26,7 @@
                                 <span class="font-medium text-navy group-hover:text-brand-indigo transition-colors">{{ entreprise.nom }}</span>
                             </a>
                         </td>
-                        <td class="px-5 py-4 text-sm">{{ entreprise.siret ?? '—' }}</td>
                         <td class="px-5 py-4 text-sm">{{ entreprise.user.email }}</td>
-                        <td class="px-5 py-4 text-sm">
-                            {% if entreprise.siteWeb %}
-                                <a href="{{ entreprise.siteWeb }}" target="_blank" rel="noopener" class="text-brand-indigo hover:underline">Visiter →</a>
-                            {% else %}
-                                —
-                            {% endif %}
-                        </td>
                         <td class="px-5 py-4 text-sm">
                             <span class="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-brand-indigo">
                                 {{ entreprise.offres|length }}
@@ -45,7 +35,7 @@
                         <td class="px-5 py-4 text-sm">{{ entreprise.user.createdAt|date('d/m/Y') }}</td>
                     </tr>
                 {% else %}
-                    <tr><td colspan="6" class="text-center text-slate-500 py-10">Aucune entreprise enregistrée.</td></tr>
+                    <tr><td colspan="4" class="text-center text-slate-500 py-10">Aucune entreprise enregistrée.</td></tr>
                 {% endfor %}
             </tbody>
         </table>

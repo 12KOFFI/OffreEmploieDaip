@@ -1,100 +1,680 @@
 {% extends 'dashboard_base.html.twig' %}
 
-{% block title %}{{ mode == 'creation' ? 'Nouvelle offre' : "Modifier l'offre" }}{% endblock %}
+{% block title %}{{ mode == 'creation' ? 'Nouvelle offre de recrutement' : "Modifier l'offre" }}{% endblock %}
+
+{# ═══════════════════════════════════════════════════════════
+   THÈME SYMFO CUSTOM — Gestion des erreurs
+   ═══════════════════════════════════════════════════════════ #}
+{% block form_errors %}
+    {% if errors|length > 0 %}
+        <div class="mt-1.5 space-y-1">
+            {% for error in errors %}
+                <p class="text-xs font-medium text-red-600 flex items-center gap-1.5 bg-red-50 px-2.5 py-1 rounded-lg border border-red-100">
+                    <i class="fa-solid fa-circle-info text-red-500"></i>
+                    <span>{{ error.message }}</span>
+                </p>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endblock %}
+
+{# ═══════════════════════════════════════════════════════════
+   THÈME SYMFO CUSTOM — Ligne Métier (Collection)
+   ═══════════════════════════════════════════════════════════ #}
+{% block _offre_offreMetiers_entry_widget %}
+    <div class="offre-metier-item bg-white border border-slate-200 rounded-2xl p-0 relative shadow-sm hover:shadow-md hover:border-indigo-300 transition-all duration-200 mb-5 overflow-hidden" data-aos="fade-up">
+        
+        {# ==========================================
+           MODE LECTURE (READ) — Carte Compacte
+           ========================================== #}
+        <div class="metier-read-mode hidden p-5 cursor-pointer hover:bg-slate-50/80 transition-colors" onclick="toggleMetierEditMode(this.closest('.offre-metier-item'))">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h3 class="text-base font-bold text-slate-800 flex items-center gap-2 mb-2">
+                        <i class="fa-solid fa-briefcase text-indigo-600"></i>
+                        <span class="read-metier-titre">Nouveau Poste</span>
+                        <span class="text-xs font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md ml-2">#<span class="metier-index">1</span></span>
+                    </h3>
+                    <div class="flex flex-wrap items-center gap-4 text-xs font-medium text-slate-600">
+                        <span title="Ville"><i class="fa-solid fa-location-dot text-slate-400 mr-1.5"></i><span class="read-ville">—</span></span>
+                        <span title="Postes"><i class="fa-solid fa-users text-slate-400 mr-1.5"></i><span class="read-postes">—</span> poste(s)</span>
+                        <span title="Contrat" class="read-contrat-wrapper hidden"><i class="fa-solid fa-file-contract text-slate-400 mr-1.5"></i><span class="read-contrat"></span></span>
+                        <span title="Étude" class="read-etude-wrapper hidden"><i class="fa-solid fa-graduation-cap text-slate-400 mr-1.5"></i><span class="read-etude"></span></span>
+                        <span title="Diplôme" class="read-diplome-wrapper hidden"><i class="fa-solid fa-certificate text-slate-400 mr-1.5"></i><span class="read-diplome"></span></span>
+                        <span title="Expérience" class="read-exp-wrapper hidden"><i class="fa-solid fa-clock text-slate-400 mr-1.5"></i><span class="read-exp"></span> an(s)</span>
+                        <span title="Salaire" class="read-salaire-wrapper hidden"><i class="fa-solid fa-money-bill-wave text-slate-400 mr-1.5"></i><span class="read-salaire"></span></span>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-2">
+                    <button type="button" class="btn-edit-metier px-3.5 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-pen text-slate-500"></i> <span class="hidden sm:inline">Modifier</span>
+                    </button>
+                    <button type="button" class="btn-remove-metier px-3.5 py-1.5 text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer" onclick="event.stopPropagation();">
+                        <i class="fa-solid fa-trash-can"></i> <span class="hidden sm:inline">Supprimer</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        {# ==========================================
+           MODE ÉDITION (EDIT) — Formulaire
+           ========================================== #}
+        <div class="metier-edit-mode p-6 sm:p-7">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-5">
+                <div class="flex items-center gap-2.5">
+                    <span class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-700 font-bold text-xs flex items-center justify-center border border-indigo-100">
+                        #<span class="metier-index">1</span>
+                    </span>
+                    <div>
+                        <h3 class="text-base font-semibold text-slate-800 leading-tight flex items-center gap-2">
+                            <i class="fa-solid fa-briefcase text-indigo-500"></i>
+                            <span class="metier-title-display text-slate-800">Définir ce poste</span>
+                        </h3>
+                    </div>
+                </div>
+                <button type="button" class="btn-remove-metier text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 p-2 rounded-xl border border-red-200/60 transition-all cursor-pointer" title="Supprimer ce poste">
+                    <i class="fa-solid fa-trash-can text-sm"></i>
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                {# --- CHAMPS OBLIGATOIRES --- #}
+                <div>
+                    {{ form_label(form.metier, null, {label_attr: {class: 'block text-sm font-medium text-slate-700 mb-1.5'}}) }}
+                    <div class="flex items-start gap-2">
+                        <div class="flex-1">
+                            {{ form_widget(form.metier, {attr: {class: 'w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-purple/25 focus:border-brand-purple metier-select bg-white'}}) }}
+                        </div>
+                        <button type="button" class="btn-autre-metier shrink-0 px-3 py-2.5 rounded-xl border border-indigo-200 text-indigo-600 hover:bg-indigo-50 text-sm font-medium transition">Autre</button>
+                    </div>
+                    {{ form_errors(form.metier) }}
+                    <div class="autre-metier-wrapper hidden mt-3">
+                        {{ form_label(form.autreMetier) }}
+                        {{ form_widget(form.autreMetier) }}
+                        {{ form_errors(form.autreMetier) }}
+                        <p class="mt-1 text-xs text-slate-500">Le m?tier sera v?rifi? et ajout? ? la liste s?il n?existe pas d?j?.</p>
+                    </div>
+                </div>
+
+                <div class="grid sm:grid-cols-2 gap-4">
+                    <div>
+                        {{ form_label(form.nombrePostes, null, {label_attr: {class: 'block text-sm font-medium text-slate-700 mb-1.5'}}) }}
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                <i class="fa-solid fa-users text-sm"></i>
+                            </div>
+                            {{ form_widget(form.nombrePostes, {attr: {class: 'w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-purple/25 focus:border-brand-purple bg-white'}}) }}
+                        </div>
+                        {{ form_errors(form.nombrePostes) }}
+                    </div>
+                    <div>
+                        {{ form_label(form.ville, null, {label_attr: {class: 'block text-sm font-medium text-slate-700 mb-1.5'}}) }}
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                <i class="fa-solid fa-location-dot text-sm"></i>
+                            </div>
+                            {{ form_widget(form.ville, {attr: {class: 'w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-purple/25 focus:border-brand-purple bg-white'}}) }}
+                        </div>
+                        {{ form_errors(form.ville) }}
+                    </div>
+                </div>
+
+                {# --- CHAMPS OPTIONNELS (PROGRESSIVE DISCLOSURE) --- #}
+                <div class="pt-2">
+                    <button type="button" class="btn-toggle-advanced flex items-center gap-2 text-sm font-semibold text-indigo-600 hover:text-indigo-800 transition-colors py-2.5 px-3.5 bg-indigo-50/60 hover:bg-indigo-50 rounded-xl w-full justify-between cursor-pointer border border-indigo-100">
+                        <span><i class="fa-solid fa-sliders mr-2"></i>Préciser les exigences (Optionnel)</span>
+                        <i class="fa-solid fa-chevron-down toggle-icon transition-transform"></i>
+                    </button>
+                    
+                    <div class="advanced-fields hidden mt-5 space-y-4">
+                        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div>
+                                {{ form_label(form.typeContrat, null, {label_attr: {class: 'block text-sm font-medium text-slate-700 mb-1.5'}}) }}
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                        <i class="fa-solid fa-file-contract text-sm"></i>
+                                    </div>
+                                    {{ form_widget(form.typeContrat, {attr: {class: 'w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-purple/25 focus:border-brand-purple bg-white'}}) }}
+                                </div>
+                                {{ form_errors(form.typeContrat) }}
+                            </div>
+                            <div>
+                                {{ form_label(form.niveauEtude, null, {label_attr: {class: 'block text-sm font-medium text-slate-700 mb-1.5'}}) }}
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                        <i class="fa-solid fa-graduation-cap text-sm"></i>
+                                    </div>
+                                    {{ form_widget(form.niveauEtude, {attr: {class: 'w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-purple/25 focus:border-brand-purple bg-white'}}) }}
+                                </div>
+                                {{ form_errors(form.niveauEtude) }}
+                            </div>
+                            <div>
+                                {{ form_label(form.diplome, null, {label_attr: {class: 'block text-sm font-medium text-slate-700 mb-1.5'}}) }}
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                        <i class="fa-solid fa-certificate text-sm"></i>
+                                    </div>
+                                    {{ form_widget(form.diplome, {attr: {class: 'w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-purple/25 focus:border-brand-purple bg-white'}}) }}
+                                </div>
+                                {{ form_errors(form.diplome) }}
+                            </div>
+                        </div>
+
+                        <div class="grid sm:grid-cols-2 gap-4">
+                            <div>
+                                {{ form_label(form.nbAnneesExperience, null, {label_attr: {class: 'block text-sm font-medium text-slate-700 mb-1.5'}}) }}
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                        <i class="fa-solid fa-clock text-sm"></i>
+                                    </div>
+                                    {{ form_widget(form.nbAnneesExperience, {attr: {class: 'w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-purple/25 focus:border-brand-purple bg-white'}}) }}
+                                </div>
+                                {{ form_errors(form.nbAnneesExperience) }}
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1.5">Fourchette salariale (FCFA)</label>
+                                <div class="grid grid-cols-2 gap-3 relative">
+                                    <div>
+                                        <div class="relative">
+                                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                                <i class="fa-solid fa-money-bill-wave text-sm"></i>
+                                            </div>
+                                            {{ form_widget(form.salaireMin, {attr: {class: 'w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-purple/25 focus:border-brand-purple bg-white', placeholder: 'Min'}}) }}
+                                        </div>
+                                        {{ form_errors(form.salaireMin) }}
+                                    </div>
+                                    <div>
+                                        {{ form_widget(form.salaireMax, {attr: {class: 'w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-purple/25 focus:border-brand-purple bg-white', placeholder: 'Max'}}) }}
+                                        {{ form_errors(form.salaireMax) }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            {{ form_label(form.prerequis, null, {label_attr: {class: 'block text-sm font-medium text-slate-700 mb-1.5'}}) }}
+                            {{ form_widget(form.prerequis, {attr: {class: 'w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-purple/25 focus:border-brand-purple bg-white', rows: 3}}) }}
+                            {{ form_errors(form.prerequis) }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-5 border-t border-slate-100 mt-5 flex justify-end">
+                    <button type="button" class="btn-validate-metier px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm transition-all flex items-center gap-2 shadow-sm cursor-pointer">
+                        <i class="fa-solid fa-check text-green-400"></i> Réduire ce poste
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
 
 {% block breadcrumb %}
-    <a href="{{ path('entreprise_dashboard') }}" class="hover:text-navy">Tableau de bord</a>
+    <a href="{{ path('entreprise_dashboard') }}" class="hover:text-slate-900 transition-colors">Tableau de bord</a>
     <span class="mx-1.5">/</span>
-    <a href="{{ path('entreprise_offres_index') }}" class="hover:text-navy">Mes offres</a>
+    <a href="{{ path('entreprise_offres_index') }}" class="hover:text-slate-900 transition-colors">Mes offres</a>
     <span class="mx-1.5">/</span>
-    <span class="text-navy font-semibold">{{ mode == 'creation' ? 'Nouvelle offre' : "Modifier l'offre" }}</span>
+    <span class="text-slate-900 font-semibold">{{ mode == 'creation' ? 'Nouvelle offre' : "Modifier l'offre" }}</span>
 {% endblock %}
 
 {% block body %}
-    <div data-aos="fade-up" class="max-w-2xl mx-auto card p-5 sm:p-11 rounded-none sm:rounded-2xl -mx-6 sm:mx-auto border-x-0 sm:border-x shadow-none sm:shadow-sm">
-        <h1 class="text-2xl mb-1.5">{{ mode == 'creation' ? 'Nouvelle offre' : "Modifier l'offre" }}</h1>
-        <p class="text-sm text-slate-500 mb-7">
-            {% if mode == 'creation' %}
-                Elle sera enregistrée en brouillon — vous pourrez la publier ensuite depuis votre tableau de bord.
-            {% else %}
-                Modifiez les informations puis enregistrez.
-            {% endif %}
-        </p>
+{% form_theme form _self %}
+<div class="bg-slate-50/80 py-8 px-4 sm:px-6 pb-36">
+    <div data-aos="fade-up" class="max-w-4xl mx-auto">
 
-        {{ form_start(form, {attr: {id: 'offre-form'}}) }}
-            <div class="grid sm:grid-cols-2 gap-x-4">
-                {{ form_row(form.titre) }}
-                {{ form_row(form.typeContrat) }}
+        {# En-tête principal de la page #}
+        <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-bold text-slate-900">
+                    {{ mode == 'creation' ? 'Créer une offre de recrutement' : 'Modifier votre offre' }}
+                </h1>
+                <p class="text-sm text-slate-500 mt-1">
+                    Complétez les informations pour publier votre annonce.
+                </p>
             </div>
-
-            <div class="grid sm:grid-cols-2 gap-x-4">
-                {{ form_row(form.ville) }}
-                {{ form_row(form.secteur) }}
+            
+            <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm text-xs font-semibold self-start">
+                <span class="flex items-center gap-1.5 text-indigo-600">
+                    <i class="fa-solid fa-file-lines"></i> Offre
+                </span>
+                <span class="text-slate-300">→</span>
+                <span class="flex items-center gap-1.5 text-orange-500 font-bold">
+                    <i class="fa-solid fa-briefcase"></i> Postes
+                </span>
             </div>
+        </div>
 
-            <div class="grid sm:grid-cols-2 gap-x-4">
-                {{ form_row(form.salaireMin) }}
-                {{ form_row(form.salaireMax) }}
-            </div>
+        {{ form_start(form, {attr: {id: 'offre-form', class: 'space-y-6'}}) }}
 
-            <div class="grid sm:grid-cols-2 gap-x-4">
-                {{ form_row(form.nbAnneesExperience) }}
-                {{ form_row(form.nombrePostes) }}
-            </div>
-
-            <div class="grid sm:grid-cols-2 gap-x-4">
-                {{ form_row(form.niveauEtude) }}
-                {{ form_row(form.dateExpiration) }}
-            </div>
-
-            {{ form_row(form.description) }}
-
-            <label class="field-label">Compétences requises</label>
-            <select id="competences-select" multiple class="field-input" size="6">
-                {% for competence in form.competences.vars.choices %}
-                    <option value="{{ competence.value }}" {% if competence.data in offre.competences %}selected{% endif %}>{{ competence.label }}</option>
-                {% endfor %}
-            </select>
-            <p class="text-xs text-slate-500 mt-1.5">Maintenez la touche Ctrl (Windows) ou Cmd (Mac) pour sélectionner plusieurs compétences.</p>
-            {{ form_widget(form.competences, {attr: {class: 'hidden'}}) }}
-
-            {% if mode == 'edition' and offre.image %}
-                <div class="mt-5">
-                    <label class="field-label">Image actuelle</label>
-                    <img src="{{ offre.image }}" alt="{{ offre.titre }}" class="mt-2 rounded-xl border border-slate-200 max-h-48 object-cover">
+        {# ═══════════════════════════════════════════════════════════
+           ÉTAPE 1 — Informations générales de l'offre
+           ═══════════════════════════════════════════════════════════ #}
+        <div class="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-sm">
+            <div class="flex items-center gap-3.5 mb-6 pb-4 border-b border-slate-100">
+                <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-lg shadow-md shadow-indigo-200 flex-shrink-0">
+                    1
                 </div>
-            {% endif %}
-
-            {{ form_row(form.imageFile) }}
-
-            <div class="flex flex-col sm:flex-row gap-3 mt-8">
-                <button type="submit" class="btn-orange w-full sm:w-auto justify-center" id="offre-submit">
-                    <span class="inline-flex items-center justify-center gap-2">
-                        <span id="offre-text">{{ mode == 'creation' ? 'Enregistrer en brouillon' : 'Enregistrer les modifications' }}</span>
-                        <svg id="offre-spinner" class="hidden animate-spin h-[17px] w-[17px] text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                    </span>
-                </button>
-                <a href="{{ path('entreprise_offres_index') }}" class="btn-ghost w-full sm:w-auto justify-center text-center">Annuler</a>
+                <div>
+                    <h2 class="text-lg font-bold text-slate-900">Informations de l'offre</h2>
+                    <p class="text-xs text-slate-500">Titre global et contexte du recrutement.</p>
+                </div>
             </div>
+
+            <div class="space-y-5">
+                <div>
+                    {{ form_label(form.titre, null, {label_attr: {class: 'block text-sm font-medium text-slate-700 mb-1.5'}}) }}
+                    {{ form_widget(form.titre, {attr: {class: 'w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-purple/25 focus:border-brand-purple bg-white'}}) }}
+                    {{ form_errors(form.titre) }}
+                </div>
+
+                <div>
+                    {{ form_label(form.description, null, {label_attr: {class: 'block text-sm font-medium text-slate-700 mb-1.5'}}) }}
+                    {{ form_widget(form.description, {attr: {class: 'w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-purple/25 focus:border-brand-purple bg-white'}}) }}
+                    {{ form_errors(form.description) }}
+                </div>
+
+                        <div class="grid sm:grid-cols-2 gap-4">
+                            <div>
+                                {{ form_label(form.dateExpiration, null, {label_attr: {class: 'block text-sm font-medium text-slate-700 mb-1.5'}}) }}
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                <i class="fa-solid fa-calendar-days text-sm"></i>
+                            </div>
+                            {{ form_widget(form.dateExpiration, {attr: {class: 'w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-purple/25 focus:border-brand-purple bg-white'}}) }}
+                        </div>
+                        {{ form_errors(form.dateExpiration) }}
+                    </div>
+                </div>
+
+                <div>
+                    {{ form_label(form.imageFile, null, {label_attr: {class: 'block text-sm font-medium text-slate-700 mb-1.5'}}) }}
+                    <div class="mt-1 flex items-center gap-4 p-4 rounded-xl border border-dashed border-slate-300 bg-slate-50 hover:bg-slate-100/70 transition-colors">
+                        <div class="w-10 h-10 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400 flex-shrink-0">
+                            <i class="fa-solid fa-image text-lg"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            {{ form_widget(form.imageFile, {attr: {class: 'block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer'}}) }}
+                            <p class="text-[11px] text-slate-400 mt-1">JPG, PNG, WebP (max 2 Mo)</p>
+                        </div>
+                    </div>
+                    {{ form_errors(form.imageFile) }}
+                </div>
+            </div>
+        </div>
+
+        {# ═══════════════════════════════════════════════════════════
+           ÉTAPE 2 — Postes recherchés & Métiers
+           ═══════════════════════════════════════════════════════════ #}
+        <div class="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-sm">
+            <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
+                <div class="flex items-center gap-3.5">
+                    <div class="w-10 h-10 rounded-xl bg-orange-500 text-white flex items-center justify-center font-bold text-lg shadow-md shadow-orange-200 flex-shrink-0">
+                        2
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900">Métiers recherchés</h2>
+                        <p class="text-xs text-slate-500">Ajoutez les postes correspondant à cette offre.</p>
+                    </div>
+                </div>
+            </div>
+
+            {# Conteneur des blocs métiers #}
+            <div id="offre-metiers-container" class="space-y-0" data-prototype="{{ form_widget(form.offreMetiers.vars.prototype)|e('html_attr') }}" data-index="{{ form.offreMetiers|length }}">
+                {% for metierForm in form.offreMetiers %}
+                    {{ form_widget(metierForm) }}
+                {% endfor %}
+            </div>
+
+            {# Bouton "+ Ajouter un poste" #}
+            <div class="mt-2">
+                <button type="button" id="add-metier-btn" class="w-full py-4 border-2 border-dashed border-indigo-200 hover:border-indigo-500 bg-indigo-50/50 hover:bg-indigo-50 rounded-2xl text-sm font-bold text-indigo-600 transition-all flex flex-col sm:flex-row items-center justify-center gap-2 group cursor-pointer shadow-xs">
+                    <span class="w-7 h-7 rounded-full bg-indigo-600 text-white flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-plus text-xs"></i>
+                    </span>
+                    <span>Ajouter un métier</span>
+                </button>
+            </div>
+        </div>
+
+        {# ═══════════════════════════════════════════════════════════
+           Résumé en direct & Actions de validation (BARRE COLLÉE EN BAS)
+           ═══════════════════════════════════════════════════════════ #}
+        <div class="fixed bottom-0 left-0 right-0 sm:static sm:bottom-auto sm:left-auto sm:right-auto z-40 p-4 sm:p-0 bg-white/90 sm:bg-transparent backdrop-blur-md sm:backdrop-blur-none border-t sm:border-0 border-slate-200">
+            <div class="bg-white border border-slate-200 shadow-lg sm:rounded-2xl p-4 sm:p-6 w-full max-w-4xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                
+                <div class="hidden sm:block">
+                    <div class="flex items-center gap-2 text-sm font-bold text-slate-800 mb-1">
+                        <i class="fa-solid fa-check text-green-500"></i> Résumé
+                    </div>
+                    <div class="text-xs font-medium text-slate-600 flex items-center gap-3">
+                        <span class="bg-slate-100 px-2 py-1 rounded-md"><i class="fa-solid fa-briefcase mr-1 text-indigo-600"></i> <span id="summary-metiers-num">0</span></span>
+                        <span class="bg-slate-100 px-2 py-1 rounded-md"><i class="fa-solid fa-users mr-1 text-orange-500"></i> <span id="summary-postes-num">0</span></span>
+                        <span id="summary-villes" class="text-slate-500 truncate max-w-[200px]"></span>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+                    <a href="{{ path('entreprise_offres_index') }}" class="inline-flex items-center justify-center px-5 py-3 text-sm font-medium text-slate-700 bg-white hover:bg-slate-100 border border-slate-300 rounded-xl transition-all shadow-xs cursor-pointer order-2 sm:order-1 flex-1 sm:flex-none">
+                        Annuler
+                    </a>
+
+                    <button type="submit" class="inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-bold text-white bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 active:scale-95 rounded-xl transition-all shadow-md shadow-orange-500/20 cursor-pointer order-1 sm:order-2 flex-1 sm:flex-none">
+                        <i class="fa-solid fa-floppy-disk"></i> <span>{{ mode == 'creation' ? 'Enregistrer en brouillon' : 'Enregistrer' }}</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
         {{ form_end(form) }}
-
-        <script>
-            (function () {
-                var select = document.getElementById('competences-select');
-                var hiddenField = document.querySelector('input[name="offre[competences]"]');
-                if (!select || !hiddenField) return;
-
-                function syncHidden() {
-                    var values = Array.from(select.selectedOptions).map(function (opt) { return opt.value; });
-                    hiddenField.value = values.join(',');
-                }
-
-                select.addEventListener('change', syncHidden);
-                syncHidden();
-            })();
-        </script>
     </div>
+</div>
+
+<script>
+// Exposer la fonction toggle globalement pour le onclick
+window.toggleMetierEditMode = null;
+
+document.addEventListener('DOMContentLoaded', function () {
+    var container = document.getElementById('offre-metiers-container');
+    var addBtn = document.getElementById('add-metier-btn');
+    var summaryMetiersNum = document.getElementById('summary-metiers-num');
+    var summaryPostesNum = document.getElementById('summary-postes-num');
+    var summaryVilles = document.getElementById('summary-villes');
+
+    function initMetierSearch(root) {
+        if (typeof TomSelect === 'undefined') return;
+        (root || document).querySelectorAll('.metier-select').forEach(function(select) {
+            if (select.tomselect) return;
+            new TomSelect(select, {
+                allowEmptyOption: true,
+                create: false,
+                maxOptions: 1000,
+                placeholder: 'Rechercher un métier…',
+                searchField: ['text'],
+                sortField: { field: 'text', direction: 'asc' }
+            });
+        });
+    }
+
+    function toggleAutreMetier(item) {
+        var select = item.querySelector('.metier-select');
+        var wrapper = item.querySelector('.autre-metier-wrapper');
+        var input = item.querySelector('.autre-metier-input');
+        if (!select || !wrapper) return;
+        if (input && input.value.trim()) item.dataset.autreMetier = '1';
+        wrapper.classList.toggle('hidden', !item.dataset.autreMetier);
+        var button = item.querySelector('.btn-autre-metier');
+        if (button) button.textContent = item.dataset.autreMetier ? 'Choisir dans la liste' : 'Autre';
+    }
+
+    // === GESTION DE L'AFFICHAGE READ/EDIT ===
+    window.toggleMetierEditMode = function(item, forceMode = null) {
+        if (!item) return;
+        var readMode = item.querySelector('.metier-read-mode');
+        var editMode = item.querySelector('.metier-edit-mode');
+        
+        if (!readMode || !editMode) return;
+
+        var isCurrentlyEdit = !editMode.classList.contains('hidden');
+        
+        if (forceMode === 'READ' || (forceMode === null && isCurrentlyEdit)) {
+            syncEditToRead(item);
+            toggleAutreMetier(item);
+            editMode.classList.add('hidden');
+            readMode.classList.remove('hidden');
+        } 
+        else if (forceMode === 'EDIT' || (forceMode === null && !isCurrentlyEdit)) {
+            var allItems = container.querySelectorAll('.offre-metier-item');
+            allItems.forEach(function(otherItem) {
+                if (otherItem !== item) {
+                    toggleMetierEditMode(otherItem, 'READ');
+                }
+            });
+            
+            readMode.classList.add('hidden');
+            editMode.classList.remove('hidden');
+        }
+    };
+
+    function syncEditToRead(item) {
+        var select = item.querySelector('.metier-select');
+        var titre = item.querySelector('.read-metier-titre');
+        if (select && titre) {
+            var selectedText = select.options[select.selectedIndex] ? select.options[select.selectedIndex].text : '';
+            titre.textContent = (selectedText && selectedText !== 'Sélectionner un métier') ? selectedText : 'Poste non défini';
+            
+            var editTitre = item.querySelector('.metier-title-display');
+            if (editTitre) editTitre.textContent = titre.textContent;
+        }
+
+        var villeInput = item.querySelector('[id$="_ville"]');
+        var villeSpan = item.querySelector('.read-ville');
+        if (villeInput && villeSpan) villeSpan.textContent = villeInput.value || '—';
+
+        var postesInput = item.querySelector('[id$="_nombrePostes"]');
+        var postesSpan = item.querySelector('.read-postes');
+        if (postesInput && postesSpan) postesSpan.textContent = postesInput.value || '0';
+
+        var contratInput = item.querySelector('[id$="_typeContrat"]');
+        var contratSpan = item.querySelector('.read-contrat');
+        var contratWrapper = item.querySelector('.read-contrat-wrapper');
+        if (contratInput && contratSpan && contratWrapper) {
+            var contratText = contratInput.options[contratInput.selectedIndex] ? contratInput.options[contratInput.selectedIndex].text : '';
+            if (contratInput.value) {
+                contratSpan.textContent = contratText;
+                contratWrapper.classList.remove('hidden');
+            } else {
+                contratWrapper.classList.add('hidden');
+            }
+        }
+
+        var etudeInput = item.querySelector('[id$="_niveauEtude"]');
+        var etudeSpan = item.querySelector('.read-etude');
+        var etudeWrapper = item.querySelector('.read-etude-wrapper');
+        if (etudeInput && etudeSpan && etudeWrapper) {
+            var etudeText = etudeInput.options[etudeInput.selectedIndex] ? etudeInput.options[etudeInput.selectedIndex].text : '';
+            if (etudeInput.value) {
+                etudeSpan.textContent = etudeText;
+                etudeWrapper.classList.remove('hidden');
+            } else {
+                etudeWrapper.classList.add('hidden');
+            }
+        }
+
+        var diplomeInput = item.querySelector('[id$="_diplome"]');
+        var diplomeSpan = item.querySelector('.read-diplome');
+        var diplomeWrapper = item.querySelector('.read-diplome-wrapper');
+        if (diplomeInput && diplomeSpan && diplomeWrapper) {
+            var diplomeText = diplomeInput.options[diplomeInput.selectedIndex] ? diplomeInput.options[diplomeInput.selectedIndex].text : '';
+            if (diplomeInput.value) {
+                diplomeSpan.textContent = diplomeText;
+                diplomeWrapper.classList.remove('hidden');
+            } else {
+                diplomeWrapper.classList.add('hidden');
+            }
+        }
+
+        var expInput = item.querySelector('[id$="_nbAnneesExperience"]');
+        var expSpan = item.querySelector('.read-exp');
+        var expWrapper = item.querySelector('.read-exp-wrapper');
+        if (expInput && expSpan && expWrapper) {
+            if (expInput.value) {
+                expSpan.textContent = expInput.value;
+                expWrapper.classList.remove('hidden');
+            } else {
+                expWrapper.classList.add('hidden');
+            }
+        }
+
+        var salMinInput = item.querySelector('[id$="_salaireMin"]');
+        var salMaxInput = item.querySelector('[id$="_salaireMax"]');
+        var salSpan = item.querySelector('.read-salaire');
+        var salWrapper = item.querySelector('.read-salaire-wrapper');
+        if (salMinInput && salMaxInput && salSpan && salWrapper) {
+            if (salMinInput.value || salMaxInput.value) {
+                salSpan.textContent = (salMinInput.value || '0') + ' - ' + (salMaxInput.value || 'Max');
+                salWrapper.classList.remove('hidden');
+            } else {
+                salWrapper.classList.add('hidden');
+            }
+        }
+    }
+
+    // === GESTION DE LA COLLECTION ===
+    function getIndex() { return parseInt(container.dataset.index || '0', 10); }
+    function setIndex(val) { container.dataset.index = val; }
+
+    function updateMetierIndexesAndSummary() {
+        var items = container.querySelectorAll('.offre-metier-item');
+        var totalPostes = 0;
+        var villes = [];
+
+        items.forEach(function(item, i) {
+            var indexSpans = item.querySelectorAll('.metier-index');
+            indexSpans.forEach(function(s) { s.textContent = (i + 1); });
+
+            var postesInput = item.querySelector('[id$="_nombrePostes"]');
+            var villeInput = item.querySelector('[id$="_ville"]');
+            if (postesInput && postesInput.value) totalPostes += parseInt(postesInput.value, 10) || 0;
+            if (villeInput && villeInput.value && villeInput.value.trim() !== '') {
+                var v = villeInput.value.trim();
+                if (villes.indexOf(v) === -1) villes.push(v);
+            }
+            
+            var removeBtns = item.querySelectorAll('.btn-remove-metier');
+            removeBtns.forEach(function(btn) {
+                btn.style.display = (items.length <= 1) ? 'none' : 'inline-flex';
+            });
+            
+            syncEditToRead(item);
+            toggleAutreMetier(item);
+        });
+
+        var count = items.length;
+        if (summaryMetiersNum) summaryMetiersNum.textContent = count;
+        if (summaryPostesNum) summaryPostesNum.textContent = totalPostes;
+        if (summaryVilles) summaryVilles.textContent = villes.length > 0 ? villes.join(', ') : '';
+    }
+
+    // Bouton Ajouter
+    addBtn.addEventListener('click', function () {
+        var index = getIndex();
+        var prototype = container.dataset.prototype;
+        var newForm = prototype.replace(/__name__/g, index);
+
+        var tempDiv = document.createElement('div');
+        tempDiv.innerHTML = newForm;
+        var element = tempDiv.firstElementChild;
+        if (!element) return;
+
+        element.style.opacity = '0';
+        element.style.transform = 'translateY(15px)';
+        container.appendChild(element);
+        initMetierSearch(element);
+        setIndex(index + 1);
+
+        requestAnimationFrame(function() {
+            element.style.transition = 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)';
+            element.style.opacity = '1';
+            element.style.transform = 'translateY(0)';
+        });
+
+        toggleMetierEditMode(element, 'EDIT');
+        toggleAutreMetier(element);
+        updateMetierIndexesAndSummary();
+
+        setTimeout(function() {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
+    });
+
+    // Délégation d'événements sur le conteneur
+    container.addEventListener('click', function (e) {
+        var removeBtn = e.target.closest('.btn-remove-metier');
+        if (removeBtn) {
+            var items = container.querySelectorAll('.offre-metier-item');
+            if (items.length <= 1) return; 
+
+            var itemToRemove = removeBtn.closest('.offre-metier-item');
+            if (!itemToRemove) return;
+
+            itemToRemove.style.transition = 'all 0.25s ease';
+            itemToRemove.style.opacity = '0';
+            itemToRemove.style.transform = 'scale(0.95)';
+
+            setTimeout(function() {
+                itemToRemove.remove();
+                updateMetierIndexesAndSummary();
+            }, 220);
+            return;
+        }
+
+        var validateBtn = e.target.closest('.btn-validate-metier');
+        if (validateBtn) {
+            e.preventDefault();
+            var item = validateBtn.closest('.offre-metier-item');
+            toggleMetierEditMode(item, 'READ');
+            return;
+        }
+        
+        var toggleAdvBtn = e.target.closest('.btn-toggle-advanced');
+        if (toggleAdvBtn) {
+            var item = toggleAdvBtn.closest('.offre-metier-item');
+            var advFields = item.querySelector('.advanced-fields');
+            var icon = toggleAdvBtn.querySelector('.toggle-icon');
+            if (advFields.classList.contains('hidden')) {
+                advFields.classList.remove('hidden');
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                advFields.classList.add('hidden');
+                icon.style.transform = 'rotate(0deg)';
+            }
+            return;
+        }
+    });
+
+    container.addEventListener('click', function (e) {
+        var customButton = e.target.closest('.btn-autre-metier');
+        if (!customButton) return;
+        var item = customButton.closest('.offre-metier-item');
+        var select = item.querySelector('.metier-select');
+        item.dataset.autreMetier = item.dataset.autreMetier ? '' : '1';
+        if (item.dataset.autreMetier && select) {
+            if (select.tomselect) select.tomselect.clear();
+            else select.value = '';
+        }
+        toggleAutreMetier(item);
+    });
+
+    container.addEventListener('change', function (e) {
+        if (e.target && e.target.classList.contains('metier-select')) {
+            var changedItem = e.target.closest('.offre-metier-item');
+            if (e.target.value) changedItem.dataset.autreMetier = '';
+            toggleAutreMetier(changedItem);
+            updateMetierIndexesAndSummary();
+        }
+    });
+
+    container.addEventListener('input', function (e) {
+        updateMetierIndexesAndSummary();
+    });
+
+    // --- INITIALISATION ---
+    initMetierSearch(container);
+    var items = container.querySelectorAll('.offre-metier-item');
+    if (items.length === 0) {
+        addBtn.click();
+    } else {
+        items.forEach(function(item) {
+            var hasErrors = item.querySelectorAll('.text-red-600').length > 0;
+            toggleMetierEditMode(item, hasErrors ? 'EDIT' : 'READ');
+        });
+        var hasOneEdit = container.querySelector('.metier-edit-mode:not(.hidden)');
+        if (!hasOneEdit && items.length > 0) {
+            toggleMetierEditMode(items[0], 'EDIT');
+        }
+        updateMetierIndexesAndSummary();
+    }
+});
+</script>
 {% endblock %}

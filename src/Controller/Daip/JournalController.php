@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/daip/journal', name: 'daip_journal_')]
+#[IsGranted('ROLE_DAIP')]
 class JournalController extends AbstractController
 {
     #[Route('', name: 'index', methods: ['GET'])]

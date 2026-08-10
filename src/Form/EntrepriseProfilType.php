@@ -26,18 +26,7 @@ class EntrepriseProfilType extends AbstractType
                 'attr' => self::INPUT_ATTR,
                 'label_attr' => self::LABEL_ATTR,
             ])
-            ->add('siret', TextType::class, [
-                'label' => 'SIRET (optionnel)',
-                'required' => false,
-                'attr' => self::INPUT_ATTR,
-                'label_attr' => self::LABEL_ATTR,
-            ])
-            ->add('siteWeb', UrlType::class, [
-                'label' => 'Site web (optionnel)',
-                'required' => false,
-                'attr' => self::INPUT_ATTR,
-                'label_attr' => self::LABEL_ATTR,
-            ])
+
             ->add('logo', FileType::class, [
                 'label' => 'Logo de l\'entreprise (optionnel)',
                 'required' => false,

@@ -45,7 +45,7 @@ class RegistrationController extends AbstractController
                 if (!is_dir($uploadsDirectory)) {
                     mkdir($uploadsDirectory, 0775, true);
                 }
-                $newFilename = uniqid() . '.' . ($uploadedFile->guessExtension() ?? 'bin');
+                $newFilename = bin2hex(random_bytes(16)) . '.' . ($uploadedFile->guessExtension() ?? 'bin');
                 $uploadedFile->move($uploadsDirectory, $newFilename);
                 $user->getEntreprise()->setLogo('/uploads/entreprises/' . $newFilename);
             }

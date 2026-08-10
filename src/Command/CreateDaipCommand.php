@@ -29,7 +29,6 @@ class CreateDaipCommand extends Command
     {
         $this
             ->addArgument('email', InputArgument::REQUIRED, "Email du compte DAIP admin")
-            ->addArgument('password', InputArgument::REQUIRED, "Mot de passe (change-le ensuite si besoin)")
         ;
     }
 
@@ -38,7 +37,14 @@ class CreateDaipCommand extends Command
         $io = new SymfonyStyle($input, $output);
 
         $email = $input->getArgument('email');
-        $plainPassword = $input->getArgument('password');
+
+        // Saisie interactive masquee pour ne pas exposer le mot de passe dans
+        // l'historique bash ni dans `ps aux`
+        $plainPassword = $io->askHidden('Mot de passe du compte DAIP admin');
+        if (!$plainPassword || strlen($plainPassword) < 8) {
+            $io->error('Le mot de passe doit contenir au moins 8 caracteres.');
+            return Command::FAILURE;
+        }
 
         $existing = $this->entityManager->getRepository(User::class)
             ->findOneBy(['email' => $email]);
@@ -50,7 +56,7 @@ class CreateDaipCommand extends Command
 
         $user = new User();
         $user->setEmail($email);
-        $user->setRoles(['ROLE_DAIP']);
+        $user->setRoles(['ROLE_DAIP_ADMIN']); // Admin = peut creer d'autres comptes DAIP
         $user->setPassword($this->passwordHasher->hashPassword($user, $plainPassword));
 
         $this->entityManager->persist($user);

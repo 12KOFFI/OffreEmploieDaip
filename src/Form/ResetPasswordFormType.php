@@ -21,7 +21,7 @@ class ResetPasswordFormType extends AbstractType
                 'first_options' => [
                     'constraints' => [
                         new NotBlank(),
-                        new Length(['min' => 6, 'max' => 4096]),
+                        new Length(['min' => 8, 'max' => 4096]),
                     ],
                     'label' => 'Nouveau mot de passe <span class="text-red-500">*</span>',
                     'label_html' => true,

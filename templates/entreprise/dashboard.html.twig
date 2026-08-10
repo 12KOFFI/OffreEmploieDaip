@@ -49,8 +49,7 @@
                         <div class="flex-1 min-w-[200px]">
                             <h3 class="text-[17px] font-semibold mb-1">{{ offre.titre }}</h3>
                             <div class="text-sm text-slate-500">
-                                {{ offre.ville }} · {{ offre.typeContrat.label }}
-                                {% if offre.secteur %} · {{ offre.secteur.nom }}{% endif %}
+                                {% if offre.villes|length > 0 %}{{ offre.villes|join(', ') }} · {% endif %}{{ offre.offreMetiers|length }} métier(s)
                             </div>
                         </div>
                         <span class="badge-{{ offre.statut.value }} inline-flex items-center">{{ offre.statut.label }}</span>

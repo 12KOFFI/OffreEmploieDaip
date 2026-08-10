@@ -24,7 +24,7 @@
         </div>
 
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
-            {% for stat in [{n: statsEntreprises, l:'Entreprises'}, {n: statsOffresPubliees, l:'Offres publiées'}, {n: statsSecteurs, l:'Secteurs'}, {n:'100%', l:'Supervisé DAIP'}] %}
+            {% for stat in [{n: statsEntreprises, l:'Entreprises'}, {n: statsOffresPubliees, l:'Offres publiées'}, {n: statsMetiers, l:'Métiers'}, {n:'100%', l:'Supervisé DAIP'}] %}
                 <div data-aos="zoom-in" data-aos-delay="{{ loop.index0 * 90 }}" class="bg-white/15 border border-white/20 rounded-2xl py-5 px-2">
                     <span class="block text-white font-display font-bold text-2xl sm:text-[28px]">{{ stat.n }}</span>
                     <span class="text-white/80 text-xs">{{ stat.l }}</span>
@@ -68,10 +68,10 @@
         <form data-aos="fade-up" method="get" action="{{ path('app_home') }}#offres" class="card grid md:grid-cols-[1.4fr_1fr_1fr_1fr_auto] gap-3 p-4.5 mb-8">
             <input type="text" name="q" value="{{ filtres.q }}" placeholder="Poste ou entreprise" class="field-input">
             <input type="text" name="ville" value="{{ filtres.ville }}" placeholder="Ville" class="field-input">
-            <select name="secteur" class="field-input">
-                <option value="">Tous les secteurs</option>
-                {% for secteur in secteurs %}
-                    <option value="{{ secteur.id }}" {{ filtres.secteur == secteur.id ? 'selected' : '' }}>{{ secteur.nom }}</option>
+            <select name="metier" class="field-input">
+                <option value="">Tous les métiers</option>
+                {% for metier in metiers %}
+                    <option value="{{ metier.id }}" {{ filtres.metier == metier.id ? 'selected' : '' }}>{{ metier.nom }}</option>
                 {% endfor %}
             </select>
             <select name="typeContrat" class="field-input">

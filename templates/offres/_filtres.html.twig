@@ -14,10 +14,10 @@
         <input type="text" name="ville" value="{{ filtres.ville }}" placeholder="Ville..." class="field-input pl-10 text-sm" data-filter-ville>
     </div>
 
-    <select name="secteur" class="field-input text-sm" data-filter-secteur>
-        <option value="">Tous les secteurs</option>
-        {% for secteur in secteurs %}
-            <option value="{{ secteur.id }}" {{ filtres.secteur == secteur.id ? 'selected' : '' }}>{{ secteur.nom }}</option>
+    <select name="metier" class="field-input text-sm" data-filter-metier>
+        <option value="">Tous les métiers</option>
+        {% for metier in metiers %}
+            <option value="{{ metier.id }}" {{ filtres.metier == metier.id ? 'selected' : '' }}>{{ metier.nom }}</option>
         {% endfor %}
     </select>
 

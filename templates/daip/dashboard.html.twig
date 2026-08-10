@@ -40,9 +40,9 @@
             </div>
         </div>
         <div data-aos="fade-up" class="card border border-2 border-indigo-100 card-zoom p-6">
-            <h3 class="text-lg mb-4">Répartition par secteur</h3>
+            <h3 class="text-lg mb-4">Répartition par métier</h3>
             <div class="relative" style="height: 280px;">
-                <canvas id="chart-secteurs" class="absolute inset-0 w-full h-full"></canvas>
+                <canvas id="chart-metiers" class="absolute inset-0 w-full h-full"></canvas>
             </div>
         </div>
     </div>
@@ -76,7 +76,7 @@
                             <tr class="border-t border-slate-100 hover:bg-slate-50 transition-colors">
                                 <td class="px-5 py-4 text-sm font-medium text-navy">{{ offre.titre }}</td>
                                 <td class="px-5 py-4 text-sm">{{ offre.entreprise.nom }}</td>
-                                <td class="px-5 py-4 text-sm">{{ offre.ville }}</td>
+                                <td class="px-5 py-4 text-sm">{% if offre.villes|length > 0 %}{{ offre.villes|join(', ') }}{% else %}—{% endif %}</td>
                                 <td class="px-5 py-4"><span class="badge-{{ offre.statut.value }} inline-flex items-center">{{ offre.statut.label }}</span></td>
                                 <td class="px-5 py-4 text-sm">{{ offre.datePublication ? offre.datePublication|date('d/m/Y') : '—' }}</td>
                                 <td class="px-5 py-4 text-sm">{{ offre.dateExpiration ? offre.dateExpiration|date('d/m/Y') : '—' }}</td>
@@ -115,7 +115,7 @@
     <script>
         (function () {
             var evolutionData = {{ evolutionParMois|json_encode|raw }};
-            var secteursData = {{ repartitionSecteurs|json_encode|raw }};
+            var metiersData = {{ repartitionMetiers|json_encode|raw }};
             var villesData = {{ repartitionVilles|json_encode|raw }};
 
             function createChart(id, labels, data, label, type) {
@@ -162,9 +162,9 @@
             );
 
             createChart(
-                'chart-secteurs',
-                secteursData.map(function (item) { return item.nom; }),
-                secteursData.map(function (item) { return item.total; }),
+                'chart-metiers',
+                metiersData.map(function (item) { return item.nom; }),
+                metiersData.map(function (item) { return item.total; }),
                 'Offres',
                 'bar'
             );

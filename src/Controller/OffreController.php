@@ -6,13 +6,14 @@ use App\Entity\Offre;
 use App\Enum\StatutOffre;
 use App\Enum\TypeContrat;
 use App\Repository\OffreRepository;
-use App\Repository\SecteurRepository;
+use App\Repository\MetierRepository;
 use App\Security\OffreVoter;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class OffreController extends AbstractController
 {
@@ -22,12 +23,12 @@ class OffreController extends AbstractController
      * Liste publique complete des offres publiees, avec filtres + pagination.
      */
     #[Route('/offres', name: 'app_offres_liste', methods: ['GET'])]
-    public function liste(Request $request, OffreRepository $offreRepository, SecteurRepository $secteurRepository): Response
+    public function liste(Request $request, OffreRepository $offreRepository, MetierRepository $metierRepository): Response
     {
         $filtres = [
             'q' => $request->query->get('q', ''),
             'ville' => $request->query->get('ville', ''),
-            'secteur' => $request->query->get('secteur', ''),
+            'metier' => $request->query->get('metier', ''),
             'typeContrat' => $request->query->get('typeContrat', ''),
         ];
         $filtresActifs = array_filter($filtres) !== [];
@@ -48,7 +49,7 @@ class OffreController extends AbstractController
                 'offres' => $offres,
                 'filtres' => $filtres,
                 'filtresActifs' => $filtresActifs,
-                'secteurs' => $secteurRepository->findBy([], ['nom' => 'ASC']),
+                'metiers' => $metierRepository->findBy([], ['nom' => 'ASC']),
                 'typesContrat' => TypeContrat::cases(),
                 'total' => $total,
                 'page' => $page,
@@ -60,7 +61,7 @@ class OffreController extends AbstractController
             'offres' => $offres,
             'filtres' => $filtres,
             'filtresActifs' => $filtresActifs,
-            'secteurs' => $secteurRepository->findBy([], ['nom' => 'ASC']),
+            'metiers' => $metierRepository->findBy([], ['nom' => 'ASC']),
             'typesContrat' => TypeContrat::cases(),
             'total' => $total,
             'page' => $page,
@@ -80,11 +81,9 @@ class OffreController extends AbstractController
     {
         $this->denyAccessUnlessGranted(OffreVoter::VIEW, $offre);
 
-        $offre->incrementViews();
-        $entityManager->flush();
-
-        $qb = $entityManager->createQueryBuilder()
-            ->select('o')
+        // Requete en deux etapes pour eviter les doublons dus au leftJoin sur offreMetiers
+        $idsQb = $entityManager->createQueryBuilder()
+            ->select('DISTINCT o.id')
             ->from(Offre::class, 'o')
             ->where('o.statut = :statut')
             ->setParameter('statut', StatutOffre::PUBLIEE)
@@ -92,15 +91,27 @@ class OffreController extends AbstractController
             ->setParameter('id', $offre->getId())
             ->setMaxResults(3);
 
-        if ($offre->getSecteur()) {
-            $qb->andWhere('o.secteur = :secteur')
-                ->setParameter('secteur', $offre->getSecteur());
-        } elseif ($offre->getVille()) {
-            $qb->andWhere('o.ville = :ville')
-                ->setParameter('ville', $offre->getVille());
+        $firstOm = $offre->getOffreMetiers()->first();
+        if ($firstOm && $firstOm->getMetier()) {
+            $idsQb->leftJoin('o.offreMetiers', 'om')
+               ->andWhere('om.metier = :metier')
+               ->setParameter('metier', $firstOm->getMetier());
+        } elseif (!empty($offre->getVilles())) {
+            $villes = $offre->getVilles();
+            $idsQb->leftJoin('o.offreMetiers', 'om')
+               ->andWhere('om.ville = :ville')
+               ->setParameter('ville', $villes[0]);
         }
 
-        $offresSimilaires = $qb->getQuery()->getResult();
+        $ids = array_column($idsQb->getQuery()->getScalarResult(), 'id');
+
+        $offresSimilaires = empty($ids) ? [] : $entityManager->createQueryBuilder()
+            ->select('o')
+            ->from(Offre::class, 'o')
+            ->where('o.id IN (:ids)')
+            ->setParameter('ids', $ids)
+            ->getQuery()
+            ->getResult();
 
         return $this->render('offres/show.html.twig', [
             'offre' => $offre,

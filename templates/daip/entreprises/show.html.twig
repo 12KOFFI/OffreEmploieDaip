@@ -36,11 +36,7 @@
                     <p class="text-sm text-slate-500">Aucune description fournie.</p>
                 {% endif %}
 
-                {% if entreprise.siteWeb %}
-                    <div class="mt-6">
-                        <a href="{{ entreprise.siteWeb }}" target="_blank" rel="noopener" class="btn-orange">Visiter le site web →</a>
-                    </div>
-                {% endif %}
+
             </div>
 
             <div data-aos="fade-up" data-aos-delay="120" class="card p-7">
@@ -50,10 +46,7 @@
                     <span class="text-slate-500">Email</span>
                     <span class="font-medium text-navy text-right">{{ entreprise.user.email }}</span>
                 </div>
-                <div class="flex justify-between text-sm py-2.5 border-t border-slate-100"><span class="text-slate-500">SIRET</span><span class="font-medium text-navy">{{ entreprise.siret }}</span></div>
-                {% if entreprise.siteWeb %}
-                    <div class="flex justify-between text-sm py-2.5 border-t border-slate-100"><span class="text-slate-500">Site web</span><a href="{{ entreprise.siteWeb }}" target="_blank" rel="noopener" class="font-medium text-brand-indigo">Visiter →</a></div>
-                {% endif %}
+
                 <div class="flex justify-between text-sm py-2.5 border-t border-slate-100"><span class="text-slate-500">Inscrite le</span><span class="font-medium text-navy">{{ entreprise.user.createdAt|date('d/m/Y') }}</span></div>
                 {% if entreprise.contact %}
                     <div class="flex justify-between text-sm py-2.5 border-t border-slate-100"><span class="text-slate-500">Contact</span><span class="font-medium text-navy">{{ entreprise.contact }}</span></div>

@@ -24,8 +24,7 @@ class Entreprise
     #[Assert\NotBlank(message: 'Le nom de l\'entreprise est requis.')]
     private ?string $nom = null;
 
-    #[ORM\Column(length: 50, nullable: true)]
-    private ?string $siret = null;
+
 
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $description = null;
@@ -33,8 +32,7 @@ class Entreprise
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $logo = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $siteWeb = null;
+
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $contact = null;
@@ -77,16 +75,7 @@ class Entreprise
         return $this;
     }
 
-    public function getSiret(): ?string
-    {
-        return $this->siret;
-    }
 
-    public function setSiret(?string $siret): static
-    {
-        $this->siret = $siret;
-        return $this;
-    }
 
     public function getDescription(): ?string
     {
@@ -110,16 +99,7 @@ class Entreprise
         return $this;
     }
 
-    public function getSiteWeb(): ?string
-    {
-        return $this->siteWeb;
-    }
 
-    public function setSiteWeb(?string $siteWeb): static
-    {
-        $this->siteWeb = $siteWeb;
-        return $this;
-    }
 
     public function getContact(): ?string
     {

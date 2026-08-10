@@ -24,15 +24,33 @@ class OffreRepository extends ServiceEntityRepository
      */
     public function rechercherOffresPubliees(array $criteres = [], ?int $limit = null, int $offset = 0): array
     {
-        $qb = $this->baseQueryBuilderOffresPubliees($criteres)
+        // Etape 1 : recuperer les IDs pagines sans JOIN de collection (evite le probleme
+        // Doctrine "LIMIT/OFFSET with fetch joins" qui charge tout en memoire).
+        $idsQb = $this->baseQueryBuilderOffresPubliees($criteres)
+            ->select('DISTINCT o.id')
             ->orderBy('o.datePublication', 'DESC')
             ->setFirstResult($offset);
 
         if ($limit !== null) {
-            $qb->setMaxResults($limit);
+            $idsQb->setMaxResults($limit);
         }
 
-        return $qb->getQuery()->getResult();
+        $ids = array_column($idsQb->getQuery()->getScalarResult(), 'id');
+
+        if (empty($ids)) {
+            return [];
+        }
+
+        // Etape 2 : charger les entites completes avec JOIN uniquement sur les IDs selectionnes.
+        return $this->createQueryBuilder('o')
+            ->where('o.id IN (:ids)')
+            ->setParameter('ids', $ids)
+            ->leftJoin('o.entreprise', 'e')->addSelect('e')
+            ->leftJoin('o.offreMetiers', 'om')->addSelect('om')
+            ->leftJoin('om.metier', 'm')->addSelect('m')
+            ->orderBy('o.datePublication', 'DESC')
+            ->getQuery()
+            ->getResult();
     }
 
     /**
@@ -41,7 +59,7 @@ class OffreRepository extends ServiceEntityRepository
     public function compterOffresPubliees(array $criteres = []): int
     {
         return (int) $this->baseQueryBuilderOffresPubliees($criteres)
-            ->select('COUNT(o.id)')
+            ->select('COUNT(DISTINCT o.id)')
             ->getQuery()
             ->getSingleScalarResult();
     }
@@ -55,25 +73,26 @@ class OffreRepository extends ServiceEntityRepository
             ->andWhere('o.statut = :statut')
             ->setParameter('statut', StatutOffre::PUBLIEE)
             ->leftJoin('o.entreprise', 'e')->addSelect('e')
-            ->leftJoin('o.secteur', 's')->addSelect('s');
+            ->leftJoin('o.offreMetiers', 'om')->addSelect('om')
+            ->leftJoin('om.metier', 'm')->addSelect('m');
 
         if (!empty($criteres['q'])) {
-            $qb->andWhere('o.titre LIKE :q OR e.nom LIKE :q')
+            $qb->andWhere('o.titre LIKE :q OR e.nom LIKE :q OR m.nom LIKE :q')
                 ->setParameter('q', '%' . $criteres['q'] . '%');
         }
 
         if (!empty($criteres['ville'])) {
-            $qb->andWhere('o.ville LIKE :ville')
+            $qb->andWhere('om.ville LIKE :ville')
                 ->setParameter('ville', '%' . $criteres['ville'] . '%');
         }
 
-        if (!empty($criteres['secteur'])) {
-            $qb->andWhere('s.id = :secteur')
-                ->setParameter('secteur', $criteres['secteur']);
+        if (!empty($criteres['metier'])) {
+            $qb->andWhere('m.id = :metier')
+                ->setParameter('metier', $criteres['metier']);
         }
 
         if (!empty($criteres['typeContrat'])) {
-            $qb->andWhere('o.typeContrat = :typeContrat')
+            $qb->andWhere('om.typeContrat = :typeContrat')
                 ->setParameter('typeContrat', $criteres['typeContrat']);
         }
 
@@ -85,22 +104,83 @@ class OffreRepository extends ServiceEntityRepository
      */
     public function findByFilters(array $criteres = []): array
     {
-        $qb = $this->createQueryBuilder('o')
-            ->leftJoin('o.entreprise', 'e')->addSelect('e')
-            ->leftJoin('o.secteur', 's')->addSelect('s');
+        return $this->baseQueryBuilderFilters($criteres)
+            ->orderBy('o.datePublication', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
 
-        if (!empty($criteres['statut'])) {
-            $qb->andWhere('o.statut = :statut')
-                ->setParameter('statut', $criteres['statut']);
+    /**
+     * Pagine les resultats en BDD avec pagination par IDs (evite LIMIT/OFFSET avec fetch joins).
+     *
+     * @return Offre[]
+     */
+    public function findByFiltersPaginated(array $criteres = [], int $limit = 9, int $offset = 0): array
+    {
+        // Etape 1 : IDs pagines sans JOIN de collection
+        $ids = array_column(
+            $this->baseQueryBuilderFilters($criteres)
+                ->select('DISTINCT o.id')
+                ->orderBy('o.datePublication', 'DESC')
+                ->setFirstResult($offset)
+                ->setMaxResults($limit)
+                ->getQuery()
+                ->getScalarResult(),
+            'id'
+        );
+
+        if (empty($ids)) {
+            return [];
         }
 
-        if (!empty($criteres['secteur'])) {
-            $qb->andWhere('s.id = :secteur')
-                ->setParameter('secteur', $criteres['secteur']);
+        // Etape 2 : entites completes uniquement sur ces IDs
+        return $this->createQueryBuilder('o')
+            ->where('o.id IN (:ids)')
+            ->setParameter('ids', $ids)
+            ->leftJoin('o.entreprise', 'e')->addSelect('e')
+            ->leftJoin('o.offreMetiers', 'om')->addSelect('om')
+            ->leftJoin('om.metier', 'm')->addSelect('m')
+            ->orderBy('o.datePublication', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Compte les offres correspondant aux filtres DAIP, sans doublons dus aux JOINs.
+     */
+    public function countByFilters(array $criteres = []): int
+    {
+        return (int) $this->baseQueryBuilderFilters($criteres)
+            ->select('COUNT(DISTINCT o.id)')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /**
+     * QueryBuilder de base pour les filtres DAIP (findByFilters, countByFilters).
+     */
+    private function baseQueryBuilderFilters(array $criteres): QueryBuilder
+    {
+        $qb = $this->createQueryBuilder('o')
+            ->leftJoin('o.entreprise', 'e')->addSelect('e')
+            ->leftJoin('o.offreMetiers', 'om')->addSelect('om')
+            ->leftJoin('om.metier', 'm')->addSelect('m');
+
+        if (!empty($criteres['statut'])) {
+            $statutEnum = \App\Enum\StatutOffre::tryFrom($criteres['statut']);
+            if ($statutEnum !== null) {
+                $qb->andWhere('o.statut = :statut')
+                    ->setParameter('statut', $statutEnum);
+            }
+        }
+
+        if (!empty($criteres['metier'])) {
+            $qb->andWhere('m.id = :metier')
+                ->setParameter('metier', $criteres['metier']);
         }
 
         if (!empty($criteres['ville'])) {
-            $qb->andWhere('o.ville LIKE :ville')
+            $qb->andWhere('om.ville LIKE :ville')
                 ->setParameter('ville', '%' . $criteres['ville'] . '%');
         }
 
@@ -114,9 +194,7 @@ class OffreRepository extends ServiceEntityRepository
                 ->setParameter('dateFin', $criteres['dateFin']);
         }
 
-        return $qb->orderBy('o.datePublication', 'DESC')
-            ->getQuery()
-            ->getResult();
+        return $qb;
     }
 
     /**

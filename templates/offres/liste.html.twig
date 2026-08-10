@@ -25,27 +25,23 @@
             {% include 'offres/_filtres.html.twig' with {
                 action_url: path('app_offres_liste'),
                 filtres: filtres,
-                secteurs: secteurs,
+                metiers: metiers,
                 typesContrat: typesContrat,
             } %}
         </div>
 
-        {% if filtresActifs %}
-            <div class="text-center -mt-4 mb-8" id="filtres-actifs-container">
-                <a href="{{ path('app_offres_liste') }}" class="text-sm font-medium text-brand-indigo hover:underline">✕ Réinitialiser les filtres</a>
-            </div>
-        {% endif %}
-
-        {% include 'offres/_liste.html.twig' with {
-            offres: offres,
-            filtres: filtres,
-            filtresActifs: filtresActifs,
-            secteurs: secteurs,
-            typesContrat: typesContrat,
-            total: total,
-            page: page,
-            totalPages: totalPages,
-        } %}
+        <div id="offres-container">
+            {% include 'offres/_liste.html.twig' with {
+                offres: offres,
+                filtres: filtres,
+                filtresActifs: filtresActifs,
+                metiers: metiers,
+                typesContrat: typesContrat,
+                total: total,
+                page: page,
+                totalPages: totalPages,
+            } %}
+        </div>
     </div>
 </div>
 
@@ -60,12 +56,12 @@
         var params = new URLSearchParams();
         var q = document.querySelector('[data-filter-q]');
         var ville = document.querySelector('[data-filter-ville]');
-        var secteur = document.querySelector('[data-filter-secteur]');
+        var metier = document.querySelector('[data-filter-metier]');
         var typeContrat = document.querySelector('[data-filter-type-contrat]');
 
         if (q && q.value) params.set('q', q.value);
         if (ville && ville.value) params.set('ville', ville.value);
-        if (secteur && secteur.value) params.set('secteur', secteur.value);
+        if (metier && metier.value) params.set('metier', metier.value);
         if (typeContrat && typeContrat.value) params.set('typeContrat', typeContrat.value);
         if (extra && extra.page) params.set('page', extra.page);
 
@@ -80,27 +76,14 @@
         })
         .then(function (response) { return response.text(); })
         .then(function (html) {
-            var parser = new DOMParser();
-            var doc = parser.parseFromString(html, 'text/html');
-            var newGrid = doc.getElementById('offres-grid');
-            var newPagination = doc.getElementById('offres-pagination');
-            var newFiltresActifs = doc.getElementById('filtres-actifs-container');
-
-            if (newGrid && grid) {
-                grid.outerHTML = newGrid.outerHTML;
-                grid = document.getElementById('offres-grid');
+            var container = document.getElementById('offres-container');
+            if (container) {
+                container.innerHTML = html;
             }
-            if (newPagination && pagination) {
-                pagination.outerHTML = newPagination.outerHTML;
-                pagination = document.getElementById('offres-pagination');
-            }
-            if (newFiltresActifs && filtresActifsContainer) {
-                filtresActifsContainer.outerHTML = newFiltresActifs.outerHTML;
-                filtresActifsContainer = document.getElementById('filtres-actifs-container');
-            } else if (filtresActifsContainer && !newFiltresActifs) {
-                filtresActifsContainer.remove();
-                filtresActifsContainer = null;
-            }
+            
+            // On peut aussi chercher s'il y a un composant filtres actifs dans le retour
+            // Mais l'URL remplace tout. Pour plus de propreté, on recharge la page si ce conteneur doit bouger,
+            // ou on laisse le JS s'en occuper, mais le plus simple pour le moment est de gérer le container.
 
             if (replaceUrl) {
                 history.pushState(null, '', url);

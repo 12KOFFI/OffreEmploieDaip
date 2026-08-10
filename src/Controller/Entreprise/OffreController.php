@@ -2,8 +2,10 @@
 
 namespace App\Controller\Entreprise;
 
-use App\Entity\Competence;
 use App\Entity\Offre;
+use App\Entity\OffreMetier;
+use App\Entity\Metier;
+use App\Repository\MetierRepository;
 use App\Entity\User;
 use App\Enum\StatutOffre;
 use App\Form\OffreType;
@@ -15,6 +17,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Form\FormError;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
@@ -66,7 +70,7 @@ class OffreController extends AbstractController
     }
 
     #[Route('/nouvelle', name: 'entreprise_offres_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, OffreManager $offreManager, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, OffreManager $offreManager, EntityManagerInterface $entityManager, MetierRepository $metierRepository): Response
     {
         $entreprise = $this->getEntrepriseOrThrow();
 
@@ -76,9 +80,12 @@ class OffreController extends AbstractController
         $form = $this->createForm(OffreType::class, $offre);
         $form->handleRequest($request);
 
+        if ($form->isSubmitted()) {
+            $this->resolveCustomMetiers($form, $metierRepository, $entityManager);
+        }
+
         if ($form->isSubmitted() && $form->isValid()) {
             $this->processImageUpload($offre, $form);
-            $this->processCompetences($offre, $request, $entityManager);
 
             $offreManager->creerBrouillon($offre);
 
@@ -95,16 +102,19 @@ class OffreController extends AbstractController
     }
 
     #[Route('/{id}/modifier', name: 'entreprise_offres_edit', methods: ['GET', 'POST'])]
-    public function edit(Offre $offre, Request $request, OffreManager $offreManager, EntityManagerInterface $entityManager): Response
+    public function edit(Offre $offre, Request $request, OffreManager $offreManager, EntityManagerInterface $entityManager, MetierRepository $metierRepository): Response
     {
         $this->denyAccessUnlessGranted(OffreVoter::EDIT, $offre);
 
         $form = $this->createForm(OffreType::class, $offre);
         $form->handleRequest($request);
 
+        if ($form->isSubmitted()) {
+            $this->resolveCustomMetiers($form, $metierRepository, $entityManager);
+        }
+
         if ($form->isSubmitted() && $form->isValid()) {
             $this->processImageUpload($offre, $form);
-            $this->processCompetences($offre, $request, $entityManager);
 
             $offreManager->modifier($offre);
 
@@ -159,41 +169,22 @@ class OffreController extends AbstractController
         return $this->redirectToRoute('entreprise_offres_index');
     }
 
-    #[Route('/{id}/dupliquer', name: 'entreprise_offres_duplicate', methods: ['POST'])]
-    public function duplicate(Offre $offre, Request $request, OffreManager $offreManager, EntityManagerInterface $entityManager): Response
+    private function resolveCustomMetiers(FormInterface $form, MetierRepository $metierRepository, EntityManagerInterface $entityManager): void
     {
-        $this->denyAccessUnlessGranted(OffreVoter::EDIT, $offre);
-
-        if (!$this->isCsrfTokenValid('dupliquer-offre-' . $offre->getId(), $request->request->get('_token'))) {
-            throw $this->createAccessDeniedException('Jeton CSRF invalide.');
+        foreach ($form->get('offreMetiers') as $offreMetierForm) {
+            $offreMetier = $offreMetierForm->getData();
+            $selection = $offreMetierForm->get('metier')->getData();
+            if ($selection && $selection->getId() !== null) { continue; }
+            $nom = trim((string) $offreMetierForm->get('autreMetier')->getData());
+            $nom = preg_replace('/\\s+/', ' ', $nom) ?? $nom;
+            if ($nom === '' || mb_strlen($nom) < 2 || mb_strlen($nom) > 150) {
+                $offreMetierForm->get('metier')->addError(new FormError('Sélectionnez un métier ou saisissez un nom valide (2 à 150 caractères).'));
+                continue;
+            }
+            $metier = $metierRepository->findOneByNameInsensitive($nom);
+            if (!$metier) { $metier = (new Metier())->setNom($nom); $entityManager->persist($metier); }
+            $offreMetier->setMetier($metier);
         }
-
-        $entreprise = $this->getEntrepriseOrThrow();
-
-        $copie = new Offre();
-        $copie->setEntreprise($entreprise);
-        $copie->setTitre($offre->getTitre() . ' (copie)');
-        $copie->setDescription($offre->getDescription());
-        $copie->setTypeContrat($offre->getTypeContrat());
-        $copie->setVille($offre->getVille());
-        $copie->setSalaireMin($offre->getSalaireMin());
-        $copie->setSalaireMax($offre->getSalaireMax());
-        $copie->setNbAnneesExperience($offre->getNbAnneesExperience());
-        $copie->setNombrePostes($offre->getNombrePostes());
-        $copie->setNiveauEtude($offre->getNiveauEtude());
-        $copie->setSecteur($offre->getSecteur());
-        $copie->setImage($offre->getImage());
-
-        foreach ($offre->getCompetences() as $competence) {
-            $copie->addCompetence($competence);
-        }
-
-        $entityManager->persist($copie);
-        $entityManager->flush();
-
-        $this->addFlash('success', 'Offre dupliquée avec succès. Vous pouvez maintenant la modifier.');
-
-        return $this->redirectToRoute('entreprise_offres_edit', ['id' => $copie->getId()]);
     }
 
     private function processImageUpload(Offre $offre, \Symfony\Component\Form\FormInterface $form): void
@@ -210,69 +201,10 @@ class OffreController extends AbstractController
             mkdir($uploadsDirectory, 0775, true);
         }
 
-        $newFilename = uniqid() . '.' . ($uploadedFile->guessExtension() ?? 'bin');
+        $newFilename = bin2hex(random_bytes(16)) . '.' . ($uploadedFile->guessExtension() ?? 'bin');
         $uploadedFile->move($uploadsDirectory, $newFilename);
 
         $offre->setImage('/uploads/offres/' . $newFilename);
-    }
-
-    private function processCompetences(Offre $offre, Request $request, EntityManagerInterface $entityManager): void
-    {
-        $ids = $request->request->all('competences') ?? [];
-        if (!is_array($ids)) {
-            return;
-        }
-
-        $offre->getCompetences()->clear();
-
-        foreach ($ids as $id) {
-            $competence = $entityManager->getRepository(Competence::class)->find($id);
-            if ($competence) {
-                $offre->addCompetence($competence);
-            }
-        }
-    }
-
-    #[Route('/api/competences/search', name: 'entreprise_api_competences_search', methods: ['GET'])]
-    public function searchCompetences(Request $request, EntityManagerInterface $entityManager): JsonResponse
-    {
-        $q = trim((string) $request->query->get('q', ''));
-
-        if (strlen($q) < 1) {
-            return $this->json([]);
-        }
-
-        $results = $entityManager->getConnection()->fetchAllAssociative(
-            'SELECT id, nom FROM competence WHERE nom LIKE :q ORDER BY nom ASC LIMIT 20',
-            ['q' => '%' . $q . '%']
-        );
-
-        return $this->json($results);
-    }
-
-    #[Route('/api/competences/create', name: 'entreprise_api_competences_create', methods: ['POST'])]
-    public function createCompetence(Request $request, EntityManagerInterface $entityManager): JsonResponse
-    {
-        $nom = trim((string) $request->request->get('nom', ''));
-
-        if (strlen($nom) < 1) {
-            return $this->json(['error' => 'Nom de compétence requis.'], 400);
-        }
-
-        $existing = $entityManager->getConnection()->fetchOne(
-            'SELECT id FROM competence WHERE nom = :nom',
-            ['nom' => $nom]
-        );
-
-        if ($existing) {
-            return $this->json(['id' => (int) $existing['id'], 'nom' => $nom]);
-        }
-
-        $entityManager->getConnection()->insert('competence', ['nom' => $nom]);
-
-        $id = (int) $entityManager->getConnection()->lastInsertId();
-
-        return $this->json(['id' => $id, 'nom' => $nom], 201);
     }
 }
 

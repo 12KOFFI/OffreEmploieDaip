@@ -8,15 +8,15 @@
         "type": "js"
     },
     "\/assets\/@symfony\/stimulus-bundle\/controllers.js": {
-        "path": "\/assets\/@symfony\/stimulus-bundle\/controllers-obm40E8.js",
+        "path": "\/assets\/@symfony\/stimulus-bundle\/controllers-7wGFrBe.js",
         "type": "js"
     },
     "\/assets\/@symfony\/ux-autocomplete\/controller.js": {
-        "path": "\/assets\/@symfony\/ux-autocomplete\/controller-FEEd2HP.js",
+        "path": "\/assets\/@symfony\/ux-autocomplete\/controller-2qp2l-k.js",
         "type": "js"
     },
     "\/assets\/@symfony\/ux-turbo\/turbo_controller.js": {
-        "path": "\/assets\/@symfony\/ux-turbo\/turbo_controller-bFCo5ub.js",
+        "path": "\/assets\/@symfony\/ux-turbo\/turbo_controller-LdQQVNw.js",
         "type": "js"
     },
     "\/assets\/controllers\/hello_controller.js": {
@@ -28,7 +28,7 @@
         "type": "js"
     },
     "\/assets\/styles\/app.css": {
-        "path": "\/assets\/styles\/app-7taLCxj.css",
+        "path": "\/assets\/styles\/app-BL0U7y3.css",
         "type": "css"
     },
     "@hotwired\/stimulus": {
@@ -36,7 +36,7 @@
         "type": "js"
     },
     "@symfony\/stimulus-bundle": {
-        "path": "\/assets\/@symfony\/stimulus-bundle\/loader-IOzBDLu.js",
+        "path": "\/assets\/@symfony\/stimulus-bundle\/loader-ToSn1lm.js",
         "type": "js"
     },
     "@hotwired\/turbo": {

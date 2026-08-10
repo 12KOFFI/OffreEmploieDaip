@@ -4,7 +4,6 @@ namespace App\Controller\Daip;
 
 use App\Repository\EntrepriseRepository;
 use App\Repository\OffreRepository;
-use App\Repository\SecteurRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -18,7 +17,6 @@ class DashboardController extends AbstractController
     public function index(
         OffreRepository $offreRepository,
         EntrepriseRepository $entrepriseRepository,
-        SecteurRepository $secteurRepository,
     ): Response {
         $compteurs = $offreRepository->countByStatut();
 
@@ -28,7 +26,7 @@ class DashboardController extends AbstractController
         $dernieresOffres = $offreRepository->findBy([], ['datePublication' => 'DESC'], 5);
 
         $evolutionParMois = $this->getEvolutionParMois($offreRepository);
-        $repartitionSecteurs = $this->getRepartitionSecteurs($offreRepository);
+        $repartitionMetiers = $this->getRepartitionMetiers($offreRepository);
         $repartitionVilles = $this->getRepartitionVilles($offreRepository);
 
         return $this->render('daip/dashboard.html.twig', [
@@ -37,7 +35,7 @@ class DashboardController extends AbstractController
             'totalEntreprises' => $totalEntreprises,
             'dernieresOffres' => $dernieresOffres,
             'evolutionParMois' => $evolutionParMois,
-            'repartitionSecteurs' => $repartitionSecteurs,
+            'repartitionMetiers' => $repartitionMetiers,
             'repartitionVilles' => $repartitionVilles,
         ]);
     }
@@ -66,14 +64,15 @@ class DashboardController extends AbstractController
     /**
      * @return array<int, array{nom: string, total: int}>
      */
-    private function getRepartitionSecteurs(OffreRepository $offreRepository): array
+    private function getRepartitionMetiers(OffreRepository $offreRepository): array
     {
         $sql = <<<SQL
-            SELECT s.nom, COUNT(o.id) AS total
+            SELECT m.nom, COUNT(DISTINCT o.id) AS total
             FROM offre o
-            JOIN secteur s ON o.secteur_id = s.id
+            JOIN offre_metier om ON om.offre_id = o.id
+            JOIN metier m ON m.id = om.metier_id
             WHERE o.statut = 'publiee'
-            GROUP BY s.id, s.nom
+            GROUP BY m.id, m.nom
             ORDER BY total DESC
             LIMIT 10
         SQL;
@@ -91,10 +90,11 @@ class DashboardController extends AbstractController
     private function getRepartitionVilles(OffreRepository $offreRepository): array
     {
         $sql = <<<SQL
-            SELECT ville, COUNT(*) AS total
-            FROM offre
-            WHERE statut = 'publiee'
-            GROUP BY ville
+            SELECT om.ville, COUNT(DISTINCT o.id) AS total
+            FROM offre o
+            JOIN offre_metier om ON om.offre_id = o.id
+            WHERE o.statut = 'publiee'
+            GROUP BY om.ville
             ORDER BY total DESC
             LIMIT 10
         SQL;

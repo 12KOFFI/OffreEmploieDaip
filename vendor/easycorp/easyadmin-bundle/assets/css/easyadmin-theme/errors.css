@@ -1,0 +1,25 @@
+/* Error pages (shown when exceptions are triggered in production)
+/* ------------------------------------------------------------------------- */
+body.error .error-message {
+    max-inline-size: 500px;
+    min-block-size: 400px;
+    padding: var(--ea-sp-11) var(--ea-sp-4);
+}
+@media (min-width: 992px) {
+    body.error .error-message {
+        padding: var(--ea-sp-11);
+    }
+}
+body.error .error-message h1 {
+    color: var(--color-danger);
+    display: flex;
+    align-items: center;
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    margin-block-end: 1em;
+}
+body.error .error-message h1 .icon {
+    margin-inline-end: var(--ea-sp-1-5);
+    line-height: var(--line-height-none);
+    font-size: 110%;
+}

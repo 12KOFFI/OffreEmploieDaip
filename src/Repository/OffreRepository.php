@@ -27,7 +27,7 @@ class OffreRepository extends ServiceEntityRepository
         // Etape 1 : recuperer les IDs pagines sans JOIN de collection (evite le probleme
         // Doctrine "LIMIT/OFFSET with fetch joins" qui charge tout en memoire).
         $idsQb = $this->baseQueryBuilderOffresPubliees($criteres)
-            ->select('DISTINCT o.id')
+            ->select('DISTINCT o.id, o.datePublication')
             ->orderBy('o.datePublication', 'DESC')
             ->setFirstResult($offset);
 
@@ -120,7 +120,7 @@ class OffreRepository extends ServiceEntityRepository
         // Etape 1 : IDs pagines sans JOIN de collection
         $ids = array_column(
             $this->baseQueryBuilderFilters($criteres)
-                ->select('DISTINCT o.id')
+                ->select('DISTINCT o.id, o.datePublication')
                 ->orderBy('o.datePublication', 'DESC')
                 ->setFirstResult($offset)
                 ->setMaxResults($limit)

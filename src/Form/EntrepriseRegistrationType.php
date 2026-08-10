@@ -64,6 +64,13 @@ class EntrepriseRegistrationType extends AbstractType
                 'attr' => self::INPUT_ATTR + ['rows' => 4],
                 'label_attr' => self::LABEL_ATTR,
             ])
+            ->add('contact', TextType::class, [
+                'label' => 'Contact de l\'entreprise (téléphone du responsable)',
+                'required' => false,
+                'property_path' => 'entreprise.contact',
+                'attr' => self::INPUT_ATTR,
+                'label_attr' => self::LABEL_ATTR,
+            ])
             ->add('logo', FileType::class, [
                 'label' => 'Logo de l\'entreprise (optionnel)',
                 'required' => false,

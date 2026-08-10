@@ -46,6 +46,12 @@ class EntrepriseProfilType extends AbstractType
                 'label_attr' => self::LABEL_ATTR,
             ])
 
+            ->add('contact', TextType::class, [
+                'label' => 'Contact de l\'entreprise (téléphone du responsable)',
+                'required' => false,
+                'attr' => self::INPUT_ATTR,
+                'label_attr' => self::LABEL_ATTR,
+            ])
             ->add('description', TextareaType::class, [
                 'label' => "Description de l'entreprise (optionnel)",
                 'required' => false,

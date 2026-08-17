@@ -24,11 +24,7 @@ class DashboardController extends AbstractController
 
         $totalOffres = array_sum($compteurs);
 
-        $dernieresOffres = $offreRepository->findBy(
-            ['entreprise' => $entreprise],
-            ['datePublication' => 'DESC'],
-            5,
-        );
+        $dernieresOffres = $offreRepository->findLatestWithRelations($entreprise, 5);
 
         return $this->render('entreprise/dashboard.html.twig', [
             'entreprise' => $entreprise,

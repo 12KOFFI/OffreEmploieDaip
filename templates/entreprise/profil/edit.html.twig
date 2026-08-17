@@ -9,26 +9,81 @@
 {% endblock %}
 
 {% block body %}
-<div class="py-12 px-6 pb-24">
-    <div class="max-w-2xl mx-auto">
-        <div data-aos="fade-up" class="mb-8">
-            <h1 class="text-[26px]">Mon profil entreprise</h1>
+<div class="bg-slate-50/80 py-6 sm:py-8 px-3 sm:px-6 pb-12 sm:pb-16">
+    <div class="max-w-4xl mx-auto">
+        <div data-aos="fade-up" class="mb-6 sm:mb-8">
+            <h1 class="text-xl sm:text-3xl font-bold text-slate-900 leading-tight">Mon profil entreprise</h1>
             <p class="text-sm text-slate-500 mt-1">Ces informations sont visibles sur vos offres publiées.</p>
         </div>
 
-        <div data-aos="fade-up" class="card card-zoom p-10 sm:p-11">
-            {{ form_start(form, {attr: {id: 'profil-form'}}) }}
+        <div data-aos="fade-up" class="bg-white border border-slate-200 rounded-2xl p-4 sm:p-8 shadow-sm">
+            {{ form_start(form, {attr: {id: 'profil-form', class: 'space-y-5 sm:space-y-6'}}) }}
                 {{ form_row(form.nom) }}
 
+                {# --- Contacts de l'entreprise (3 colonnes) --- #}
+                <div class="mt-7 pt-6 border-t border-slate-100 mb-6">
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="w-8 h-8 rounded-lg bg-indigo-50 text-brand-indigo flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                        </span>
+                        <div>
+                            <h2 class="text-base font-semibold text-navy">Contacts téléphoniques</h2>
+                            <p class="text-xs text-slate-500">Sélectionnez l'indicatif puis saisissez le numéro (chiffres uniquement).</p>
+                        </div>
+                    </div>
 
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {# Colonne 1: Contact de l'entreprise #}
+                        <div>
+                            <label for="{{ form.contact.numero.vars.id }}" class="field-label !mt-0 text-xs sm:text-sm font-semibold">
+                                Contact de l’entreprise <span class="text-red-500">*</span>
+                            </label>
+                            <div class="flex items-center rounded-xl border border-slate-200 bg-white shadow-sm transition-all focus-within:border-brand-purple focus-within:ring-2 focus-within:ring-brand-purple/20 overflow-hidden mt-1.5 min-h-[48px] sm:min-h-0">
+                                {{ form_widget(form.contact.indicatif) }}
+                                {{ form_widget(form.contact.numero) }}
+                            </div>
+                            {{ form_errors(form.contact) }}
+                            {{ form_errors(form.contact.numero) }}
+                        </div>
 
-                {{ form_row(form.logo) }}
-                {{ form_row(form.contact) }}
+                        {# Colonne 2: Contact du responsable #}
+                        <div>
+                            <label for="{{ form.contactResponsable.numero.vars.id }}" class="field-label !mt-0 text-xs sm:text-sm font-semibold">
+                                Contact du responsable <span class="text-red-500">*</span>
+                            </label>
+                            <div class="flex items-center rounded-xl border border-slate-200 bg-white shadow-sm transition-all focus-within:border-brand-purple focus-within:ring-2 focus-within:ring-brand-purple/20 overflow-hidden mt-1.5 min-h-[48px] sm:min-h-0">
+                                {{ form_widget(form.contactResponsable.indicatif) }}
+                                {{ form_widget(form.contactResponsable.numero) }}
+                            </div>
+                            {{ form_errors(form.contactResponsable) }}
+                            {{ form_errors(form.contactResponsable.numero) }}
+                        </div>
+
+                        {# Colonne 3: Autre contact #}
+                        <div>
+                            <label for="{{ form.autreContact.numero.vars.id }}" class="field-label !mt-0 text-xs sm:text-sm font-semibold text-slate-600">
+                                Autre contact <span class="text-xs font-normal text-slate-400">(optionnel)</span>
+                            </label>
+                            <div class="flex items-center rounded-xl border border-slate-200 bg-white shadow-sm transition-all focus-within:border-brand-purple focus-within:ring-2 focus-within:ring-brand-purple/20 overflow-hidden mt-1.5 min-h-[48px] sm:min-h-0">
+                                {{ form_widget(form.autreContact.indicatif) }}
+                                {{ form_widget(form.autreContact.numero) }}
+                            </div>
+                            {{ form_errors(form.autreContact) }}
+                            {{ form_errors(form.autreContact.numero) }}
+                        </div>
+                    </div>
+                </div>
+
                 {{ form_row(form.description) }}
 
-                <div class="flex gap-3 mt-8">
-                    <button type="submit" class="btn-orange" id="profil-submit">
+                <div class="flex flex-col sm:flex-row items-center justify-end gap-3 mt-8 pt-6 border-t border-slate-100">
+                    <a href="{{ path('entreprise_offres_index') }}" class="inline-flex items-center justify-center min-h-[48px] sm:min-h-0 px-5 py-3 text-sm font-medium text-slate-700 bg-white hover:bg-slate-100 active:bg-slate-200 border border-slate-300 rounded-xl transition-all shadow-xs cursor-pointer w-full sm:w-auto order-2 sm:order-1">
+                        Retour à mes offres
+                    </a>
+                    
+                    <button type="submit" id="profil-submit" class="inline-flex items-center justify-center gap-2 min-h-[48px] sm:min-h-0 px-6 py-3 text-base sm:text-sm font-bold text-white bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 active:from-orange-700 active:to-amber-800 active:scale-[0.98] rounded-xl transition-all shadow-md shadow-orange-500/20 cursor-pointer w-full sm:w-auto order-1 sm:order-2">
                         <span class="inline-flex items-center gap-2">
+                            <i class="fa-solid fa-floppy-disk"></i>
                             <span id="profil-text">Enregistrer</span>
                             <svg id="profil-spinner" class="hidden animate-spin h-[17px] w-[17px] text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -36,7 +91,6 @@
                             </svg>
                         </span>
                     </button>
-                    <a href="{{ path('entreprise_offres_index') }}" class="btn-ghost">Retour à mes offres</a>
                 </div>
             {{ form_end(form) }}
         </div>
@@ -46,6 +100,17 @@
 <script>
     var profilForm = document.getElementById('profil-form');
     if (profilForm) {
+        profilForm.querySelectorAll('input[type="tel"]').forEach(function (telInput) {
+            telInput.addEventListener('input', function () {
+                this.value = this.value.replace(/[^0-9]/g, '');
+            });
+            telInput.addEventListener('paste', function () {
+                setTimeout(function () {
+                    telInput.value = telInput.value.replace(/[^0-9]/g, '');
+                }, 0);
+            });
+        });
+
         profilForm.addEventListener('submit', function () {
             var button = document.getElementById('profil-submit');
             var text = document.getElementById('profil-text');

@@ -4,6 +4,7 @@ namespace App\Controller\Daip;
 
 use App\Entity\Entreprise;
 use App\Repository\EntrepriseRepository;
+use App\Repository\OffreRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -20,55 +21,25 @@ class EntrepriseController extends AbstractController
     public function index(Request $request, EntrepriseRepository $entrepriseRepository): Response
     {
         $search = trim((string) $request->query->get('q', ''));
-
         $page = max(1, $request->query->getInt('page', 1));
 
-        if ($search !== '') {
-            $qb = $entrepriseRepository->createQueryBuilder('e')
-                ->leftJoin('e.user', 'u')->addSelect('u')
-                ->where('LOWER(e.nom) LIKE :q')
-                ->orWhere('LOWER(u.email) LIKE :q')
-                ->setParameter('q', '%' . strtolower($search) . '%')
-                ->orderBy('e.nom', 'ASC');
-        } else {
-            $qb = $entrepriseRepository->createQueryBuilder('e')
-                ->leftJoin('e.user', 'u')->addSelect('u')
-                ->orderBy('e.nom', 'ASC');
-        }
-
-        $total = (int) $qb->select('COUNT(e.id)')->getQuery()->getSingleScalarResult();
-        $totalPages = max(1, (int) ceil($total / self::PAR_PAGE));
-        $page = min($page, $totalPages);
-
-        $entreprises = $entrepriseRepository->createQueryBuilder('e')
-            ->leftJoin('e.user', 'u')->addSelect('u')
-            ->orderBy('e.nom', 'ASC');
-
-        if ($search !== '') {
-            $entreprises->where('LOWER(e.nom) LIKE :q')
-                ->orWhere('LOWER(u.email) LIKE :q')
-                ->setParameter('q', '%' . strtolower($search) . '%');
-        }
-
-        $entreprises = $entreprises->setFirstResult(($page - 1) * self::PAR_PAGE)
-            ->setMaxResults(self::PAR_PAGE)
-            ->getQuery()
-            ->getResult();
+        $resultat = $entrepriseRepository->searchPaginated($search, $page, self::PAR_PAGE);
 
         return $this->render('daip/entreprises/index.html.twig', [
-            'entreprises' => $entreprises,
-            'total' => $total,
-            'totalPages' => $totalPages,
-            'page' => $page,
+            'entreprises' => $resultat['entreprises'],
+            'total' => $resultat['total'],
+            'totalPages' => $resultat['totalPages'],
+            'page' => $resultat['page'],
             'search' => $search,
         ]);
     }
 
     #[Route('/{id}', name: 'show', methods: ['GET'])]
-    public function show(Entreprise $entreprise): Response
+    public function show(Entreprise $entreprise, OffreRepository $offreRepository): Response
     {
         return $this->render('daip/entreprises/show.html.twig', [
             'entreprise' => $entreprise,
+            'offresPubliees' => $offreRepository->findPublishedByEntreprise($entreprise),
         ]);
     }
 }

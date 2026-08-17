@@ -8,7 +8,6 @@ use App\Enum\TypeContrat;
 use App\Repository\OffreRepository;
 use App\Repository\MetierRepository;
 use App\Security\OffreVoter;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -77,45 +76,17 @@ class OffreController extends AbstractController
      * retiree).
      */
     #[Route('/offres/{id}', name: 'app_offre_show', methods: ['GET'])]
-    public function show(Offre $offre, EntityManagerInterface $entityManager): Response
+    public function show(Offre $offre, OffreRepository $offreRepository): Response
     {
         $this->denyAccessUnlessGranted(OffreVoter::VIEW, $offre);
 
-        // Requete en deux etapes pour eviter les doublons dus au leftJoin sur offreMetiers
-        $idsQb = $entityManager->createQueryBuilder()
-            ->select('DISTINCT o.id')
-            ->from(Offre::class, 'o')
-            ->where('o.statut = :statut')
-            ->setParameter('statut', StatutOffre::PUBLIEE)
-            ->andWhere('o.id != :id')
-            ->setParameter('id', $offre->getId())
-            ->setMaxResults(3);
-
-        $firstOm = $offre->getOffreMetiers()->first();
-        if ($firstOm && $firstOm->getMetier()) {
-            $idsQb->leftJoin('o.offreMetiers', 'om')
-               ->andWhere('om.metier = :metier')
-               ->setParameter('metier', $firstOm->getMetier());
-        } elseif (!empty($offre->getVilles())) {
-            $villes = $offre->getVilles();
-            $idsQb->leftJoin('o.offreMetiers', 'om')
-               ->andWhere('om.ville = :ville')
-               ->setParameter('ville', $villes[0]);
+        if ($offre->getStatut() === StatutOffre::PUBLIEE) {
+            $offreRepository->incrementViewCount($offre->getId());
         }
-
-        $ids = array_column($idsQb->getQuery()->getScalarResult(), 'id');
-
-        $offresSimilaires = empty($ids) ? [] : $entityManager->createQueryBuilder()
-            ->select('o')
-            ->from(Offre::class, 'o')
-            ->where('o.id IN (:ids)')
-            ->setParameter('ids', $ids)
-            ->getQuery()
-            ->getResult();
 
         return $this->render('offres/show.html.twig', [
             'offre' => $offre,
-            'offres_similaires' => $offresSimilaires,
+            'offres_similaires' => $offreRepository->findSimilar($offre),
         ]);
     }
 }

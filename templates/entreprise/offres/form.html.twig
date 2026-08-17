@@ -7,10 +7,10 @@
    ═══════════════════════════════════════════════════════════ #}
 {% block form_errors %}
     {% if errors|length > 0 %}
-        <div class="mt-1.5 space-y-1">
+        <div class="mt-2 space-y-1.5">
             {% for error in errors %}
-                <p class="text-xs font-medium text-red-600 flex items-center gap-1.5 bg-red-50 px-2.5 py-1 rounded-lg border border-red-100">
-                    <i class="fa-solid fa-circle-info text-red-500"></i>
+                <p class="text-sm sm:text-xs font-medium text-red-600 flex items-center gap-2 bg-red-50 px-3 py-2.5 sm:px-2.5 sm:py-1.5 rounded-xl sm:rounded-lg border border-red-100">
+                    <i class="fa-solid fa-circle-info text-red-500 shrink-0"></i>
                     <span>{{ error.message }}</span>
                 </p>
             {% endfor %}
@@ -27,15 +27,15 @@
         {# ==========================================
            MODE LECTURE (READ) — Carte Compacte
            ========================================== #}
-        <div class="metier-read-mode hidden p-5 cursor-pointer hover:bg-slate-50/80 transition-colors" onclick="toggleMetierEditMode(this.closest('.offre-metier-item'))">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
+        <div class="metier-read-mode hidden p-4 sm:p-5 cursor-pointer hover:bg-slate-50/80 active:bg-slate-100 transition-colors" onclick="toggleMetierEditMode(this.closest('.offre-metier-item'))">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                <div class="min-w-0">
                     <h3 class="text-base font-bold text-slate-800 flex items-center gap-2 mb-2">
-                        <i class="fa-solid fa-briefcase text-indigo-600"></i>
-                        <span class="read-metier-titre">Nouveau Poste</span>
-                        <span class="text-xs font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md ml-2">#<span class="metier-index">1</span></span>
+                        <i class="fa-solid fa-briefcase text-indigo-600 shrink-0"></i>
+                        <span class="read-metier-titre truncate">Nouveau Poste</span>
+                        <span class="text-xs font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md ml-1 shrink-0">#<span class="metier-index">1</span></span>
                     </h3>
-                    <div class="flex flex-wrap items-center gap-4 text-xs font-medium text-slate-600">
+                    <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-medium text-slate-600">
                         <span title="Ville"><i class="fa-solid fa-location-dot text-slate-400 mr-1.5"></i><span class="read-ville">—</span></span>
                         <span title="Postes"><i class="fa-solid fa-users text-slate-400 mr-1.5"></i><span class="read-postes">—</span> poste(s)</span>
                         <span title="Contrat" class="read-contrat-wrapper hidden"><i class="fa-solid fa-file-contract text-slate-400 mr-1.5"></i><span class="read-contrat"></span></span>
@@ -46,12 +46,12 @@
                     </div>
                 </div>
                 
-                <div class="flex items-center gap-2">
-                    <button type="button" class="btn-edit-metier px-3.5 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer">
-                        <i class="fa-solid fa-pen text-slate-500"></i> <span class="hidden sm:inline">Modifier</span>
+                <div class="flex items-center gap-2 pt-1 sm:pt-0 shrink-0">
+                    <button type="button" class="btn-edit-metier min-h-[44px] px-4 py-2.5 sm:px-3.5 sm:py-1.5 text-sm sm:text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 border border-slate-200 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer flex-1 sm:flex-none">
+                        <i class="fa-solid fa-pen text-slate-500"></i> <span>Modifier</span>
                     </button>
-                    <button type="button" class="btn-remove-metier px-3.5 py-1.5 text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer" onclick="event.stopPropagation();">
-                        <i class="fa-solid fa-trash-can"></i> <span class="hidden sm:inline">Supprimer</span>
+                    <button type="button" class="btn-remove-metier min-h-[44px] px-4 py-2.5 sm:px-3.5 sm:py-1.5 text-sm sm:text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 active:bg-red-200 border border-red-200 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer flex-1 sm:flex-none" onclick="event.stopPropagation();">
+                        <i class="fa-solid fa-trash-can"></i> <span>Supprimer</span>
                     </button>
                 </div>
             </div>
@@ -60,61 +60,61 @@
         {# ==========================================
            MODE ÉDITION (EDIT) — Formulaire
            ========================================== #}
-        <div class="metier-edit-mode p-6 sm:p-7">
-            <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-5">
-                <div class="flex items-center gap-2.5">
-                    <span class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-700 font-bold text-xs flex items-center justify-center border border-indigo-100">
+        <div class="metier-edit-mode p-4 sm:p-7">
+            <div class="flex items-center justify-between gap-3 border-b border-slate-100 pb-4 mb-5">
+                <div class="flex items-center gap-2.5 flex-1 min-w-0">
+                    <span class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-700 font-bold text-xs flex items-center justify-center border border-indigo-100 shrink-0">
                         #<span class="metier-index">1</span>
                     </span>
-                    <div>
+                    <div class="min-w-0 flex-1">
                         <h3 class="text-base font-semibold text-slate-800 leading-tight flex items-center gap-2">
-                            <i class="fa-solid fa-briefcase text-indigo-500"></i>
-                            <span class="metier-title-display text-slate-800">Définir ce poste</span>
+                            <i class="fa-solid fa-briefcase text-indigo-500 shrink-0"></i>
+                            <span class="metier-title-display text-slate-800 truncate block">Définir ce poste</span>
                         </h3>
                     </div>
                 </div>
-                <button type="button" class="btn-remove-metier text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 p-2 rounded-xl border border-red-200/60 transition-all cursor-pointer" title="Supprimer ce poste">
+                <button type="button" class="btn-remove-metier text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 active:bg-red-200 min-w-[40px] min-h-[40px] p-2 rounded-xl border border-red-200/60 transition-all cursor-pointer flex items-center justify-center shrink-0" title="Supprimer ce poste">
                     <i class="fa-solid fa-trash-can text-sm"></i>
                 </button>
             </div>
 
-            <div class="space-y-4">
+            <div class="space-y-5">
                 {# --- CHAMPS OBLIGATOIRES --- #}
                 <div>
-                    {{ form_label(form.metier, null, {label_attr: {class: 'block text-sm font-medium text-slate-700 mb-1.5'}}) }}
+                    {{ form_label(form.metier, null, {label_attr: {class: 'block text-sm font-semibold text-slate-700 mb-2'}}) }}
                     <div class="flex items-start gap-2">
                         <div class="flex-1">
-                            {{ form_widget(form.metier, {attr: {class: 'w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-purple/25 focus:border-brand-purple metier-select bg-white'}}) }}
+                            {{ form_widget(form.metier, {attr: {class: 'w-full px-3.5 py-3 sm:py-2.5 rounded-xl border border-slate-200 text-base sm:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 metier-select bg-white transition-shadow min-h-[48px] sm:min-h-0'}}) }}
                         </div>
-                        <button type="button" class="btn-autre-metier shrink-0 px-3 py-2.5 rounded-xl border border-indigo-200 text-indigo-600 hover:bg-indigo-50 text-sm font-medium transition">Autre</button>
+                        <button type="button" class="btn-autre-metier shrink-0 px-4 py-3 sm:py-2.5 rounded-xl border border-indigo-200 text-indigo-600 hover:bg-indigo-50 active:bg-indigo-100 text-sm font-medium transition min-h-[48px] sm:min-h-0">Autre</button>
                     </div>
                     {{ form_errors(form.metier) }}
                     <div class="autre-metier-wrapper hidden mt-3">
                         {{ form_label(form.autreMetier) }}
                         {{ form_widget(form.autreMetier) }}
                         {{ form_errors(form.autreMetier) }}
-                        <p class="mt-1 text-xs text-slate-500">Le m?tier sera v?rifi? et ajout? ? la liste s?il n?existe pas d?j?.</p>
+                        <p class="mt-1.5 text-xs text-slate-500">Le métier sera vérifié et ajouté à la liste s'il n'existe pas déjà.</p>
                     </div>
                 </div>
 
-                <div class="grid sm:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        {{ form_label(form.nombrePostes, null, {label_attr: {class: 'block text-sm font-medium text-slate-700 mb-1.5'}}) }}
+                        {{ form_label(form.nombrePostes, null, {label_attr: {class: 'block text-sm font-semibold text-slate-700 mb-2'}}) }}
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                                 <i class="fa-solid fa-users text-sm"></i>
                             </div>
-                            {{ form_widget(form.nombrePostes, {attr: {class: 'w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-purple/25 focus:border-brand-purple bg-white'}}) }}
+                            {{ form_widget(form.nombrePostes, {attr: {class: 'w-full pl-10 pr-3.5 py-3 sm:py-2.5 rounded-xl border border-slate-200 text-base sm:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white transition-shadow min-h-[48px] sm:min-h-0'}}) }}
                         </div>
                         {{ form_errors(form.nombrePostes) }}
                     </div>
                     <div>
-                        {{ form_label(form.ville, null, {label_attr: {class: 'block text-sm font-medium text-slate-700 mb-1.5'}}) }}
+                        {{ form_label(form.ville, null, {label_attr: {class: 'block text-sm font-semibold text-slate-700 mb-2'}}) }}
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                                 <i class="fa-solid fa-location-dot text-sm"></i>
                             </div>
-                            {{ form_widget(form.ville, {attr: {class: 'w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-purple/25 focus:border-brand-purple bg-white'}}) }}
+                            {{ form_widget(form.ville, {attr: {class: 'w-full pl-10 pr-3.5 py-3 sm:py-2.5 rounded-xl border border-slate-200 text-base sm:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white transition-shadow min-h-[48px] sm:min-h-0'}}) }}
                         </div>
                         {{ form_errors(form.ville) }}
                     </div>
@@ -122,70 +122,70 @@
 
                 {# --- CHAMPS OPTIONNELS (PROGRESSIVE DISCLOSURE) --- #}
                 <div class="pt-2">
-                    <button type="button" class="btn-toggle-advanced flex items-center gap-2 text-sm font-semibold text-indigo-600 hover:text-indigo-800 transition-colors py-2.5 px-3.5 bg-indigo-50/60 hover:bg-indigo-50 rounded-xl w-full justify-between cursor-pointer border border-indigo-100">
+                    <button type="button" class="btn-toggle-advanced flex items-center gap-2 text-sm font-semibold text-indigo-600 hover:text-indigo-800 active:text-indigo-900 transition-colors py-3 sm:py-2.5 px-4 sm:px-3.5 bg-indigo-50/60 hover:bg-indigo-50 active:bg-indigo-100 rounded-xl w-full justify-between cursor-pointer border border-indigo-100 min-h-[48px] sm:min-h-0">
                         <span><i class="fa-solid fa-sliders mr-2"></i>Préciser les exigences (Optionnel)</span>
                         <i class="fa-solid fa-chevron-down toggle-icon transition-transform"></i>
                     </button>
                     
-                    <div class="advanced-fields hidden mt-5 space-y-4">
-                        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="advanced-fields hidden mt-5 space-y-5 sm:space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                             <div>
-                                {{ form_label(form.typeContrat, null, {label_attr: {class: 'block text-sm font-medium text-slate-700 mb-1.5'}}) }}
+                                {{ form_label(form.typeContrat, null, {label_attr: {class: 'block text-sm font-semibold text-slate-700 mb-2'}}) }}
                                 <div class="relative">
                                     <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                                         <i class="fa-solid fa-file-contract text-sm"></i>
                                     </div>
-                                    {{ form_widget(form.typeContrat, {attr: {class: 'w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-purple/25 focus:border-brand-purple bg-white'}}) }}
+                                    {{ form_widget(form.typeContrat, {attr: {class: 'w-full pl-10 pr-3.5 py-3 sm:py-2.5 rounded-xl border border-slate-200 text-base sm:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white transition-shadow min-h-[48px] sm:min-h-0'}}) }}
                                 </div>
                                 {{ form_errors(form.typeContrat) }}
                             </div>
                             <div>
-                                {{ form_label(form.niveauEtude, null, {label_attr: {class: 'block text-sm font-medium text-slate-700 mb-1.5'}}) }}
+                                {{ form_label(form.niveauEtude, null, {label_attr: {class: 'block text-sm font-semibold text-slate-700 mb-2'}}) }}
                                 <div class="relative">
                                     <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                                         <i class="fa-solid fa-graduation-cap text-sm"></i>
                                     </div>
-                                    {{ form_widget(form.niveauEtude, {attr: {class: 'w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-purple/25 focus:border-brand-purple bg-white'}}) }}
+                                    {{ form_widget(form.niveauEtude, {attr: {class: 'w-full pl-10 pr-3.5 py-3 sm:py-2.5 rounded-xl border border-slate-200 text-base sm:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white transition-shadow min-h-[48px] sm:min-h-0'}}) }}
                                 </div>
                                 {{ form_errors(form.niveauEtude) }}
                             </div>
                             <div>
-                                {{ form_label(form.diplome, null, {label_attr: {class: 'block text-sm font-medium text-slate-700 mb-1.5'}}) }}
+                                {{ form_label(form.diplome, null, {label_attr: {class: 'block text-sm font-semibold text-slate-700 mb-2'}}) }}
                                 <div class="relative">
                                     <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                                         <i class="fa-solid fa-certificate text-sm"></i>
                                     </div>
-                                    {{ form_widget(form.diplome, {attr: {class: 'w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-purple/25 focus:border-brand-purple bg-white'}}) }}
+                                    {{ form_widget(form.diplome, {attr: {class: 'w-full pl-10 pr-3.5 py-3 sm:py-2.5 rounded-xl border border-slate-200 text-base sm:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white transition-shadow min-h-[48px] sm:min-h-0'}}) }}
                                 </div>
                                 {{ form_errors(form.diplome) }}
                             </div>
                         </div>
 
-                        <div class="grid sm:grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                {{ form_label(form.nbAnneesExperience, null, {label_attr: {class: 'block text-sm font-medium text-slate-700 mb-1.5'}}) }}
+                                {{ form_label(form.nbAnneesExperience, null, {label_attr: {class: 'block text-sm font-semibold text-slate-700 mb-2'}}) }}
                                 <div class="relative">
                                     <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                                         <i class="fa-solid fa-clock text-sm"></i>
                                     </div>
-                                    {{ form_widget(form.nbAnneesExperience, {attr: {class: 'w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-purple/25 focus:border-brand-purple bg-white'}}) }}
+                                    {{ form_widget(form.nbAnneesExperience, {attr: {class: 'w-full pl-10 pr-3.5 py-3 sm:py-2.5 rounded-xl border border-slate-200 text-base sm:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white transition-shadow min-h-[48px] sm:min-h-0'}}) }}
                                 </div>
                                 {{ form_errors(form.nbAnneesExperience) }}
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1.5">Fourchette salariale (FCFA)</label>
+                                <label class="block text-sm font-semibold text-slate-700 mb-2">Fourchette salariale (FCFA)</label>
                                 <div class="grid grid-cols-2 gap-3 relative">
                                     <div>
                                         <div class="relative">
                                             <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                                                 <i class="fa-solid fa-money-bill-wave text-sm"></i>
                                             </div>
-                                            {{ form_widget(form.salaireMin, {attr: {class: 'w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-purple/25 focus:border-brand-purple bg-white', placeholder: 'Min'}}) }}
+                                            {{ form_widget(form.salaireMin, {attr: {class: 'w-full pl-10 pr-3.5 py-3 sm:py-2.5 rounded-xl border border-slate-200 text-base sm:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white transition-shadow min-h-[48px] sm:min-h-0', placeholder: 'Min'}}) }}
                                         </div>
                                         {{ form_errors(form.salaireMin) }}
                                     </div>
                                     <div>
-                                        {{ form_widget(form.salaireMax, {attr: {class: 'w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-purple/25 focus:border-brand-purple bg-white', placeholder: 'Max'}}) }}
+                                        {{ form_widget(form.salaireMax, {attr: {class: 'w-full px-3.5 py-3 sm:py-2.5 rounded-xl border border-slate-200 text-base sm:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white transition-shadow min-h-[48px] sm:min-h-0', placeholder: 'Max'}}) }}
                                         {{ form_errors(form.salaireMax) }}
                                     </div>
                                 </div>
@@ -193,15 +193,15 @@
                         </div>
 
                         <div>
-                            {{ form_label(form.prerequis, null, {label_attr: {class: 'block text-sm font-medium text-slate-700 mb-1.5'}}) }}
-                            {{ form_widget(form.prerequis, {attr: {class: 'w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-purple/25 focus:border-brand-purple bg-white', rows: 3}}) }}
+                            {{ form_label(form.prerequis, null, {label_attr: {class: 'block text-sm font-semibold text-slate-700 mb-2'}}) }}
+                            {{ form_widget(form.prerequis, {attr: {class: 'w-full px-3.5 py-3 sm:py-2.5 rounded-xl border border-slate-200 text-base sm:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white transition-shadow', rows: 3}}) }}
                             {{ form_errors(form.prerequis) }}
                         </div>
                     </div>
                 </div>
 
                 <div class="pt-5 border-t border-slate-100 mt-5 flex justify-end">
-                    <button type="button" class="btn-validate-metier px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm transition-all flex items-center gap-2 shadow-sm cursor-pointer">
+                    <button type="button" class="btn-validate-metier w-full sm:w-auto px-5 py-3 sm:py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 active:bg-slate-700 text-white font-semibold text-sm transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer min-h-[48px] sm:min-h-0">
                         <i class="fa-solid fa-check text-green-400"></i> Réduire ce poste
                     </button>
                 </div>
@@ -220,13 +220,13 @@
 
 {% block body %}
 {% form_theme form _self %}
-<div class="bg-slate-50/80 py-8 px-4 sm:px-6 pb-36">
+<div class="bg-slate-50/80 py-6 sm:py-8 px-3 sm:px-6 pb-12 sm:pb-16">
     <div data-aos="fade-up" class="max-w-4xl mx-auto">
 
-        {# En-tête principal de la page #}
-        <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        {# ── En-tête principal de la page ───────────────────────── #}
+        <div class="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
             <div>
-                <h1 class="text-2xl sm:text-3xl font-bold text-slate-900">
+                <h1 class="text-xl sm:text-3xl font-bold text-slate-900 leading-tight">
                     {{ mode == 'creation' ? 'Créer une offre de recrutement' : 'Modifier votre offre' }}
                 </h1>
                 <p class="text-sm text-slate-500 mt-1">
@@ -234,7 +234,7 @@
                 </p>
             </div>
             
-            <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm text-xs font-semibold self-start">
+            <div class="flex items-center gap-2 bg-white px-3.5 sm:px-4 py-2 rounded-xl border border-slate-200 shadow-sm text-xs font-semibold self-start">
                 <span class="flex items-center gap-1.5 text-indigo-600">
                     <i class="fa-solid fa-file-lines"></i> Offre
                 </span>
@@ -245,57 +245,57 @@
             </div>
         </div>
 
-        {{ form_start(form, {attr: {id: 'offre-form', class: 'space-y-6'}}) }}
+        {{ form_start(form, {attr: {id: 'offre-form', class: 'space-y-5 sm:space-y-6'}}) }}
 
         {# ═══════════════════════════════════════════════════════════
            ÉTAPE 1 — Informations générales de l'offre
            ═══════════════════════════════════════════════════════════ #}
-        <div class="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-sm">
-            <div class="flex items-center gap-3.5 mb-6 pb-4 border-b border-slate-100">
-                <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-lg shadow-md shadow-indigo-200 flex-shrink-0">
+        <div class="bg-white border border-slate-200 rounded-2xl p-4 sm:p-8 shadow-sm">
+            <div class="flex items-center gap-3 sm:gap-3.5 mb-5 sm:mb-6 pb-4 border-b border-slate-100">
+                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-base sm:text-lg shadow-md shadow-indigo-200 flex-shrink-0">
                     1
                 </div>
                 <div>
-                    <h2 class="text-lg font-bold text-slate-900">Informations de l'offre</h2>
-                    <p class="text-xs text-slate-500">Titre global et contexte du recrutement.</p>
+                    <h2 class="text-base sm:text-lg font-bold text-slate-900">Informations de l'offre</h2>
+                    <p class="text-xs text-slate-500 hidden sm:block">Titre global et contexte du recrutement.</p>
                 </div>
             </div>
 
             <div class="space-y-5">
                 <div>
-                    {{ form_label(form.titre, null, {label_attr: {class: 'block text-sm font-medium text-slate-700 mb-1.5'}}) }}
-                    {{ form_widget(form.titre, {attr: {class: 'w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-purple/25 focus:border-brand-purple bg-white'}}) }}
+                    {{ form_label(form.titre, null, {label_attr: {class: 'block text-sm font-semibold text-slate-700 mb-2'}}) }}
+                    {{ form_widget(form.titre, {attr: {class: 'w-full px-3.5 py-3 sm:py-2.5 rounded-xl border border-slate-200 text-base sm:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white transition-shadow min-h-[48px] sm:min-h-0'}}) }}
                     {{ form_errors(form.titre) }}
                 </div>
 
                 <div>
-                    {{ form_label(form.description, null, {label_attr: {class: 'block text-sm font-medium text-slate-700 mb-1.5'}}) }}
-                    {{ form_widget(form.description, {attr: {class: 'w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-purple/25 focus:border-brand-purple bg-white'}}) }}
+                    {{ form_label(form.description, null, {label_attr: {class: 'block text-sm font-semibold text-slate-700 mb-2'}}) }}
+                    {{ form_widget(form.description, {attr: {class: 'w-full px-3.5 py-3 sm:py-2.5 rounded-xl border border-slate-200 text-base sm:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white transition-shadow'}}) }}
                     {{ form_errors(form.description) }}
                 </div>
 
-                        <div class="grid sm:grid-cols-2 gap-4">
-                            <div>
-                                {{ form_label(form.dateExpiration, null, {label_attr: {class: 'block text-sm font-medium text-slate-700 mb-1.5'}}) }}
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        {{ form_label(form.dateExpiration, null, {label_attr: {class: 'block text-sm font-semibold text-slate-700 mb-2'}}) }}
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                                 <i class="fa-solid fa-calendar-days text-sm"></i>
                             </div>
-                            {{ form_widget(form.dateExpiration, {attr: {class: 'w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-purple/25 focus:border-brand-purple bg-white'}}) }}
+                            {{ form_widget(form.dateExpiration, {attr: {class: 'w-full pl-10 pr-3.5 py-3 sm:py-2.5 rounded-xl border border-slate-200 text-base sm:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white transition-shadow min-h-[48px] sm:min-h-0'}}) }}
                         </div>
                         {{ form_errors(form.dateExpiration) }}
                     </div>
                 </div>
 
                 <div>
-                    {{ form_label(form.imageFile, null, {label_attr: {class: 'block text-sm font-medium text-slate-700 mb-1.5'}}) }}
-                    <div class="mt-1 flex items-center gap-4 p-4 rounded-xl border border-dashed border-slate-300 bg-slate-50 hover:bg-slate-100/70 transition-colors">
-                        <div class="w-10 h-10 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400 flex-shrink-0">
+                    {{ form_label(form.imageFile, null, {label_attr: {class: 'block text-sm font-semibold text-slate-700 mb-2'}}) }}
+                    <div class="mt-1 flex items-center gap-4 p-4 rounded-xl border border-dashed border-slate-300 bg-slate-50 hover:bg-slate-100/70 active:bg-slate-100 transition-colors min-h-[72px]">
+                        <div class="w-11 h-11 sm:w-10 sm:h-10 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400 flex-shrink-0">
                             <i class="fa-solid fa-image text-lg"></i>
                         </div>
                         <div class="flex-1 min-w-0">
-                            {{ form_widget(form.imageFile, {attr: {class: 'block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer'}}) }}
-                            <p class="text-[11px] text-slate-400 mt-1">JPG, PNG, WebP (max 2 Mo)</p>
+                            {{ form_widget(form.imageFile, {attr: {class: 'block w-full text-sm sm:text-xs text-slate-500 file:mr-3 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm sm:file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer file:min-h-[40px]'}}) }}
+                            <p class="text-xs text-slate-400 mt-1.5">JPG, PNG, WebP (max 2 Mo)</p>
                         </div>
                     </div>
                     {{ form_errors(form.imageFile) }}
@@ -306,15 +306,15 @@
         {# ═══════════════════════════════════════════════════════════
            ÉTAPE 2 — Postes recherchés & Métiers
            ═══════════════════════════════════════════════════════════ #}
-        <div class="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-sm">
-            <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
-                <div class="flex items-center gap-3.5">
-                    <div class="w-10 h-10 rounded-xl bg-orange-500 text-white flex items-center justify-center font-bold text-lg shadow-md shadow-orange-200 flex-shrink-0">
+        <div class="bg-white border border-slate-200 rounded-2xl p-4 sm:p-8 shadow-sm">
+            <div class="flex items-center justify-between mb-5 sm:mb-6 pb-4 border-b border-slate-100">
+                <div class="flex items-center gap-3 sm:gap-3.5">
+                    <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-orange-500 text-white flex items-center justify-center font-bold text-base sm:text-lg shadow-md shadow-orange-200 flex-shrink-0">
                         2
                     </div>
                     <div>
-                        <h2 class="text-lg font-bold text-slate-900">Métiers recherchés</h2>
-                        <p class="text-xs text-slate-500">Ajoutez les postes correspondant à cette offre.</p>
+                        <h2 class="text-base sm:text-lg font-bold text-slate-900">Métiers recherchés</h2>
+                        <p class="text-xs text-slate-500 hidden sm:block">Ajoutez les postes correspondant à cette offre.</p>
                     </div>
                 </div>
             </div>
@@ -328,8 +328,8 @@
 
             {# Bouton "+ Ajouter un poste" #}
             <div class="mt-2">
-                <button type="button" id="add-metier-btn" class="w-full py-4 border-2 border-dashed border-indigo-200 hover:border-indigo-500 bg-indigo-50/50 hover:bg-indigo-50 rounded-2xl text-sm font-bold text-indigo-600 transition-all flex flex-col sm:flex-row items-center justify-center gap-2 group cursor-pointer shadow-xs">
-                    <span class="w-7 h-7 rounded-full bg-indigo-600 text-white flex items-center justify-center group-hover:scale-110 transition-transform">
+                <button type="button" id="add-metier-btn" class="w-full py-4 sm:py-4 border-2 border-dashed border-indigo-200 hover:border-indigo-500 active:border-indigo-600 bg-indigo-50/50 hover:bg-indigo-50 active:bg-indigo-100 rounded-2xl text-sm font-bold text-indigo-600 transition-all flex flex-col sm:flex-row items-center justify-center gap-2 group cursor-pointer shadow-xs min-h-[56px]">
+                    <span class="w-8 h-8 sm:w-7 sm:h-7 rounded-full bg-indigo-600 text-white flex items-center justify-center group-hover:scale-110 transition-transform">
                         <i class="fa-solid fa-plus text-xs"></i>
                     </span>
                     <span>Ajouter un métier</span>
@@ -338,31 +338,31 @@
         </div>
 
         {# ═══════════════════════════════════════════════════════════
-           Résumé en direct & Actions de validation (BARRE COLLÉE EN BAS)
+           Résumé en direct & Actions de validation (En bas du formulaire)
            ═══════════════════════════════════════════════════════════ #}
-        <div class="fixed bottom-0 left-0 right-0 sm:static sm:bottom-auto sm:left-auto sm:right-auto z-40 p-4 sm:p-0 bg-white/90 sm:bg-transparent backdrop-blur-md sm:backdrop-blur-none border-t sm:border-0 border-slate-200">
-            <div class="bg-white border border-slate-200 shadow-lg sm:rounded-2xl p-4 sm:p-6 w-full max-w-4xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                
-                <div class="hidden sm:block">
-                    <div class="flex items-center gap-2 text-sm font-bold text-slate-800 mb-1">
-                        <i class="fa-solid fa-check text-green-500"></i> Résumé
-                    </div>
-                    <div class="text-xs font-medium text-slate-600 flex items-center gap-3">
-                        <span class="bg-slate-100 px-2 py-1 rounded-md"><i class="fa-solid fa-briefcase mr-1 text-indigo-600"></i> <span id="summary-metiers-num">0</span></span>
-                        <span class="bg-slate-100 px-2 py-1 rounded-md"><i class="fa-solid fa-users mr-1 text-orange-500"></i> <span id="summary-postes-num">0</span></span>
-                        <span id="summary-villes" class="text-slate-500 truncate max-w-[200px]"></span>
-                    </div>
+        <div class="bg-white border border-slate-200 shadow-sm sm:shadow-lg rounded-2xl p-4 sm:p-6 w-full flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-2">
+            
+            {# Résumé — visible uniquement desktop #}
+            <div class="hidden sm:block">
+                <div class="flex items-center gap-2 text-sm font-bold text-slate-800 mb-1">
+                    <i class="fa-solid fa-check text-green-500"></i> Résumé
                 </div>
-
-                <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
-                    <a href="{{ path('entreprise_offres_index') }}" class="inline-flex items-center justify-center px-5 py-3 text-sm font-medium text-slate-700 bg-white hover:bg-slate-100 border border-slate-300 rounded-xl transition-all shadow-xs cursor-pointer order-2 sm:order-1 flex-1 sm:flex-none">
-                        Annuler
-                    </a>
-
-                    <button type="submit" class="inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-bold text-white bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 active:scale-95 rounded-xl transition-all shadow-md shadow-orange-500/20 cursor-pointer order-1 sm:order-2 flex-1 sm:flex-none">
-                        <i class="fa-solid fa-floppy-disk"></i> <span>{{ mode == 'creation' ? 'Enregistrer en brouillon' : 'Enregistrer' }}</span>
-                    </button>
+                <div class="text-xs font-medium text-slate-600 flex items-center gap-3">
+                    <span class="bg-slate-100 px-2 py-1 rounded-md"><i class="fa-solid fa-briefcase mr-1 text-indigo-600"></i> <span id="summary-metiers-num">0</span></span>
+                    <span class="bg-slate-100 px-2 py-1 rounded-md"><i class="fa-solid fa-users mr-1 text-orange-500"></i> <span id="summary-postes-num">0</span></span>
+                    <span id="summary-villes" class="text-slate-500 truncate max-w-[200px]"></span>
                 </div>
+            </div>
+
+            {# Boutons d'action #}
+            <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+                <a href="{{ path('entreprise_offres_index') }}" class="inline-flex items-center justify-center min-h-[52px] sm:min-h-0 px-5 py-3 text-sm font-medium text-slate-700 bg-white hover:bg-slate-100 active:bg-slate-200 border border-slate-300 rounded-xl transition-all shadow-xs cursor-pointer flex-1 sm:flex-none">
+                    Annuler
+                </a>
+
+                <button type="submit" class="inline-flex items-center justify-center gap-2 min-h-[52px] sm:min-h-0 px-6 py-3 text-base sm:text-sm font-bold text-white bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 active:from-orange-700 active:to-amber-800 active:scale-[0.98] rounded-xl transition-all shadow-md shadow-orange-500/20 cursor-pointer flex-1 sm:flex-none">
+                    <i class="fa-solid fa-floppy-disk"></i> <span>{{ mode == 'creation' ? 'Enregistrer en brouillon' : 'Enregistrer' }}</span>
+                </button>
             </div>
         </div>
 
@@ -543,7 +543,7 @@ document.addEventListener('DOMContentLoaded', function () {
             
             var removeBtns = item.querySelectorAll('.btn-remove-metier');
             removeBtns.forEach(function(btn) {
-                btn.style.display = (items.length <= 1) ? 'none' : 'inline-flex';
+                btn.style.display = (items.length <= 1) ? 'none' : 'flex';
             });
             
             syncEditToRead(item);

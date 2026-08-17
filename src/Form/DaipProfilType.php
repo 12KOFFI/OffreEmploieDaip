@@ -12,8 +12,7 @@ use Symfony\Component\Validator\Constraints\NotBlank;
 
 class DaipProfilType extends AbstractType
 {
-    private const INPUT_ATTR = ['class' => 'field-input'];
-    private const LABEL_ATTR = ['class' => 'field-label'];
+    use FormStylingTrait;
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
@@ -27,8 +26,7 @@ class DaipProfilType extends AbstractType
                 ],
                 'attr' => self::INPUT_ATTR,
                 'label_attr' => self::LABEL_ATTR,
-            ])
-        ;
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

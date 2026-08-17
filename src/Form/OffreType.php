@@ -15,9 +15,7 @@ use Symfony\Component\Validator\Constraints\File;
 
 class OffreType extends AbstractType
 {
-    private const INPUT_ATTR = ['class' => 'field-input'];
-    private const LABEL_ATTR = ['class' => 'field-label'];
-    private const REQUIRED_STAR = ' <span class="text-red-500">*</span>';
+    use FormStylingTrait;
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {

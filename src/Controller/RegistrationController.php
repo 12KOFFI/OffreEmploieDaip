@@ -2,12 +2,13 @@
 
 namespace App\Controller;
 
+use App\Dto\RegistrationDto;
 use App\Entity\Entreprise;
 use App\Entity\User;
 use App\Form\EntrepriseRegistrationType;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -25,33 +26,36 @@ class RegistrationController extends AbstractController
             return $this->redirectToRoute('app_dashboard_redirect');
         }
 
-        $user = new User();
-        $user->setEntreprise(new Entreprise());
+        $dto = new RegistrationDto();
 
-        $form = $this->createForm(EntrepriseRegistrationType::class, $user);
+        $form = $this->createForm(EntrepriseRegistrationType::class, $dto);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $plainPassword = $form->get('plainPassword')->getData();
-            $user->setPassword($passwordHasher->hashPassword($user, $plainPassword));
+            $user = new User();
+            $user->setEmail($dto->email);
+            $user->setPassword($passwordHasher->hashPassword($user, $dto->plainPassword));
             $user->setRoles(['ROLE_ENTREPRISE']);
 
-            // Relie l'entreprise a son user (relation bidirectionnelle)
-            $user->getEntreprise()->setUser($user);
+            $entreprise = new Entreprise();
+            $entreprise->setNom($dto->nom);
+            $entreprise->setContact($dto->contact);
+            $entreprise->setContactResponsable($dto->contactResponsable);
+            $entreprise->setAutreContact($dto->autreContact);
+            $entreprise->setDescription($dto->description);
+            $entreprise->setUser($user);
+            $user->setEntreprise($entreprise);
 
-            $uploadedFile = $form->get('logo')->getData();
-            if ($uploadedFile) {
-                $uploadsDirectory = $this->getParameter('kernel.project_dir') . '/public/uploads/entreprises';
-                if (!is_dir($uploadsDirectory)) {
-                    mkdir($uploadsDirectory, 0775, true);
-                }
-                $newFilename = bin2hex(random_bytes(16)) . '.' . ($uploadedFile->guessExtension() ?? 'bin');
-                $uploadedFile->move($uploadsDirectory, $newFilename);
-                $user->getEntreprise()->setLogo('/uploads/entreprises/' . $newFilename);
+            try {
+                $entityManager->persist($user);
+                $entityManager->flush();
+            } catch (UniqueConstraintViolationException) {
+                $this->addFlash('error', 'Un compte existe déjà avec cet email.');
+
+                return $this->render('registration/register.html.twig', [
+                    'registrationForm' => $form,
+                ]);
             }
-
-            $entityManager->persist($user);
-            $entityManager->flush();
 
             $this->addFlash('success', 'Compte cree avec succes, vous pouvez vous connecter.');
 

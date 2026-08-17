@@ -29,7 +29,7 @@
             <span class="badge-{{ offre.statut.value }} inline-flex items-center ml-auto flex-shrink-0">{{ offre.statut.label }}</span>
         </div>
 
-        <span class="text-[11px] text-slate-400 font-medium mb-1.5">RÉF. {{ 'DAIP-%s-%05d'|format(offre.datePublication|date('Y'), offre.id) }}</span>
+        <span class="text-[11px] text-slate-400 font-medium mb-1.5">RÉF. {{ offre.datePublication ? 'DAIP-%s-%05d'|format(offre.datePublication|date('Y'), offre.id) : 'DAIP-BROUILLON-%05d'|format(offre.id) }}</span>
         <h4 class="text-lg font-semibold mb-3">{{ offre.titre }}</h4>
 
         <div class="flex flex-wrap gap-1.5 mb-5">

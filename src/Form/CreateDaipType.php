@@ -2,7 +2,7 @@
 
 namespace App\Form;
 
-use App\Entity\User;
+use App\Dto\CreateDaipDto;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
@@ -15,8 +15,7 @@ use Symfony\Component\Validator\Constraints\Regex;
 
 class CreateDaipType extends AbstractType
 {
-    private const INPUT_ATTR = ['class' => 'field-input pl-10'];
-    private const LABEL_ATTR = ['class' => 'field-label'];
+    use FormStylingTrait;
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
@@ -28,7 +27,6 @@ class CreateDaipType extends AbstractType
             ])
             ->add('plainPassword', RepeatedType::class, [
                 'type' => PasswordType::class,
-                'mapped' => false,
                 'first_options' => ['label' => 'Mot de passe', 'attr' => self::INPUT_ATTR + ['id' => 'password-field'], 'label_attr' => self::LABEL_ATTR],
                 'second_options' => ['label' => 'Confirmer le mot de passe', 'attr' => self::INPUT_ATTR, 'label_attr' => self::LABEL_ATTR],
                 'invalid_message' => 'Les deux mots de passe ne correspondent pas.',
@@ -47,7 +45,7 @@ class CreateDaipType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => User::class,
+            'data_class' => CreateDaipDto::class,
         ]);
     }
 }

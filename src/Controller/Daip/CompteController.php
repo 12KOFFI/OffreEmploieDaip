@@ -2,9 +2,11 @@
 
 namespace App\Controller\Daip;
 
+use App\Dto\CreateDaipDto;
 use App\Entity\User;
 use App\Form\CreateDaipType;
 use App\Repository\UserRepository;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -25,12 +27,7 @@ class CompteController extends AbstractController
     #[Route('', name: 'daip_comptes_index', methods: ['GET'])]
     public function index(UserRepository $userRepository): Response
     {
-        $comptes = $userRepository->createQueryBuilder('u')
-            ->where('u.roles LIKE :role')
-            ->setParameter('role', '%ROLE_DAIP%')
-            ->orderBy('u.createdAt', 'DESC')
-            ->getQuery()
-            ->getResult();
+        $comptes = $userRepository->findAllDaip();
 
         return $this->render('daip/comptes/index.html.twig', [
             'comptes' => $comptes,
@@ -42,19 +39,27 @@ class CompteController extends AbstractController
         Request $request,
         EntityManagerInterface $entityManager,
         UserPasswordHasherInterface $passwordHasher,
-        UserRepository $userRepository,
     ): Response {
-        $user = new User();
-        $form = $this->createForm(CreateDaipType::class, $user);
+        $dto = new CreateDaipDto();
+        $form = $this->createForm(CreateDaipType::class, $dto);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $plainPassword = $form->get('plainPassword')->getData();
-            $user->setPassword($passwordHasher->hashPassword($user, $plainPassword));
+            $user = new User();
+            $user->setEmail($dto->email);
+            $user->setPassword($passwordHasher->hashPassword($user, $dto->plainPassword));
             $user->setRoles(['ROLE_DAIP']);
 
-            $entityManager->persist($user);
-            $entityManager->flush();
+            try {
+                $entityManager->persist($user);
+                $entityManager->flush();
+            } catch (UniqueConstraintViolationException) {
+                $this->addFlash('error', 'Un compte existe déjà avec cet email.');
+
+                return $this->render('daip/comptes/new.html.twig', [
+                    'form' => $form,
+                ]);
+            }
 
             $this->addFlash('success', 'Nouveau compte DAIP créé pour ' . $user->getEmail() . '.');
 

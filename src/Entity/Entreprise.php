@@ -21,10 +21,8 @@ class Entreprise
     private ?User $user = null;
 
     #[ORM\Column(length: 255)]
-    #[Assert\NotBlank(message: 'Le nom de l\'entreprise est requis.')]
+    #[Assert\NotBlank(message: "Le nom de l'entreprise est obligatoire.")]
     private ?string $nom = null;
-
-
 
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $description = null;
@@ -32,15 +30,21 @@ class Entreprise
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $logo = null;
 
-
-
-    #[ORM\Column(length: 255, nullable: true)]
+    #[ORM\Column(length: 50, nullable: true)]
+    #[Assert\NotBlank(message: "Le contact de l'entreprise est obligatoire.")]
     private ?string $contact = null;
+
+    #[ORM\Column(length: 50, nullable: true)]
+    #[Assert\NotBlank(message: "Le contact du responsable est obligatoire.")]
+    private ?string $contactResponsable = null;
+
+    #[ORM\Column(length: 50, nullable: true)]
+    private ?string $autreContact = null;
 
     /**
      * @var Collection<int, Offre>
      */
-    #[ORM\OneToMany(targetEntity: Offre::class, mappedBy: 'entreprise', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: Offre::class, mappedBy: 'entreprise', orphanRemoval: true, fetch: 'EXTRA_LAZY')]
     private Collection $offres;
 
     public function __construct()
@@ -75,8 +79,6 @@ class Entreprise
         return $this;
     }
 
-
-
     public function getDescription(): ?string
     {
         return $this->description;
@@ -99,8 +101,6 @@ class Entreprise
         return $this;
     }
 
-
-
     public function getContact(): ?string
     {
         return $this->contact;
@@ -109,6 +109,39 @@ class Entreprise
     public function setContact(?string $contact): static
     {
         $this->contact = $contact;
+        return $this;
+    }
+
+    public function getContactEntreprise(): ?string
+    {
+        return $this->contact;
+    }
+
+    public function setContactEntreprise(?string $contact): static
+    {
+        $this->contact = $contact;
+        return $this;
+    }
+
+    public function getContactResponsable(): ?string
+    {
+        return $this->contactResponsable;
+    }
+
+    public function setContactResponsable(?string $contactResponsable): static
+    {
+        $this->contactResponsable = $contactResponsable;
+        return $this;
+    }
+
+    public function getAutreContact(): ?string
+    {
+        return $this->autreContact;
+    }
+
+    public function setAutreContact(?string $autreContact): static
+    {
+        $this->autreContact = $autreContact;
         return $this;
     }
 

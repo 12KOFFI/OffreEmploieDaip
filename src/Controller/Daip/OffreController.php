@@ -9,6 +9,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
@@ -24,7 +25,7 @@ class OffreController extends AbstractController
      * seulement une question d'UI.
      */
     #[Route('/export/csv', name: 'daip_offres_export_csv', methods: ['GET'])]
-    public function exportCsv(Request $request, OffreRepository $offreRepository): Response
+    public function exportCsv(Request $request, OffreRepository $offreRepository): StreamedResponse
     {
         $filtres = [
             'statut' => $request->query->get('statut'),
@@ -33,67 +34,67 @@ class OffreController extends AbstractController
             'dateDebut' => $request->query->get('dateDebut'),
             'dateFin' => $request->query->get('dateFin'),
         ];
+        $filtres = array_filter($filtres);
 
-        $offres = $offreRepository->findByFilters(array_filter($filtres));
+        $response = new StreamedResponse(function () use ($offreRepository, $filtres): void {
+            $handle = fopen('php://output', 'w');
+            // UTF-8 BOM pour Excel
+            fprintf($handle, chr(0xEF) . chr(0xBB) . chr(0xBF));
+            fputcsv($handle, [
+                'Référence Offre',
+                'Titre de l\'offre',
+                'Entreprise',
+                'Statut',
+                'Date publication',
+                'Date expiration',
+                'Métier / Poste',
+                'Ville',
+                'Type de contrat',
+                'Nombre de postes',
+                'Niveau d\'étude',
+                'Diplôme',
+                'Expérience (années)',
+                'Salaire Min (FCFA)',
+                'Salaire Max (FCFA)'
+            ], ';');
 
-        $handle = fopen('php://temp', 'r+');
-        // UTF-8 BOM pour Excel
-        fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
-        fputcsv($handle, [
-            'Référence Offre',
-            'Titre de l\'offre',
-            'Entreprise',
-            'Statut',
-            'Date publication',
-            'Date expiration',
-            'Métier / Poste',
-            'Ville',
-            'Type de contrat',
-            'Nombre de postes',
-            'Niveau d\'étude',
-            'Diplôme',
-            'Expérience (années)',
-            'Salaire Min (FCFA)',
-            'Salaire Max (FCFA)'
-        ], ';');
+            // Iteration par lots memoire-constante : jamais plus d'un batch d'offres
+            // en memoire, meme sur un registre de plusieurs dizaines de milliers d'offres (audit C6).
+            foreach ($offreRepository->iterateByFilters($filtres) as $offre) {
+                $baseRow = [
+                    'DAIP-' . $offre->getDatePublication()?->format('Y') . '-' . str_pad((string) $offre->getId(), 5, '0', STR_PAD_LEFT),
+                    $offre->getTitre(),
+                    $offre->getEntreprise()?->getNom(),
+                    $offre->getStatut()?->label(),
+                    $offre->getDatePublication()?->format('d/m/Y'),
+                    $offre->getDateExpiration()?->format('d/m/Y'),
+                ];
 
-        foreach ($offres as $offre) {
-            $baseRow = [
-                'DAIP-' . $offre->getDatePublication()?->format('Y') . '-' . str_pad((string) $offre->getId(), 5, '0', STR_PAD_LEFT),
-                $offre->getTitre(),
-                $offre->getEntreprise()?->getNom(),
-                $offre->getStatut()?->label(),
-                $offre->getDatePublication()?->format('d/m/Y'),
-                $offre->getDateExpiration()?->format('d/m/Y'),
-            ];
+                $offreMetiers = $offre->getOffreMetiers();
 
-            $offreMetiers = $offre->getOffreMetiers();
+                if ($offreMetiers->isEmpty()) {
+                    fputcsv($handle, array_merge($baseRow, array_fill(0, 9, '')), ';');
+                } else {
+                    foreach ($offreMetiers as $om) {
+                        $row = $baseRow;
+                        $row[] = $om->getMetier()?->getNom();
+                        $row[] = $om->getVille();
+                        $row[] = $om->getTypeContrat()?->label();
+                        $row[] = $om->getNombrePostes();
+                        $row[] = $om->getNiveauEtude()?->label();
+                        $row[] = $om->getDiplome()?->label();
+                        $row[] = $om->getNbAnneesExperience();
+                        $row[] = $om->getSalaireMin();
+                        $row[] = $om->getSalaireMax();
 
-            if ($offreMetiers->isEmpty()) {
-                fputcsv($handle, array_merge($baseRow, array_fill(0, 9, '')), ';');
-            } else {
-                foreach ($offreMetiers as $om) {
-                    $row = $baseRow;
-                    $row[] = $om->getMetier()?->getNom();
-                    $row[] = $om->getVille();
-                    $row[] = $om->getTypeContrat()?->label();
-                    $row[] = $om->getNombrePostes();
-                    $row[] = $om->getNiveauEtude()?->label();
-                    $row[] = $om->getDiplome()?->label();
-                    $row[] = $om->getNbAnneesExperience();
-                    $row[] = $om->getSalaireMin();
-                    $row[] = $om->getSalaireMax();
-
-                    fputcsv($handle, $row, ';');
+                        fputcsv($handle, $row, ';');
+                    }
                 }
             }
-        }
 
-        rewind($handle);
-        $csv = stream_get_contents($handle);
-        fclose($handle);
+            fclose($handle);
+        });
 
-        $response = new Response($csv);
         $disposition = $response->headers->makeDisposition(
             ResponseHeaderBag::DISPOSITION_ATTACHMENT,
             'registre_offres_' . (new \DateTimeImmutable())->format('Ymd_His') . '.csv'

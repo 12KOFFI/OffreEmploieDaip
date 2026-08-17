@@ -9,12 +9,12 @@
 {% endblock %}
 
 {% block body %}
-<div class="py-12 px-6 pb-24">
+<div class="bg-slate-50/80 py-6 sm:py-8 px-3 sm:px-6 pb-12 sm:pb-16 min-h-screen">
     <div class="max-w-5xl mx-auto">
-        <div data-aos="fade-up" class="mb-8">
+        <div data-aos="fade-up" class="mb-6 sm:mb-8">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <h1 class="text-[26px]">Registre des entreprises</h1>
+                    <h1 class="text-xl sm:text-3xl font-bold text-slate-900 leading-tight">Registre des entreprises</h1>
                     <p class="text-sm text-slate-500 mt-1">Liste des entreprises partenaires inscrites sur la plateforme.</p>
                 </div>
                 <div class="flex items-center gap-3">
@@ -25,34 +25,25 @@
             </div>
         </div>
 
-        {#
-        <div data-aos="fade-up" class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <div class="rounded-2xl p-5 bg-brand-gradient text-white">
-                <span class="block font-display font-bold text-2xl">{{ total }}</span>
-                <span class="text-xs text-white/80">Total entreprises</span>
-            </div>
-            <div class="rounded-2xl p-5 bg-green-50 text-brand-green border border-slate-100">
-                <span class="block font-display font-bold text-2xl">{{ entreprises|length }}</span>
-                <span class="text-xs opacity-70">Affichées</span>
-            </div>
-            <div class="rounded-2xl p-5 bg-slate-50 text-slate-600 border border-slate-100">
-                <span class="block font-display font-bold text-2xl">{{ entreprises|reduce((carry, e) => carry + e.offres|length, 0) }}</span>
-                <span class="text-xs opacity-70">Offres publiées</span>
-            </div>
-            <div class="rounded-2xl p-5 bg-indigo-50 text-brand-indigo border border-slate-100">
-                <span class="block font-display font-bold text-2xl">{{ totalPages }}</span>
-                <span class="text-xs opacity-70">Pages</span>
-            </div>
-        </div>
-        #}
-
-        <div data-aos="fade-up" class="card p-4 mb-6">
-            <form method="get" action="{{ path('daip_entreprises_index') }}" class="flex gap-3">
-                <input type="text" name="q" value="{{ search }}" placeholder="Rechercher par nom ou email..." class="field-input flex-1">
-                <button type="submit" class="btn-orange">Rechercher</button>
-                {% if search %}
-                    <a href="{{ path('daip_entreprises_index') }}" class="btn-ghost">Effacer</a>
-                {% endif %}
+        <div data-aos="fade-up" class="bg-white border border-slate-200 shadow-sm rounded-2xl p-4 sm:p-5 mb-6 sm:mb-8">
+            <form method="get" action="{{ path('daip_entreprises_index') }}" class="flex flex-col sm:flex-row gap-3">
+                <div class="relative flex-1">
+                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                    <input type="text" name="q" value="{{ search }}" placeholder="Rechercher par nom ou email..." class="w-full pl-10 pr-4 py-3 sm:py-2.5 rounded-xl border border-slate-200 text-base sm:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-slate-50 focus:bg-white transition-all min-h-[48px] sm:min-h-0">
+                </div>
+                
+                <div class="flex gap-3 w-full sm:w-auto shrink-0">
+                    <button type="submit" class="inline-flex items-center justify-center gap-2 min-h-[48px] sm:min-h-0 px-6 py-3 sm:py-2 text-base sm:text-sm font-bold text-white bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 active:from-orange-700 active:to-amber-800 active:scale-[0.98] rounded-xl transition-all shadow-md shadow-orange-500/20 cursor-pointer flex-1 sm:flex-none">
+                        Rechercher
+                    </button>
+                    {% if search %}
+                        <a href="{{ path('daip_entreprises_index') }}" class="inline-flex items-center justify-center min-h-[48px] sm:min-h-0 px-5 py-3 sm:py-2 text-base sm:text-sm font-medium text-slate-700 bg-white hover:bg-red-50 active:bg-red-100 hover:text-red-600 border border-slate-300 hover:border-red-200 rounded-xl transition-all shadow-xs cursor-pointer flex-1 sm:flex-none">
+                            Effacer
+                        </a>
+                    {% endif %}
+                </div>
             </form>
         </div>
 

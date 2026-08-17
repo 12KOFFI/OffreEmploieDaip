@@ -7,8 +7,12 @@ use App\Enum\NiveauEtude;
 use App\Enum\TypeContrat;
 use App\Repository\OffreMetierRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 #[ORM\Entity(repositoryClass: OffreMetierRepository::class)]
+#[ORM\Index(name: 'idx_offre_metier_ville', columns: ['ville'])]
+#[Assert\Callback('validateSalaires')]
 class OffreMetier
 {
     #[ORM\Id]
@@ -28,9 +32,11 @@ class OffreMetier
     private ?TypeContrat $typeContrat = null;
 
     #[ORM\Column(length: 100)]
+    #[Assert\NotBlank(message: 'La ville est obligatoire.')]
     private ?string $ville = null;
 
     #[ORM\Column]
+    #[Assert\Positive(message: 'Le nombre de postes doit être supérieur à 0.')]
     private int $nombrePostes = 1;
 
     #[ORM\Column(nullable: true)]
@@ -175,5 +181,14 @@ class OffreMetier
     {
         $this->prerequis = $prerequis;
         return $this;
+    }
+
+    public function validateSalaires(ExecutionContextInterface $context): void
+    {
+        if ($this->salaireMin !== null && $this->salaireMax !== null && $this->salaireMin > $this->salaireMax) {
+            $context->buildViolation('Le salaire minimum ne peut pas \u00eatre sup\u00e9rieur au salaire maximum.')
+                ->atPath('salaireMin')
+                ->addViolation();
+        }
     }
 }

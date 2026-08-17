@@ -7,8 +7,14 @@ use App\Repository\OffreRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 #[ORM\Entity(repositoryClass: OffreRepository::class)]
+#[ORM\Index(name: 'idx_offre_statut', columns: ['statut'])]
+#[ORM\Index(name: 'idx_offre_date_publication', columns: ['date_publication'])]
+#[ORM\Index(name: 'idx_offre_date_expiration', columns: ['date_expiration'])]
+#[Assert\Callback('validateTitrePourPublication')]
 class Offre
 {
     #[ORM\Id]
@@ -235,5 +241,17 @@ class Offre
     public function __toString(): string
     {
         return $this->titre ?? '';
+    }
+
+    /**
+     * Une offre ne peut pas être publiée sans titre (brouillon = seul statut tolérant un titre vide).
+     */
+    public function validateTitrePourPublication(ExecutionContextInterface $context): void
+    {
+        if ($this->statut !== StatutOffre::BROUILLON && ($this->titre === null || trim($this->titre) === '')) {
+            $context->buildViolation('Le titre est obligatoire dès que l\'offre n\'est plus en brouillon.')
+                ->atPath('titre')
+                ->addViolation();
+        }
     }
 }

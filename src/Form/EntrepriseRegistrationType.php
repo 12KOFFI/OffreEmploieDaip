@@ -2,7 +2,7 @@
 
 namespace App\Form;
 
-use App\Entity\User;
+use App\Dto\RegistrationDto;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
@@ -19,8 +19,7 @@ use Symfony\Component\Validator\Constraints\Regex;
 
 class EntrepriseRegistrationType extends AbstractType
 {
-    private const INPUT_ATTR = ['class' => 'field-input'];
-    private const LABEL_ATTR = ['class' => 'field-label'];
+    use FormStylingTrait;
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
@@ -33,7 +32,6 @@ class EntrepriseRegistrationType extends AbstractType
             ])
             ->add('plainPassword', RepeatedType::class, [
                 'type' => PasswordType::class,
-                'mapped' => false,
                 'first_options' => ['label' => 'Mot de passe <span class="text-red-500">*</span>', 'label_html' => true, 'attr' => self::INPUT_ATTR, 'label_attr' => self::LABEL_ATTR],
                 'second_options' => ['label' => 'Confirmer le mot de passe <span class="text-red-500">*</span>', 'label_html' => true, 'attr' => self::INPUT_ATTR, 'label_attr' => self::LABEL_ATTR],
                 'invalid_message' => 'Les deux mots de passe ne correspondent pas.',
@@ -53,39 +51,34 @@ class EntrepriseRegistrationType extends AbstractType
             ->add('nom', TextType::class, [
                 'label' => "Nom de l'entreprise <span class=\"text-red-500\">*</span>",
                 'label_html' => true,
-                'property_path' => 'entreprise.nom',
+                'required' => true,
                 'attr' => self::INPUT_ATTR,
                 'label_attr' => self::LABEL_ATTR,
-            ])
-            ->add('contact', TextType::class, [
-                'label' => 'Contact de l\'entreprise (téléphone du responsable)',
-                'required' => false,
-                'property_path' => 'entreprise.contact',
-                'attr' => self::INPUT_ATTR,
-                'label_attr' => self::LABEL_ATTR,
-            ])
-            ->add('logo', FileType::class, [
-                'label' => 'Logo de l\'entreprise (optionnel)',
-                'required' => false,
-                'mapped' => false,
                 'constraints' => [
-                    new File([
-                        'maxSize' => '2M',
-                        'mimeTypes' => [
-                            'image/jpeg',
-                            'image/png',
-                            'image/webp',
-                        ],
-                        'mimeTypesMessage' => 'Veuillez uploader une image valide (JPG, PNG ou WebP).',
-                    ])
+                    new NotBlank(message: "Le nom de l'entreprise est obligatoire."),
                 ],
-                'attr' => self::INPUT_ATTR,
+            ])
+            ->add('contact', PhoneNumberType::class, [
+                'label' => "Contact de l’entreprise <span class=\"text-red-500\">*</span>",
+                'label_html' => true,
+                'required' => true,
+                'label_attr' => self::LABEL_ATTR,
+            ])
+            ->add('contactResponsable', PhoneNumberType::class, [
+                'label' => "Contact du responsable <span class=\"text-red-500\">*</span>",
+                'label_html' => true,
+                'required' => true,
+                'label_attr' => self::LABEL_ATTR,
+            ])
+            ->add('autreContact', PhoneNumberType::class, [
+                'label' => 'Autre contact <span class="text-xs font-normal text-slate-400">(optionnel)</span>',
+                'label_html' => true,
+                'required' => false,
                 'label_attr' => self::LABEL_ATTR,
             ])
             ->add('description', TextareaType::class, [
                 'label' => "Description de l'entreprise (optionnel)",
                 'required' => false,
-                'property_path' => 'entreprise.description',
                 'attr' => self::INPUT_ATTR + ['rows' => 4],
                 'label_attr' => self::LABEL_ATTR,
             ])
@@ -95,7 +88,7 @@ class EntrepriseRegistrationType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => User::class,
+            'data_class' => RegistrationDto::class,
         ]);
     }
 }

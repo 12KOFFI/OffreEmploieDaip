@@ -14,8 +14,7 @@ use Symfony\Component\Validator\Constraints\File;
 
 class EntrepriseProfilType extends AbstractType
 {
-    private const INPUT_ATTR = ['class' => 'field-input'];
-    private const LABEL_ATTR = ['class' => 'field-label'];
+    use FormStylingTrait;
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
@@ -27,29 +26,22 @@ class EntrepriseProfilType extends AbstractType
                 'label_attr' => self::LABEL_ATTR,
             ])
 
-            ->add('logo', FileType::class, [
-                'label' => 'Logo de l\'entreprise (optionnel)',
-                'required' => false,
-                'mapped' => false,
-                'constraints' => [
-                    new File([
-                        'maxSize' => '2M',
-                        'mimeTypes' => [
-                            'image/jpeg',
-                            'image/png',
-                            'image/webp',
-                        ],
-                        'mimeTypesMessage' => 'Veuillez uploader une image valide (JPG, PNG ou WebP).',
-                    ])
-                ],
-                'attr' => self::INPUT_ATTR,
+            ->add('contact', PhoneNumberType::class, [
+                'label' => "Contact de l’entreprise <span class=\"text-red-500\">*</span>",
+                'label_html' => true,
+                'required' => true,
                 'label_attr' => self::LABEL_ATTR,
             ])
-
-            ->add('contact', TextType::class, [
-                'label' => 'Contact de l\'entreprise (téléphone du responsable)',
+            ->add('contactResponsable', PhoneNumberType::class, [
+                'label' => "Contact du responsable <span class=\"text-red-500\">*</span>",
+                'label_html' => true,
+                'required' => true,
+                'label_attr' => self::LABEL_ATTR,
+            ])
+            ->add('autreContact', PhoneNumberType::class, [
+                'label' => 'Autre contact <span class="text-xs font-normal text-slate-400">(optionnel)</span>',
+                'label_html' => true,
                 'required' => false,
-                'attr' => self::INPUT_ATTR,
                 'label_attr' => self::LABEL_ATTR,
             ])
             ->add('description', TextareaType::class, [

@@ -30,18 +30,6 @@ class ProfilController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $uploadedFile = $form->get('logo')->getData();
-
-            if ($uploadedFile) {
-                $uploadsDirectory = $this->getParameter('kernel.project_dir') . '/public/uploads/entreprises';
-                if (!is_dir($uploadsDirectory)) {
-                    mkdir($uploadsDirectory, 0775, true);
-                }
-                $newFilename = bin2hex(random_bytes(16)) . '.' . ($uploadedFile->guessExtension() ?? 'bin');
-                $uploadedFile->move($uploadsDirectory, $newFilename);
-                $entreprise->setLogo('/uploads/entreprises/' . $newFilename);
-            }
-
             $entityManager->flush();
             $this->addFlash('success', 'Profil mis à jour.');
 

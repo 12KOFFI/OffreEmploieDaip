@@ -1,0 +1,313 @@
+# Audit Complet & Plan de Corrections — Projet OffreEntreprise
+
+> Analyse exhaustive de **tous** les fichiers : Entités, Contrôleurs, Repositories, Service, Security, Forms, Commands, Config, Migrations, et **Templates Twig**.
+> **Révisé le 2026-08-17** : audit vérifié point par point contre le code réel. Corrections apportées (C1, P5) et 4 nouveaux problèmes ajoutés (C6, C7, A6, A7).
+
+---
+
+## 🔴 CRITIQUE — Sécurité (7)
+
+### C1. ⚠️ PARTIELLEMENT OBSOLÈTE — `APP_SECRET` réel dans `.env.local`, historique Git à vérifier
+- **Constat révisé** : [`.env`](file:///i:/offreEntreprise/.env) a déjà été nettoyé (`APP_SECRET=change_me_in_env_local`), et le mot de passe BDD n'y apparaît plus.
+- [`.env.local:4`](file:///i:/offreEntreprise/.env.local#L4) : `APP_SECRET=49fe8bda32ef642b21b341d731fbcede` — valeur réelle, MAIS `.env.local` est bien présent dans [`.gitignore`](file:///i:/offreEntreprise/.gitignore).
+
+> [!WARNING]
+> Le risque résiduel : si `.env.local` (ou un ancien `.env` avec le secret) a été commité dans l'historique Git, le secret est compromis et doit être régénéré + l'historique purgé (BFG/git filter-repo).
+
+**Fix** : Vérifier `git log --all -p -- .env .env.local | grep APP_SECRET`. Si le secret apparaît : régénérer `APP_SECRET` et purger l'historique.
+
+---
+
+### C2. `resetToken` sans index — full table scan + timing attack
+- [`User.php:29-30`](file:///i:/offreEntreprise/src/Entity/User.php#L29-L30) : `resetToken` n'a aucun index
+- [`ForgotPasswordController.php:72`](file:///i:/offreEntreprise/src/Controller/ForgotPasswordController.php#L72) : `findOneBy(['resetToken' => $token])` → scan complet
+
+**Fix** : Ajouter `#[ORM\Index]` sur `resetToken`.
+
+---
+
+### C3. Race condition à l'inscription — erreur 500 possible
+- [`RegistrationController.php:42-43`](file:///i:/offreEntreprise/src/Controller/RegistrationController.php#L42-L43) : Pas de try/catch autour de `persist/flush` — `UniqueConstraintViolationException` non attrapée
+
+**Fix** : Try/catch avec flash d'erreur.
+
+---
+
+### C4. Absence de validation sur les entités `Offre` et `OffreMetier`
+- [`Offre.php`](file:///i:/offreEntreprise/src/Entity/Offre.php) : **Aucun** `#[Assert\...]` sur aucun champ
+- [`OffreMetier.php`](file:///i:/offreEntreprise/src/Entity/OffreMetier.php) : Pas de `NotBlank` sur `ville` (obligatoire), ni de validation sur `nombrePostes >= 1`, ni de contrainte `salaireMin <= salaireMax`
+
+**Fix** : Ajouter les contraintes Validator.
+
+---
+
+### C5. Page DAIP entreprise show : chargement non paginé + filtrage en Twig
+- [`daip/entreprises/show.html.twig:66`](file:///i:/offreEntreprise/templates/daip/entreprises/show.html.twig#L66) : `{% for offre in entreprise.offres %}` charge **TOUTES** les offres de l'entreprise sans pagination, puis filtre `{% if offre.statut.value == 'publiee' %}` côté Twig
+- → Si une entreprise a 10 000 offres : memory exhaustion + freeze
+
+**Fix** : Passer les offres publiées depuis le contrôleur via une requête DQL filtrée et paginée.
+
+---
+
+### C6. 🆕 Export CSV DAIP : charge TOUTES les offres en mémoire, sans limite
+- [`Daip\OffreController.php:37`](file:///i:/offreEntreprise/src/Controller/Daip/OffreController.php#L37) : `$offreRepository->findByFilters(array_filter($filtres))` — **aucune pagination, aucune limite**
+- Puis itère chaque offre + toute la collection `offreMetiers` → N+1 massif en plus du memory exhaustion
+- Plus grave que C5 : un export sur 50 000 offres plantera le serveur PHP (timeout + mémoire)
+
+**Fix** : Traiter par batch (curseur Doctrine `toIterable()` + `clear()` périodique) et streamer la réponse (`StreamedResponse`).
+
+---
+
+### C7. 🆕 Race condition aussi dans `CompteController` (création de comptes DAIP)
+- [`Daip\CompteController.php:58-59`](file:///i:/offreEntreprise/src/Controller/Daip/CompteController.php#L58-L59) : même défaut que C3 — `persist/flush` sans try/catch `UniqueConstraintViolationException`
+- L'audit initial ne signalait que `RegistrationController`
+
+**Fix** : Try/catch identique à C3.
+
+---
+
+## 🟠 IMPORTANT — Performance N+1 (5)
+
+### P1. Dashboards : `findBy()` sans eager loading → N+1 massif
+- [`Entreprise\DashboardController.php:27-31`](file:///i:/offreEntreprise/src/Controller/Entreprise/DashboardController.php#L27-L31) : `findBy([], ['datePublication' => 'DESC'], 5)` sans JOIN
+- [`Daip\DashboardController.php:26`](file:///i:/offreEntreprise/src/Controller/Daip/DashboardController.php#L26) : Idem
+- **Templates** : `offre.entreprise.nom`, `offre.villes` (itère `offreMetiers`), `offre.offreMetiers|length` → **15+ requêtes SQL** par page
+
+**Fix** : Méthode repository `findLatestWithRelations()` avec `leftJoin + addSelect`.
+
+---
+
+### P2. Tableau entreprises DAIP : `entreprise.offres|length` dans la boucle
+- [`daip/entreprises/_tableau.html.twig:32`](file:///i:/offreEntreprise/templates/daip/entreprises/_tableau.html.twig#L32) : `{{ entreprise.offres|length }}` déclenche le lazy loading de **toute la collection `offres`** pour chaque entreprise, juste pour compter
+- Avec 12 entreprises par page : **12 requêtes SELECT supplémentaires** (qui chargent potentiellement des centaines d'offres chacune en mémoire)
+
+**Fix** : Passer un `COUNT` via le QueryBuilder, ou utiliser `Extra Lazy` fetch.
+
+---
+
+### P3. QueryBuilder dupliqué (count + résultats construits 2 fois)
+- [`Entreprise\OffreController.php:39-59`](file:///i:/offreEntreprise/src/Controller/Entreprise/OffreController.php#L39-L59) : Le QB est construit **2 fois**
+- [`Daip\EntrepriseController.php:27-56`](file:///i:/offreEntreprise/src/Controller/Daip/EntrepriseController.php#L27-L56) : Idem — copier-collé fragile
+
+**Fix** : Factoriser dans le repository.
+
+---
+
+### P4. Absence d'index SQL sur les colonnes les plus filtrées
+Aucun index explicite sur :
+- `offre.statut` — filtré dans **presque toutes** les requêtes
+- `offre.date_publication` — `ORDER BY` systématique
+- `offre.date_expiration` — commande `app:expire-offres`
+- `offre_metier.ville` — filtres LIKE
+
+**Fix** : Migration ajoutant les index.
+
+---
+
+### P5. ⚠️ RÉVISÉ — `incrementViews()` : code mort, pas un problème d'atomicité
+- [`Offre.php:120-124`](file:///i:/offreEntreprise/src/Entity/Offre.php#L120-L124) : `$this->views++` en PHP
+- **Constat révisé** : `incrementViews()` n'est **jamais appelé** dans le code — le compteur de vues est une fonctionnalité non câblée
+- Le diagnostic initial (pertes concurrentes) serait valide SI la méthode était utilisée ; le vrai problème est que la fonctionnalité n'existe pas
+
+**Fix** : Décision produit requise — soit câbler le compteur (dans `app_offre_show`, via `UPDATE offre SET views = views + 1` atomique), soit supprimer le champ `views` et la méthode.
+
+---
+
+## 🟠 IMPORTANT — Architecture (7)
+
+### A1. SQL brut dans le contrôleur DAIP Dashboard
+- [`Daip\DashboardController.php:46-107`](file:///i:/offreEntreprise/src/Controller/Daip/DashboardController.php#L46-L107) : 3 méthodes SQL dans le contrôleur
+
+**Fix** : Déplacer dans `OffreRepository`.
+
+---
+
+### A2. Upload d'image avec chemin hardcodé
+- [`Entreprise\OffreController.php:198`](file:///i:/offreEntreprise/src/Controller/Entreprise/OffreController.php#L198) : `kernel.project_dir . '/public/uploads/offres'` non configurable
+- Pas de suppression de l'ancien fichier en cas de re-upload
+
+**Fix** : Paramètre `services.yaml`, nettoyage de l'ancien fichier.
+
+---
+
+### A3. `persist()` inutile + chargement mémoire dans ExpireOffresCommand
+- [`ExpireOffresCommand.php:44`](file:///i:/offreEntreprise/src/Command/ExpireOffresCommand.php#L44) : `persist()` sur entité managée (inutile)
+- Toutes les offres expirées sont chargées en mémoire → problème si des milliers
+
+**Fix** : `UPDATE` DQL batch.
+
+---
+
+### A4. `Offre::getVilles()`, `getTotalPostes()`, `getSalaireMinGlobal()` etc. — itérations lazy
+- [`Offre.php:188-233`](file:///i:/offreEntreprise/src/Entity/Offre.php#L188-L233) : 4 méthodes qui itèrent `$this->getOffreMetiers()`, déclenchant un lazy load si la collection n'est pas initialisée
+- Appelées **massivement** dans les templates (`_card.html.twig:37-39`, `show.html.twig:39-42`, etc.)
+
+**Fix** : S'assurer que les requêtes qui alimentent ces templates font systématiquement du eager loading sur `offreMetiers + metier`.
+
+---
+
+### A5. `Offre::__toString()` retourne `$this->titre` mais titre est nullable
+- [`Offre.php:235-238`](file:///i:/offreEntreprise/src/Entity/Offre.php#L235-L238) : `$this->titre ?? ''` — OK mais un titre null pour une offre publiée n'est pas logique, il manque une validation
+
+**Fix** : Ajouter `#[Assert\NotBlank]` quand statut ≠ brouillon (ou inconditionnellement).
+
+---
+
+### A6. 🆕 Recherche de rôles DAIP par `LIKE` sur colonne JSON
+- [`Daip\CompteController.php:30-31`](file:///i:/offreEntreprise/src/Controller/Daip/CompteController.php#L30-L31) : `u.roles LIKE '%ROLE_DAIP%'` sur le tableau JSON `roles`
+- Fragile (dépend de la sérialisation), non indexable (full table scan), et matcherait un hypothétique `ROLE_DAIP_XXX`
+
+**Fix** : Utiliser une requête `JSON_CONTAINS` (MySQL) ou charger tous les users et filtrer en PHP via `getRoles()` si le volume est faible.
+
+---
+
+### A7. 🆕 Offres similaires : logique de requête dans le contrôleur public
+- [`OffreController.php:88-117`](file:///i:/offreEntreprise/src/Controller/OffreController.php#L88-L117) : construction de requête DQL dans le contrôleur + `$offre->getOffreMetiers()->first()` déclenche un lazy load de la collection
+- La seconde requête (récupération par IDs) ne fait **pas** d'eager loading → les templates qui affichent `offres_similaires` re-déclenchent des lazy loads
+
+**Fix** : Déplacer dans `OffreRepository::findSimilar()` avec eager loading `entreprise + offreMetiers + metier`.
+
+---
+
+## 🟡 MINEUR (6)
+
+### M1. `baseQueryBuilderOffresPubliees` fait des `addSelect` inutiles pour la requête d'IDs
+- [`OffreRepository.php:70-77`](file:///i:/offreEntreprise/src/Repository/OffreRepository.php#L70-L77) : Les `addSelect('e', 'om', 'm')` sont inutiles quand on ne récupère que les IDs → overhead Doctrine
+
+### M2. Redondance de la constante `INPUT_ATTR` / `LABEL_ATTR` dans chaque FormType
+- Présente dans 5 FormTypes identiques — devrait être un trait ou un AbstractFormType
+
+### M3. `_card.html.twig:32` — `offre.datePublication` peut être null
+- `'DAIP-%s-%05d'|format(offre.datePublication|date('Y'), offre.id)` → si `datePublication` est null → erreur Twig
+- Concerne les brouillons non publiés
+
+### M4. Commentaire HTML laissé dans `daip/entreprises/index.html.twig:28-47`
+- Bloc `{# ... #}` avec du code KPI commenté, incluant `entreprises|reduce(...)` qui chargerait toutes les offres
+
+### M5. Collection `Offre.offres` manque de `fetch: 'EXTRA_LAZY'`
+- [`Entreprise.php:47`](file:///i:/offreEntreprise/src/Entity/Entreprise.php#L47) : `#[ORM\OneToMany(... orphanRemoval: true)]` — pas de `fetch: 'EXTRA_LAZY'`
+- Chaque `entreprise.offres|length` charge toute la collection au lieu de faire un `COUNT`
+
+### M6. 🆕 Access control fail-open
+- [`security.yaml:46`](file:///i:/offreEntreprise/config/packages/security.yaml#L46) : dernière règle `- { path: ^/, roles: PUBLIC_ACCESS }`
+- Toute **nouvelle route** ajoutée au projet sera publique par défaut si on oublie de la couvrir dans `access_control` — risque d'exposition silencieuse
+
+**Fix** : Documenter la convention, ou envisager une règle restrictive par défaut avec whitelist explicite des routes publiques.
+
+---
+
+## Proposed Changes
+
+### 1. Entities — Index + Validation + Extra Lazy
+
+#### [MODIFY] [`Offre.php`](file:///i:/offreEntreprise/src/Entity/Offre.php)
+- Ajouter `#[ORM\Index]` sur `statut`, `datePublication`, `dateExpiration`
+- Ajouter `#[Assert\NotBlank]` sur `titre`
+
+#### [MODIFY] [`OffreMetier.php`](file:///i:/offreEntreprise/src/Entity/OffreMetier.php)
+- Ajouter `#[Assert\NotBlank]` sur `ville`
+- Ajouter `#[Assert\Positive]` sur `nombrePostes`
+
+#### [MODIFY] [`User.php`](file:///i:/offreEntreprise/src/Entity/User.php)
+- Ajouter `#[ORM\Index]` sur `resetToken`
+
+#### [MODIFY] [`Entreprise.php`](file:///i:/offreEntreprise/src/Entity/Entreprise.php)
+- Ajouter `fetch: 'EXTRA_LAZY'` sur la relation `offres`
+
+---
+
+### 2. Repositories — Factorisation & Performance
+
+#### [MODIFY] [`OffreRepository.php`](file:///i:/offreEntreprise/src/Repository/OffreRepository.php)
+- `findLatestWithRelations()` (eager loading pour dashboards)
+- `getEvolutionParMois()`, `getRepartitionMetiers()`, `getRepartitionVilles()` (depuis le contrôleur DAIP)
+- `incrementViewCount(int $id)` (UPDATE atomique) — **si** le compteur de vues est câblé (cf. P5 révisé)
+- `findByEntreprisePaginated()` (factoriser double QB)
+- `expireOutdated()` (UPDATE DQL batch)
+- Optimiser `baseQueryBuilderOffresPubliees` (pas de addSelect pour IDs)
+- `findPublishedByEntreprise()` (pour la page show entreprise)
+- 🆕 `findSimilar(Offre $offre)` (offres similaires avec eager loading — cf. A7)
+- 🆕 `iterateByFilters()` (curseur `toIterable()` pour l'export CSV — cf. C6)
+
+#### [MODIFY] [`EntrepriseRepository.php`](file:///i:/offreEntreprise/src/Repository/EntrepriseRepository.php)
+- `searchPaginated()` avec eager loading `user` + `COUNT(offres)`
+
+---
+
+### 3. Controllers — Sécurité & Refactoring
+
+#### [MODIFY] [`RegistrationController.php`](file:///i:/offreEntreprise/src/Controller/RegistrationController.php)
+- Try/catch `UniqueConstraintViolationException`
+
+#### [MODIFY] [`Daip\CompteController.php`](file:///i:/offreEntreprise/src/Controller/Daip/CompteController.php) 🆕
+- Try/catch `UniqueConstraintViolationException` (même fix que C3)
+- Remplacer `roles LIKE` par `JSON_CONTAINS` ou filtrage PHP (cf. A6)
+
+#### [MODIFY] [`Daip\OffreController.php`](file:///i:/offreEntreprise/src/Controller/Daip/OffreController.php) 🆕
+- Export CSV : utiliser `iterateByFilters()` + `StreamedResponse` + `EntityManager::clear()` périodique (cf. C6)
+
+#### [MODIFY] [`OffreController.php`](file:///i:/offreEntreprise/src/Controller/OffreController.php) 🆕 (public)
+- Déléguer les offres similaires à `OffreRepository::findSimilar()` (cf. A7)
+- 🆕 Décision P5 : câbler `incrementViewCount()` ici ou supprimer la fonctionnalité
+
+#### [MODIFY] [`Entreprise\DashboardController.php`](file:///i:/offreEntreprise/src/Controller/Entreprise/DashboardController.php)
+- Utiliser `findLatestWithRelations()`
+
+#### [MODIFY] [`Daip\DashboardController.php`](file:///i:/offreEntreprise/src/Controller/Daip/DashboardController.php)
+- Déléguer SQL au repository, utiliser `findLatestWithRelations()`
+
+#### [MODIFY] [`Entreprise\OffreController.php`](file:///i:/offreEntreprise/src/Controller/Entreprise/OffreController.php)
+- Factoriser via `findByEntreprisePaginated()`
+- Paramètre configurable pour uploads
+
+#### [MODIFY] [`Daip\EntrepriseController.php`](file:///i:/offreEntreprise/src/Controller/Daip/EntrepriseController.php)
+- Factoriser via `searchPaginated()`
+- Passer les offres publiées depuis le contrôleur pour `show()`
+
+---
+
+### 4. Commands
+
+#### [MODIFY] [`ExpireOffresCommand.php`](file:///i:/offreEntreprise/src/Command/ExpireOffresCommand.php)
+- UPDATE DQL batch au lieu de charger les entités
+
+---
+
+### 5. Config
+
+#### [MODIFY] [`.env`](file:///i:/offreEntreprise/.env)
+- Supprimer credentials, placeholder pour `APP_SECRET`
+
+#### [MODIFY] [`services.yaml`](file:///i:/offreEntreprise/config/services.yaml)
+- Paramètre `app.uploads_dir`
+
+---
+
+### 6. Templates (correctifs mineurs)
+
+#### [MODIFY] [`daip/entreprises/show.html.twig`](file:///i:/offreEntreprise/templates/daip/entreprises/show.html.twig)
+- Utiliser la variable `offresPubliees` passée depuis le contrôleur
+
+#### [MODIFY] [`_card.html.twig`](file:///i:/offreEntreprise/templates/offres/_card.html.twig)
+- Guard `offre.datePublication` null
+
+---
+
+### 7. Migration
+
+#### [NEW] Migration pour les index SQL
+
+---
+
+## Verification Plan
+
+```bash
+php bin/console doctrine:schema:validate
+php bin/console lint:container
+php bin/console lint:twig templates/
+git log --all -p -- .env .env.local | grep APP_SECRET   # 🆕 vérifier fuite historique (C1 révisé)
+```
+
+Vérifier dans le Symfony Profiler que le nombre de requêtes SQL a diminué sur les dashboards et les listes.
+
+🆕 Tester l'export CSV avec un volume important (fixtures) pour valider la mémoire constante.

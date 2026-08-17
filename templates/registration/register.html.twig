@@ -18,77 +18,151 @@
 {% block title %}Inscription entreprise{% endblock %}
 
 {% block body %}
-<div class="bg-slate-50 py-16 px-6">
-    <div data-aos="fade-up" class="max-w-lg mx-auto card p-10">
-        <h1 class="text-2xl text-center mb-1.5">Créer un compte entreprise</h1>
-        <p class="text-center text-sm text-slate-500 mb-7">Publiez vos offres en quelques minutes</p>
+<div class="bg-slate-50 min-h-screen py-6 sm:py-16 px-3.5 sm:px-6">
+    <div data-aos="fade-up" class="max-w-4xl mx-auto card p-5 sm:p-10 rounded-2xl sm:rounded-3xl border border-slate-200/70 shadow-none">
+        <h1 class="text-xl sm:text-2xl font-bold text-center mb-1 text-navy">Créer un compte entreprise</h1>
+        <p class="text-center text-xs sm:text-sm text-slate-500 mb-6 sm:mb-8">Publiez vos offres en quelques minutes</p>
 
         {{ form_start(registrationForm, {attr: {id: 'registration-form'}}) }}
-            {# --- Email --- #}
-            <label for="{{ registrationForm.email.vars.id }}" class="field-label">Email professionnel</label>
-            <div class="relative">
-                <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></svg>
-                </span>
-                {{ form_widget(registrationForm.email, {attr: {class: 'field-input pl-10', placeholder: 'votre@entreprise.com'}}) }}
-            </div>
-            {{ form_errors(registrationForm.email) }}
-
-            {# --- Mot de passe --- #}
-            <label for="{{ registrationForm.plainPassword.first.vars.id }}" class="field-label">Mot de passe</label>
-            <div class="relative">
-                <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                </span>
-                {{ form_widget(registrationForm.plainPassword.first, {attr: {class: 'field-input pl-10 pr-10', placeholder: '••••••••'}}) }}
-                <button type="button" data-toggle-password="{{ registrationForm.plainPassword.first.vars.id }}" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-                    <svg data-eye-open xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg>
-                    <svg data-eye-closed class="hidden" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 1 12s4 8 11 8a9.26 9.26 0 0 0 5.39-1.61"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
-                </button>
-            </div>
-            {{ form_errors(registrationForm.plainPassword.first) }}
-
-            {# --- Jauge de force du mot de passe --- #}
-            <div class="mt-2.5">
-                <div class="flex gap-1.5" id="strength-bars">
-                    <span class="h-1.5 flex-1 rounded-full bg-slate-200 transition-colors duration-200" data-bar></span>
-                    <span class="h-1.5 flex-1 rounded-full bg-slate-200 transition-colors duration-200" data-bar></span>
-                    <span class="h-1.5 flex-1 rounded-full bg-slate-200 transition-colors duration-200" data-bar></span>
-                    <span class="h-1.5 flex-1 rounded-full bg-slate-200 transition-colors duration-200" data-bar></span>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-5">
+                {# --- Email --- #}
+                <div>
+                    <label for="{{ registrationForm.email.vars.id }}" class="field-label">
+                        Email professionnel <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></svg>
+                        </span>
+                        {{ form_widget(registrationForm.email, {attr: {class: 'field-input pl-10', placeholder: 'votre@entreprise.com', required: 'required'}}) }}
+                    </div>
+                    {{ form_errors(registrationForm.email) }}
                 </div>
-                <p id="strength-label" class="text-xs text-slate-400 mt-1.5">Au moins 8 caractères, avec majuscule, chiffre et symbole recommandés.</p>
+
+                {# --- Nom entreprise --- #}
+                <div>
+                    <label for="{{ registrationForm.nom.vars.id }}" class="field-label">
+                        Nom de l'entreprise <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/><path d="M9 9v.01"/><path d="M9 12v.01"/><path d="M9 15v.01"/><path d="M9 18v.01"/></svg>
+                        </span>
+                        {{ form_widget(registrationForm.nom, {attr: {class: 'field-input pl-10', placeholder: 'TechCorp Abidjan', required: 'required'}}) }}
+                    </div>
+                    {{ form_errors(registrationForm.nom) }}
+                </div>
             </div>
 
-            {# --- Confirmation --- #}
-            <label for="{{ registrationForm.plainPassword.second.vars.id }}" class="field-label">Confirmer le mot de passe</label>
-            <div class="relative">
-                <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                </span>
-                {{ form_widget(registrationForm.plainPassword.second, {attr: {class: 'field-input pl-10 pr-10', placeholder: '••••••••'}}) }}
-                <button type="button" data-toggle-password="{{ registrationForm.plainPassword.second.vars.id }}" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-                    <svg data-eye-open xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg>
-                    <svg data-eye-closed class="hidden" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 1 12s4 8 11 8a9.26 9.26 0 0 0 5.39-1.61"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
-                </button>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-5">
+                {# --- Mot de passe --- #}
+                <div>
+                    <label for="{{ registrationForm.plainPassword.first.vars.id }}" class="field-label">
+                        Mot de passe <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        </span>
+                        {{ form_widget(registrationForm.plainPassword.first, {attr: {class: 'field-input pl-10 pr-10', placeholder: '••••••••', required: 'required'}}) }}
+                        <button type="button" data-toggle-password="{{ registrationForm.plainPassword.first.vars.id }}" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                            <svg data-eye-open xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg>
+                            <svg data-eye-closed class="hidden" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 1 12s4 8 11 8a9.26 9.26 0 0 0 5.39-1.61"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                        </button>
+                    </div>
+                    {{ form_errors(registrationForm.plainPassword.first) }}
+
+                    {# --- Jauge de force du mot de passe --- #}
+                    <div class="mt-2.5">
+                        <div class="flex gap-1.5" id="strength-bars">
+                            <span class="h-1.5 flex-1 rounded-full bg-slate-200 transition-colors duration-200" data-bar></span>
+                            <span class="h-1.5 flex-1 rounded-full bg-slate-200 transition-colors duration-200" data-bar></span>
+                            <span class="h-1.5 flex-1 rounded-full bg-slate-200 transition-colors duration-200" data-bar></span>
+                            <span class="h-1.5 flex-1 rounded-full bg-slate-200 transition-colors duration-200" data-bar></span>
+                        </div>
+                        <p id="strength-label" class="text-xs text-slate-400 mt-1.5">Au moins 8 caractères (lettre + chiffre requis).</p>
+                    </div>
+                </div>
+
+                {# --- Confirmation --- #}
+                <div>
+                    <label for="{{ registrationForm.plainPassword.second.vars.id }}" class="field-label">
+                        Confirmer le mot de passe <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        </span>
+                        {{ form_widget(registrationForm.plainPassword.second, {attr: {class: 'field-input pl-10 pr-10', placeholder: '••••••••', required: 'required'}}) }}
+                        <button type="button" data-toggle-password="{{ registrationForm.plainPassword.second.vars.id }}" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                            <svg data-eye-open xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg>
+                            <svg data-eye-closed class="hidden" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 1 12s4 8 11 8a9.26 9.26 0 0 0 5.39-1.61"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                        </button>
+                    </div>
+                    <p id="match-indicator" class="text-xs mt-1.5 hidden"></p>
+                    {{ form_errors(registrationForm.plainPassword.second) }}
+                </div>
             </div>
-            <p id="match-indicator" class="text-xs mt-1.5 hidden"></p>
-            {{ form_errors(registrationForm.plainPassword.second) }}
 
-            {# --- Nom entreprise --- #}
-            <label for="{{ registrationForm.nom.vars.id }}" class="field-label">Nom de l'entreprise</label>
-            <div class="relative">
-                <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/><path d="M9 9v.01"/><path d="M9 12v.01"/><path d="M9 15v.01"/><path d="M9 18v.01"/></svg>
-                </span>
-                {{ form_widget(registrationForm.nom, {attr: {class: 'field-input pl-10', placeholder: 'TechCorp Abidjan'}}) }}
+            {# --- Contacts de l'entreprise (3 colonnes) --- #}
+            <div class="mt-7 pt-6 border-t border-slate-100">
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="w-8 h-8 rounded-lg bg-indigo-50 text-brand-indigo flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    </span>
+                    <div>
+                        <h2 class="text-base font-semibold text-navy">Contacts téléphoniques</h2>
+                        <p class="text-xs text-slate-500">Sélectionnez l'indicatif puis saisissez le numéro (chiffres uniquement).</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {# Colonne 1: Contact de l'entreprise #}
+                    <div>
+                        <label for="{{ registrationForm.contact.numero.vars.id }}" class="field-label !mt-0 text-xs sm:text-sm font-semibold">
+                            Contact de l'entreprise <span class="text-red-500">*</span>
+                        </label>
+                        <div class="flex items-center rounded-xl border border-slate-200 bg-white shadow-sm transition-all focus-within:border-brand-purple focus-within:ring-2 focus-within:ring-brand-purple/20 overflow-hidden mt-1.5">
+                            {{ form_widget(registrationForm.contact.indicatif) }}
+                            {{ form_widget(registrationForm.contact.numero, {attr: {placeholder: '0102030405', required: 'required'}}) }}
+                        </div>
+                        {{ form_errors(registrationForm.contact) }}
+                        {{ form_errors(registrationForm.contact.numero) }}
+                    </div>
+
+                    {# Colonne 2: Contact du responsable #}
+                    <div>
+                        <label for="{{ registrationForm.contactResponsable.numero.vars.id }}" class="field-label !mt-0 text-xs sm:text-sm font-semibold">
+                            Contact du responsable <span class="text-red-500">*</span>
+                        </label>
+                        <div class="flex items-center rounded-xl border border-slate-200 bg-white shadow-sm transition-all focus-within:border-brand-purple focus-within:ring-2 focus-within:ring-brand-purple/20 overflow-hidden mt-1.5">
+                            {{ form_widget(registrationForm.contactResponsable.indicatif) }}
+                            {{ form_widget(registrationForm.contactResponsable.numero, {attr: {placeholder: '0708091011', required: 'required'}}) }}
+                        </div>
+                        {{ form_errors(registrationForm.contactResponsable) }}
+                        {{ form_errors(registrationForm.contactResponsable.numero) }}
+                    </div>
+
+                    {# Colonne 3: Autre contact #}
+                    <div>
+                        <label for="{{ registrationForm.autreContact.numero.vars.id }}" class="field-label !mt-0 text-xs sm:text-sm font-semibold text-slate-600">
+                            Autre contact <span class="text-xs font-normal text-slate-400">(optionnel)</span>
+                        </label>
+                        <div class="flex items-center rounded-xl border border-slate-200 bg-white shadow-sm transition-all focus-within:border-brand-purple focus-within:ring-2 focus-within:ring-brand-purple/20 overflow-hidden mt-1.5">
+                            {{ form_widget(registrationForm.autreContact.indicatif) }}
+                            {{ form_widget(registrationForm.autreContact.numero, {attr: {placeholder: '2721000000'}}) }}
+                        </div>
+                        {{ form_errors(registrationForm.autreContact) }}
+                        {{ form_errors(registrationForm.autreContact.numero) }}
+                    </div>
+                </div>
             </div>
-            {{ form_errors(registrationForm.nom) }}
 
-            {{ form_row(registrationForm.contact) }}
-            {{ form_row(registrationForm.logo) }}
-            {{ form_row(registrationForm.description) }}
+            <div class="mt-6 pt-5 border-t border-slate-100">
+                {{ form_row(registrationForm.description) }}
+            </div>
 
-            <button type="submit" class="btn-gradient w-full mt-6" id="register-submit">
+            <button type="submit" class="btn-gradient w-full mt-7 py-3.5 text-base sm:text-sm font-semibold rounded-xl shadow-lg shadow-indigo-500/25 active:scale-[0.98] transition-all cursor-pointer" id="register-submit">
                 <span class="inline-flex items-center gap-2">
                     <svg id="register-icon" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
                     <span id="register-text">Créer mon compte</span>
@@ -126,8 +200,6 @@
         var label = document.getElementById('strength-label');
         var matchIndicator = document.getElementById('match-indicator');
 
-        // Classes ecrites en toutes lettres (et non construites dynamiquement)
-        // pour que Tailwind les detecte a la compilation.
         var levels = [
             { bar: 'bg-red-400', text: 'text-red-500', label: 'Faible — ajoutez majuscules, chiffres et symboles.' },
             { bar: 'bg-orange-400', text: 'text-orange-500', label: 'Moyen — encore un peu court ou trop simple.' },
@@ -153,7 +225,7 @@
             });
 
             if (value.length === 0) {
-                label.textContent = 'Au moins 8 caractères, avec majuscule, chiffre et symbole recommandés.';
+                label.textContent = 'Au moins 8 caractères (lettre + chiffre requis).';
                 label.className = 'text-xs text-slate-400 mt-1.5';
                 return;
             }
@@ -213,6 +285,17 @@
 
     var registrationForm = document.getElementById('registration-form');
     if (registrationForm) {
+        registrationForm.querySelectorAll('input[type="tel"]').forEach(function (telInput) {
+            telInput.addEventListener('input', function () {
+                this.value = this.value.replace(/[^0-9]/g, '');
+            });
+            telInput.addEventListener('paste', function () {
+                setTimeout(function () {
+                    telInput.value = telInput.value.replace(/[^0-9]/g, '');
+                }, 0);
+            });
+        });
+
         registrationForm.addEventListener('submit', function () {
             var button = document.getElementById('register-submit');
             var icon = document.getElementById('register-icon');

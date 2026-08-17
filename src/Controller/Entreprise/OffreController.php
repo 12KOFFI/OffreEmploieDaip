@@ -34,29 +34,13 @@ class OffreController extends AbstractController
 
         $page = max(1, (int) $request->query->get('page', 1));
         $limit = 10;
+
+        $total = $offreRepository->countByEntreprise($entreprise);
+        $totalPages = max(1, (int) ceil($total / $limit));
+        $page = min($page, $totalPages);
         $offset = ($page - 1) * $limit;
 
-        $qb = $offreRepository->createQueryBuilder('o')
-            ->where('o.entreprise = :entreprise')
-            ->setParameter('entreprise', $entreprise)
-            ->orderBy('o.datePublication', 'DESC');
-
-        $total = (int) $qb->select('COUNT(o.id)')->getQuery()->getSingleScalarResult();
-        $totalPages = max(1, (int) ceil($total / $limit));
-
-        if ($page > $totalPages) {
-            $page = $totalPages;
-            $offset = ($page - 1) * $limit;
-        }
-
-        $offres = $offreRepository->createQueryBuilder('o')
-            ->where('o.entreprise = :entreprise')
-            ->setParameter('entreprise', $entreprise)
-            ->orderBy('o.datePublication', 'DESC')
-            ->setFirstResult($offset)
-            ->setMaxResults($limit)
-            ->getQuery()
-            ->getResult();
+        $offres = $offreRepository->findByEntreprisePaginated($entreprise, $limit, $offset);
 
         $compteurs = $offreRepository->countByStatutForEntreprise($entreprise);
 
@@ -174,7 +158,9 @@ class OffreController extends AbstractController
         foreach ($form->get('offreMetiers') as $offreMetierForm) {
             $offreMetier = $offreMetierForm->getData();
             $selection = $offreMetierForm->get('metier')->getData();
-            if ($selection && $selection->getId() !== null) { continue; }
+            if ($selection && $selection->getId() !== null) {
+                continue;
+            }
             $nom = trim((string) $offreMetierForm->get('autreMetier')->getData());
             $nom = preg_replace('/\\s+/', ' ', $nom) ?? $nom;
             if ($nom === '' || mb_strlen($nom) < 2 || mb_strlen($nom) > 150) {
@@ -182,7 +168,10 @@ class OffreController extends AbstractController
                 continue;
             }
             $metier = $metierRepository->findOneByNameInsensitive($nom);
-            if (!$metier) { $metier = (new Metier())->setNom($nom); $entityManager->persist($metier); }
+            if (!$metier) {
+                $metier = (new Metier())->setNom($nom);
+                $entityManager->persist($metier);
+            }
             $offreMetier->setMetier($metier);
         }
     }
@@ -195,16 +184,24 @@ class OffreController extends AbstractController
             return;
         }
 
-        $uploadsDirectory = $this->getParameter('kernel.project_dir') . '/public/uploads/offres';
+        $uploadsDirectory = $this->getParameter('app.uploads_dir');
 
         if (!is_dir($uploadsDirectory)) {
             mkdir($uploadsDirectory, 0775, true);
         }
 
+        $ancienneImage = $offre->getImage();
+
         $newFilename = bin2hex(random_bytes(16)) . '.' . ($uploadedFile->guessExtension() ?? 'bin');
         $uploadedFile->move($uploadsDirectory, $newFilename);
 
         $offre->setImage('/uploads/offres/' . $newFilename);
+
+        if ($ancienneImage) {
+            $ancienChemin = $this->getParameter('kernel.project_dir') . '/public' . $ancienneImage;
+            if (is_file($ancienChemin)) {
+                @unlink($ancienChemin);
+            }
+        }
     }
 }
-

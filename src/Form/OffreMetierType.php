@@ -19,11 +19,9 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class OffreMetierType extends AbstractType
 {
-    public function __construct(private readonly MetierRepository $metierRepository) {}
+    use FormStylingTrait;
 
-    private const INPUT_ATTR = ['class' => 'field-input'];
-    private const LABEL_ATTR = ['class' => 'field-label'];
-    private const REQUIRED_STAR = ' <span class="text-red-500">*</span>';
+    public function __construct(private readonly MetierRepository $metierRepository) {}
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
@@ -47,7 +45,7 @@ class OffreMetierType extends AbstractType
             ->add('typeContrat', EnumType::class, [
                 'label'        => 'Type de contrat',
                 'class'        => TypeContrat::class,
-                'choice_label' => fn (TypeContrat $t) => $t->label(),
+                'choice_label' => fn(TypeContrat $t) => $t->label(),
                 'required'     => false,
                 'placeholder'  => '— Non spécifié —',
                 'attr'         => self::INPUT_ATTR,
@@ -68,7 +66,7 @@ class OffreMetierType extends AbstractType
             ->add('niveauEtude', EnumType::class, [
                 'label'        => "Niveau d'étude",
                 'class'        => NiveauEtude::class,
-                'choice_label' => fn (NiveauEtude $n) => $n->label(),
+                'choice_label' => fn(NiveauEtude $n) => $n->label(),
                 'required'     => false,
                 'placeholder'  => '— Optionnel —',
                 'attr'         => self::INPUT_ATTR,
@@ -77,7 +75,7 @@ class OffreMetierType extends AbstractType
             ->add('diplome', EnumType::class, [
                 'label'        => "Diplôme",
                 'class'        => Diplome::class,
-                'choice_label' => fn (Diplome $d) => $d->label(),
+                'choice_label' => fn(Diplome $d) => $d->label(),
                 'required'     => false,
                 'placeholder'  => '— Optionnel —',
                 'attr'         => self::INPUT_ATTR,

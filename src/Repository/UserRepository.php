@@ -32,4 +32,23 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $this->getEntityManager()->persist($user);
         $this->getEntityManager()->flush();
     }
+
+    /**
+     * Liste les comptes DAIP (DAIP + DAIP_ADMIN). Les valeurs recherchees sont
+     * entourees de guillemets pour matcher l'encodage JSON exact du role et
+     * eviter les faux positifs sur un role qui contiendrait "ROLE_DAIP" comme
+     * simple sous-chaine (audit A6).
+     *
+     * @return User[]
+     */
+    public function findAllDaip(): array
+    {
+        return $this->createQueryBuilder('u')
+            ->andWhere('u.roles LIKE :roleDaip OR u.roles LIKE :roleDaipAdmin')
+            ->setParameter('roleDaip', '%"ROLE_DAIP"%')
+            ->setParameter('roleDaipAdmin', '%"ROLE_DAIP_ADMIN"%')
+            ->orderBy('u.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
 }

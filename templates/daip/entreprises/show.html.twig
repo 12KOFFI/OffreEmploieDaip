@@ -49,7 +49,13 @@
 
                 <div class="flex justify-between text-sm py-2.5 border-t border-slate-100"><span class="text-slate-500">Inscrite le</span><span class="font-medium text-navy">{{ entreprise.user.createdAt|date('d/m/Y') }}</span></div>
                 {% if entreprise.contact %}
-                    <div class="flex justify-between text-sm py-2.5 border-t border-slate-100"><span class="text-slate-500">Contact</span><span class="font-medium text-navy">{{ entreprise.contact }}</span></div>
+                    <div class="flex justify-between text-sm py-2.5 border-t border-slate-100"><span class="text-slate-500">Contact entreprise</span><span class="font-medium text-navy">{{ entreprise.contact }}</span></div>
+                {% endif %}
+                {% if entreprise.contactResponsable %}
+                    <div class="flex justify-between text-sm py-2.5 border-t border-slate-100"><span class="text-slate-500">Contact responsable</span><span class="font-medium text-navy">{{ entreprise.contactResponsable }}</span></div>
+                {% endif %}
+                {% if entreprise.autreContact %}
+                    <div class="flex justify-between text-sm py-2.5 border-t border-slate-100"><span class="text-slate-500">Autre contact</span><span class="font-medium text-navy">{{ entreprise.autreContact }}</span></div>
                 {% endif %}
             </div>
         </div>
@@ -57,10 +63,8 @@
         <div class="mt-14">
             <h2 class="text-2xl mb-6">Offres publiées</h2>
             <div class="grid md:grid-cols-3 gap-5">
-                {% for offre in entreprise.offres %}
-                    {% if offre.statut.value == 'publiee' %}
-                        {% include 'offres/_card.html.twig' with {offre: offre, aos_delay: loop.index0 * 80} %}
-                    {% endif %}
+                {% for offre in offresPubliees %}
+                    {% include 'offres/_card.html.twig' with {offre: offre, aos_delay: loop.index0 * 80} %}
                 {% else %}
                     <div class="card text-center py-10 px-6 text-slate-500 md:col-span-3">
                         <p>Aucune offre publiée pour le moment.</p>
